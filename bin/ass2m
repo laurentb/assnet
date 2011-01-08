@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: ft=python et softtabstop=4 cinoptions=4 shiftwidth=4 ts=4 ai
+
+import sys
+from ass2m.cli import Ass2mCLI
+
+if __name__ == '__main__':
+    app = Ass2mCLI()
+    sys.exit(app.parse_args(sys.argv))
