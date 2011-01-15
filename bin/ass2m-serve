@@ -4,6 +4,7 @@
 
 import os
 from webob import Request
+from webob.exc import HTTPMovedPermanently, HTTPNotFound
 from paste.fileapp import FileApp
 
 def app(environ, start_response):
@@ -16,7 +17,16 @@ def app(environ, start_response):
         # serve the file, delegate everything to to FileApp
         return fapp(environ, start_response)
 
-    return listdir(base, parsed_path, start_response)
+    if os.path.isdir(fpath):
+        if parsed_path[-1:] != "/":
+            resp = HTTPMovedPermanently(location=req.path_info+"/")
+            return resp(environ, start_response)
+        else:
+            return listdir(base, parsed_path, start_response)
+
+    resp = HTTPNotFound()
+    return resp(environ, start_response)
+
 
 def listdir(base, relpath, start_response):
     directory = os.path.join(base, relpath)
@@ -30,7 +40,10 @@ def listdir(base, relpath, start_response):
 <h1>Listing ./%s</h1>
 <ul>""" % relpath
     for filename in os.listdir(directory):
-        yield '<li><a href="%s">%s</a></li>' % (os.path.join(relpath, filename), filename)
+        if os.path.isdir(os.path.join(directory, filename)):
+            yield '<li><strong><a href="%s/">%s</a></strong></li>' % (filename, filename)
+        else:
+            yield '<li><a href="%s">%s</a></li>' % (filename, filename)
     yield """
 </ul>
 </body>
