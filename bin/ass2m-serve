@@ -30,7 +30,7 @@ def listdir(base, relpath, start_response):
 <h1>Listing ./%s</h1>
 <ul>""" % relpath
     for filename in os.listdir(directory):
-        yield "<li><a href=%s>%s</a></li>" % (filename, filename)
+        yield '<li><a href="%s">%s</a></li>' % (os.path.join(relpath, filename), filename)
     yield """
 </ul>
 </body>
@@ -38,4 +38,4 @@ def listdir(base, relpath, start_response):
 
 if __name__ == '__main__':
     from paste import httpserver
-    httpserver.serve(app, host='127.0.0.1', port='8042')
+    httpserver.serve(app, host='0.0.0.0', port='8042')
