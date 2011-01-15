@@ -18,7 +18,7 @@ def app(environ, start_response):
         return fapp(environ, start_response)
 
     if os.path.isdir(fpath):
-        if parsed_path[-1:] != "/":
+        if parsed_path[-1:] != "/" and len(parsed_path):
             resp = HTTPMovedPermanently(location=req.path_info+"/")
             return resp(environ, start_response)
         else:
