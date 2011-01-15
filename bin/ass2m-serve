@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 # vim: ft=python et softtabstop=4 cinoptions=4 shiftwidth=4 ts=4 ai
 
-from flup.server.fcgi import WSGIServer
-
 def app(environ, start_response):
-    start_response('200 OK', [('Content-Type', 'text/html')])
+    start_response('200 OK', [('content-type', 'text/html')])
     yield """
 <html>
 <head>
@@ -16,4 +14,6 @@ def app(environ, start_response):
 </body>
 </html>"""
 
-WSGIServer(app).run()
+if __name__ == '__main__':
+    from paste import httpserver
+    httpserver.serve(app, host='127.0.0.1', port='8042')
