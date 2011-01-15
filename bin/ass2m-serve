@@ -2,15 +2,22 @@
 # -*- coding: utf-8 -*-
 # vim: ft=python et softtabstop=4 cinoptions=4 shiftwidth=4 ts=4 ai
 
+import os
+
 def app(environ, start_response):
+    directory = "/tmp/ass2m"
     start_response('200 OK', [('content-type', 'text/html')])
     yield """
 <html>
 <head>
-    <title>Hello you!</title>
+    <title>ass2m</title>
 </head>
 <body>
-    <h1>Hello you!</h1>
+<ul>"""
+    for filename in os.listdir(directory):
+        yield "<li><a href=%s>%s</a></li>" % (filename, filename)
+    yield """
+</ul>
 </body>
 </html>"""
 
