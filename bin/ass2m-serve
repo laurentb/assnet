@@ -3,9 +3,23 @@
 # vim: ft=python et softtabstop=4 cinoptions=4 shiftwidth=4 ts=4 ai
 
 import os
+from webob import Request
+from paste.fileapp import FileApp
 
 def app(environ, start_response):
-    directory = "/tmp/ass2m"
+    base = "/tmp/ass2m"
+    req = Request(environ)
+    parsed_path = req.path_info[1:]
+    fpath = os.path.join(base, parsed_path)
+    if os.path.isfile(fpath):
+        fapp = FileApp(fpath)
+        # serve the file, delegate everything to to FileApp
+        return fapp(environ, start_response)
+
+    return listdir(base, parsed_path, start_response)
+
+def listdir(base, relpath, start_response):
+    directory = os.path.join(base, relpath)
     start_response('200 OK', [('content-type', 'text/html')])
     yield """
 <html>
@@ -13,7 +27,8 @@ def app(environ, start_response):
     <title>ass2m</title>
 </head>
 <body>
-<ul>"""
+<h1>Listing ./%s</h1>
+<ul>""" % relpath
     for filename in os.listdir(directory):
         yield "<li><a href=%s>%s</a></li>" % (filename, filename)
     yield """
