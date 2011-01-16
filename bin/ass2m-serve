@@ -6,8 +6,16 @@ import os
 from webob import Request
 from webob.exc import HTTPMovedPermanently, HTTPNotFound
 from paste import httpserver
-from paste import response
 from paste.fileapp import FileApp
+
+class Ass2mFileApp(FileApp):
+    def guess_type(self):
+        # add UTF-8 by default to text content-types
+        guess = FileApp.guess_type(self)
+        content_type = guess[0]
+        if content_type and "text/" in content_type and "charset=" not in content_type:
+            content_type += "; charset=UTF-8"
+        return (content_type, guess[1])
 
 class Server(object):
     def __init__(self, root):
@@ -21,13 +29,7 @@ class Server(object):
         parsed_path = req.path_info[1:]
         fpath = os.path.join(self.root, parsed_path)
         if os.path.isfile(fpath):
-            fapp = FileApp(fpath)
-            # add UTF-8 by default to text content-types
-            content_type = response.header_value(fapp.headers, "Content-Type")
-            if content_type and "text/" in content_type and "charset=" not in content_type:
-                content_type += "; charset=UTF-8"
-                response.replace_header(fapp.headers, "Content-Type", content_type)
-
+            fapp = Ass2mFileApp(fpath)
             # serve the file, delegate everything to to FileApp
             return fapp(environ, start_response)
 
