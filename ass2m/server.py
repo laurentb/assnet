@@ -6,6 +6,8 @@ from webob.exc import HTTPMovedPermanently, HTTPNotFound
 from paste import httpserver
 from paste.fileapp import FileApp
 
+from ass2m import Ass2m, NotWorkingDir
+
 class Ass2mFileApp(FileApp):
     def guess_type(self):
         # add UTF-8 by default to text content-types
@@ -18,11 +20,21 @@ class Ass2mFileApp(FileApp):
 class Server(object):
     def __init__(self, root):
         self.root = root
+        try:
+            self.ass2m = Ass2m(root)
+        except NotWorkingDir:
+            self.ass2m = None
 
     def bind(self, hostname, port):
         httpserver.serve(self.process, host=hostname, port=str(port))
 
     def process(self, environ, start_response):
+        if not self.ass2m:
+            try:
+                self.ass2m = Ass2m(self.root)
+            except NotWorkingDir:
+                return self.error_notworkingdir(start_response)
+
         req = Request(environ)
         parsed_path = req.path_info[1:]
         fpath = os.path.join(self.root, parsed_path)
@@ -53,6 +65,8 @@ class Server(object):
 <h1>Listing /%s</h1>
 <ul>""" % (relpath, relpath)
         for filename in sorted(os.listdir(directory)):
+            if filename.startswith('.'):
+                continue
             if os.path.isdir(os.path.join(directory, filename)):
                 yield '<li><strong><a href="%s/">%s/</a></strong></li>' % (filename, filename)
             else:
@@ -63,3 +77,22 @@ class Server(object):
 <address>ass2m</address>
 </body>
 </html>"""
+
+    def error_notworkingdir(self, start_response):
+        start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
+        yield """
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+<h1>Internal error</h1>
+<p>
+The configured root path is not an ass2m working directory.<br />
+Please use:
+</p>
+<pre>$ ass2m init %s</pre>
+<hr>
+<address>ass2m</address>
+</body>
+</html>""" % self.root
