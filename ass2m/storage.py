@@ -3,6 +3,8 @@
 from __future__ import with_statement
 
 import os
+import hashlib
+from ConfigParser import RawConfigParser
 
 class User(object):
     def __init__(self, name):
@@ -30,7 +32,7 @@ class Storage(object):
         return cls(path)
 
     def get_user(self, name):
-        config = self._get_config(os.path.join(path, 'users', name))
+        config = self._get_config(os.path.join(self.path, 'users', name))
         if not config:
             return None
 
@@ -38,6 +40,14 @@ class Storage(object):
         info = dict(config.items('info'))
         user.email = info.get('email', None)
         return user
+
+    def get_file(self, path):
+        config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(path).hexdigest()))
+        if not config:
+            return None
+
+        f = File(path)
+        return f
 
     def _get_config(self, path):
         config = RawConfigParser()

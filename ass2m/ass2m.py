@@ -19,7 +19,14 @@ class Ass2m(object):
 
             storage = Storage(os.path.join(path, self.DIRNAME))
         self.storage = storage
+        self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))
 
     @classmethod
     def create(cls, path):
         return cls(Storage.init(os.path.join(path, cls.DIRNAME)))
+
+    def get_file(self, name):
+        return self.storage.get_file(name)
+
+    def get_user(self, name):
+        return self.storage.get_user(name)
