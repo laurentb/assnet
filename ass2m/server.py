@@ -17,6 +17,77 @@ class Ass2mFileApp(FileApp):
             content_type += "; charset=UTF-8"
         return (content_type, guess[1])
 
+class Client(object):
+    def __init__(self, ass2m, environ, start_response):
+        self.ass2m = ass2m
+        self.environ = environ
+        self.req = Request(environ)
+        self.start_response = start_response
+        self.user = None
+
+    def answer(self):
+        parsed_path = self.req.path_info[1:]
+        fpath = os.path.join(self.ass2m.root, parsed_path)
+        if os.path.isfile(fpath):
+            fapp = Ass2mFileApp(fpath)
+            # serve the file, delegate everything to to FileApp
+            return fapp(self.environ, self.start_response)
+
+        if os.path.isdir(fpath):
+            if parsed_path[-1:] != "/" and len(parsed_path):
+                resp = HTTPMovedPermanently(location=self.req.path_info+"/")
+                return resp(self.environ, self.start_response)
+            else:
+                return self.listdir(parsed_path)
+
+        resp = HTTPNotFound()
+        return resp(self.environ, self.start_response)
+
+    def listdir(self, relpath):
+        directory = os.path.join(self.ass2m.root, relpath)
+        self.start_response('200 OK', [('Content-Type', 'text/html; charset=UTF-8')])
+        yield """
+<html>
+<head>
+    <title>Index of /%s</title>
+</head>
+<body>
+<h1>Listing /%s</h1>
+<ul>""" % (relpath, relpath)
+        for filename in sorted(os.listdir(directory)):
+            f = self.ass2m.get_file(os.path.join(directory, filename))
+            if self.user and not self.user.has_perms(f):
+                continue
+            if os.path.isdir(os.path.join(directory, filename)):
+                yield '<li><strong><a href="%s/">%s/</a></strong></li>' % (filename, filename)
+            else:
+                yield '<li><a href="%s">%s</a></li>' % (filename, filename)
+        yield """
+</ul>
+<hr>
+<address>ass2m</address>
+</body>
+</html>"""
+
+    def error_notworkingdir(self):
+        self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
+        yield """
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+<h1>Internal error</h1>
+<p>
+The configured root path is not an ass2m working directory.<br />
+Please use:
+</p>
+<pre>$ ass2m init %s</pre>
+<hr>
+<address>ass2m</address>
+</body>
+</html>""" % self.ass2m.root
+
 class Server(object):
     def __init__(self, root):
         self.root = root
@@ -35,64 +106,6 @@ class Server(object):
             except NotWorkingDir:
                 return self.error_notworkingdir(start_response)
 
-        req = Request(environ)
-        parsed_path = req.path_info[1:]
-        fpath = os.path.join(self.root, parsed_path)
-        if os.path.isfile(fpath):
-            fapp = Ass2mFileApp(fpath)
-            # serve the file, delegate everything to to FileApp
-            return fapp(environ, start_response)
+        client = Client(self.ass2m, environ, start_response)
+        return client.answer()
 
-        if os.path.isdir(fpath):
-            if parsed_path[-1:] != "/" and len(parsed_path):
-                resp = HTTPMovedPermanently(location=req.path_info+"/")
-                return resp(environ, start_response)
-            else:
-                return self.listdir(start_response, parsed_path)
-
-        resp = HTTPNotFound()
-        return resp(environ, start_response)
-
-    def listdir(self, start_response, relpath):
-        directory = os.path.join(self.root, relpath)
-        start_response('200 OK', [('Content-Type', 'text/html; charset=UTF-8')])
-        yield """
-<html>
-<head>
-    <title>Index of /%s</title>
-</head>
-<body>
-<h1>Listing /%s</h1>
-<ul>""" % (relpath, relpath)
-        for filename in sorted(os.listdir(directory)):
-            if filename.startswith('.'):
-                continue
-            if os.path.isdir(os.path.join(directory, filename)):
-                yield '<li><strong><a href="%s/">%s/</a></strong></li>' % (filename, filename)
-            else:
-                yield '<li><a href="%s">%s</a></li>' % (filename, filename)
-        yield """
-</ul>
-<hr>
-<address>ass2m</address>
-</body>
-</html>"""
-
-    def error_notworkingdir(self, start_response):
-        start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
-        yield """
-<html>
-<head>
-    <title>Error</title>
-</head>
-<body>
-<h1>Internal error</h1>
-<p>
-The configured root path is not an ass2m working directory.<br />
-Please use:
-</p>
-<pre>$ ass2m init %s</pre>
-<hr>
-<address>ass2m</address>
-</body>
-</html>""" % self.root
