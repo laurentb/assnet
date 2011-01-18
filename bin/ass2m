@@ -7,4 +7,4 @@ from ass2m.cli import Ass2mCLI
 
 if __name__ == '__main__':
     app = Ass2mCLI()
-    sys.exit(app.parse_args(sys.argv))
+    sys.exit(app.process_command(sys.argv))
