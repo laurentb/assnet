@@ -69,25 +69,6 @@ class Client(object):
 </body>
 </html>"""
 
-    def error_notworkingdir(self):
-        self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
-        yield """
-<html>
-<head>
-    <title>Error</title>
-</head>
-<body>
-<h1>Internal error</h1>
-<p>
-The configured root path is not an ass2m working directory.<br />
-Please use:
-</p>
-<pre>$ ass2m init %s</pre>
-<hr>
-<address>ass2m</address>
-</body>
-</html>""" % self.ass2m.root
-
 class Server(object):
     def __init__(self, root):
         self.root = root
@@ -104,8 +85,27 @@ class Server(object):
             try:
                 self.ass2m = Ass2m(self.root)
             except NotWorkingDir:
-                return self.error_notworkingdir(start_response)
+                return self.error_notworkingdir(start_response, self.root)
 
         client = Client(self.ass2m, environ, start_response)
         return client.answer()
+
+    def error_notworkingdir(self, start_response, root):
+        start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
+        yield """
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+<h1>Internal error</h1>
+<p>
+The configured root path is not an ass2m working directory.<br />
+Please use:
+</p>
+<pre>$ cd %s && ass2m init</pre>
+<hr>
+<address>ass2m</address>
+</body>
+</html>""" % root
 
