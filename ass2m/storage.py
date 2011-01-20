@@ -19,6 +19,7 @@ class Group(object):
 class File(object):
     def __init__(self, path):
         self.path = path
+        self.perms = {}
 
 class Storage(object):
     def __init__(self, path):
@@ -41,6 +42,11 @@ class Storage(object):
         user.email = info.get('email', None)
         return user
 
+    def save_user(self, user):
+        sections = {}
+        sections['info'] = {'email': user.email}
+        self._save_config(os.path.join(self.path, 'users', user.name), sections)
+
     def get_file(self, path):
         config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(path).hexdigest()))
         if not config:
@@ -48,6 +54,10 @@ class Storage(object):
 
         f = File(path)
         return f
+
+    def save_file(self, f):
+        sections = {}
+        self._save_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()), sections)
 
     def _get_config(self, path):
         config = RawConfigParser()
@@ -57,3 +67,12 @@ class Storage(object):
         except IOError:
             return None
         return config
+
+    def _save_config(self, path, sections):
+        config = RawConfigParser()
+        for sec, items in sections.iteritems():
+            config.add_section(sec)
+            for key, value in items.iteritems():
+                config.set(sec, key, unicode(value))
+        with open(path, 'wb') as f:
+            config.write(f)
