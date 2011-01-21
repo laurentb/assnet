@@ -11,6 +11,8 @@ class Ass2m(object):
     def __init__(self, path):
         if isinstance(path, Storage):
             storage = path
+        elif not path:
+            raise NotWorkingDir()
         else:
             while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
                 path = os.path.dirname(path)

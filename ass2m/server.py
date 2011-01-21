@@ -18,12 +18,11 @@ class Ass2mFileApp(FileApp):
         return (content_type, guess[1])
 
 class Actions(object):
-    def __init__(self, root, environ, start_response):
+    def __init__(self, environ, start_response):
         try:
-            self.ass2m = Ass2m(root)
+            self.ass2m = Ass2m(environ.get("ASS2M_ROOT"))
         except NotWorkingDir:
             self.ass2m = None
-        self.root = root
         self.environ = environ
         self.req = Request(environ)
         self.start_response = start_response
@@ -31,22 +30,39 @@ class Actions(object):
 
     def error_notworkingdir(self):
         self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
-        yield """
-<html>
-<head>
-    <title>Error</title>
-</head>
-<body>
-<h1>Internal error</h1>
-<p>
-The configured root path is not an ass2m working directory.<br />
-Please use:
-</p>
-<pre>$ cd %s && ass2m init</pre>
-<hr>
-<address>ass2m</address>
-</body>
-</html>""" % self.root
+        if self.environ.has_key("ASS2M_ROOT"):
+            return """
+    <html>
+    <head>
+        <title>Error</title>
+    </head>
+    <body>
+    <h1>Internal error</h1>
+    <p>
+    The configured root path is not an ass2m working directory.<br />
+    Please use:
+    </p>
+    <pre>$ cd %s && ass2m init</pre>
+    <hr>
+    <address>ass2m</address>
+    </body>
+    </html>""" % self.environ["ASS2M_ROOT"]
+        else:
+            return """
+    <html>
+    <head>
+        <title>Error</title>
+    </head>
+    <body>
+    <h1>Internal error</h1>
+    <p>
+    No root path was provided.
+    </p>
+    <hr>
+    <address>ass2m</address>
+    </body>
+    </html>"""
+
 
     def answer(self):
         if not self.ass2m:
@@ -96,13 +112,23 @@ Please use:
 </html>"""
 
 class Server(object):
-    def __init__(self, root):
+    def __init__(self, root = None):
+        """
+        The optional root parameter is used to force a root directory.
+        If not present, the ASS2M_ROOT of environ (provided by the HTTP server)
+        will be used.
+        """
         self.root = root
 
     def bind(self, hostname, port):
         httpserver.serve(self.process, host=hostname, port=str(port))
 
     def process(self, environ, start_response):
-        actions = Actions(self.root, environ, start_response)
+        """
+        WSGI interface
+        """
+        if self.root:
+            environ["ASS2M_ROOT"] = self.root
+        actions = Actions(environ, start_response)
         return actions.answer()
 
