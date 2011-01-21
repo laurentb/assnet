@@ -18,14 +18,40 @@ class Ass2mFileApp(FileApp):
         return (content_type, guess[1])
 
 class Client(object):
-    def __init__(self, ass2m, environ, start_response):
-        self.ass2m = ass2m
+    def __init__(self, root, environ, start_response):
+        try:
+            self.ass2m = Ass2m(root)
+        except NotWorkingDir:
+            self.ass2m = None
+        self.root = root
         self.environ = environ
         self.req = Request(environ)
         self.start_response = start_response
         self.user = None
 
+    def error_notworkingdir(self):
+        self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
+        yield """
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+<h1>Internal error</h1>
+<p>
+The configured root path is not an ass2m working directory.<br />
+Please use:
+</p>
+<pre>$ cd %s && ass2m init</pre>
+<hr>
+<address>ass2m</address>
+</body>
+</html>""" % self.root
+
     def answer(self):
+        if not self.ass2m:
+            return self.error_notworkingdir()
+
         parsed_path = self.req.path_info[1:]
         fpath = os.path.join(self.ass2m.root, parsed_path)
         if os.path.isfile(fpath):
@@ -72,40 +98,11 @@ class Client(object):
 class Server(object):
     def __init__(self, root):
         self.root = root
-        try:
-            self.ass2m = Ass2m(root)
-        except NotWorkingDir:
-            self.ass2m = None
 
     def bind(self, hostname, port):
         httpserver.serve(self.process, host=hostname, port=str(port))
 
     def process(self, environ, start_response):
-        if not self.ass2m:
-            try:
-                self.ass2m = Ass2m(self.root)
-            except NotWorkingDir:
-                return self.error_notworkingdir(start_response, self.root)
-
-        client = Client(self.ass2m, environ, start_response)
+        client = Client(self.root, environ, start_response)
         return client.answer()
-
-    def error_notworkingdir(self, start_response, root):
-        start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
-        yield """
-<html>
-<head>
-    <title>Error</title>
-</head>
-<body>
-<h1>Internal error</h1>
-<p>
-The configured root path is not an ass2m working directory.<br />
-Please use:
-</p>
-<pre>$ cd %s && ass2m init</pre>
-<hr>
-<address>ass2m</address>
-</body>
-</html>""" % root
 
