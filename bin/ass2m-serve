@@ -5,5 +5,10 @@
 from ass2m.server import Server
 
 if __name__ == '__main__':
-    server = Server('/tmp/ass2m')
-    server.bind('0.0.0.0', 8042)
+    import sys
+    if len(sys.argv) > 1:
+        server = Server(sys.argv[1])
+        server.bind('0.0.0.0', 8042)
+    else:
+        print 'Usage: %s <rootdir>' % sys.argv[0]
+        sys.exit(1)
