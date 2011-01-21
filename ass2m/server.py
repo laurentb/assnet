@@ -17,7 +17,7 @@ class Ass2mFileApp(FileApp):
             content_type += "; charset=UTF-8"
         return (content_type, guess[1])
 
-class Client(object):
+class Actions(object):
     def __init__(self, root, environ, start_response):
         try:
             self.ass2m = Ass2m(root)
@@ -103,6 +103,6 @@ class Server(object):
         httpserver.serve(self.process, host=hostname, port=str(port))
 
     def process(self, environ, start_response):
-        client = Client(self.root, environ, start_response)
-        return client.answer()
+        actions = Actions(self.root, environ, start_response)
+        return actions.answer()
 
