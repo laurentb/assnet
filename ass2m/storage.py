@@ -60,6 +60,7 @@ class Storage(object):
         info = dict(config.items('info'))
         user.email = info.get('email', None)
         user.realname = info.get('realname', None)
+        user.password = info.get('password', None)
         return user
 
     def iter_users(self):

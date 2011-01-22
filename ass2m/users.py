@@ -31,6 +31,7 @@ class User(object):
         self.name = name
         self.email = None
         self.realname = None
+        self.password = None
         self.groups = []
 
     def save(self):
@@ -48,7 +49,7 @@ class User(object):
 
         f_perms = f.get_all_perms()
         if f_perms is not None:
-            return f_perms
+            return f_perms & perm
 
         f_parent = f.parent()
         return f_parent and self.has_perms(f_parent, perm)

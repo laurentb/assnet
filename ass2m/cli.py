@@ -54,6 +54,7 @@ class Ass2mCLI(object):
         print 'Commands:'
         print '    init'
         print '    share PATH [CONTACTS..]'
+        print '    contacts <add|list|remove>'
 
     @workdir
     def cmd_share(self, args):
