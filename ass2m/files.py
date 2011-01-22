@@ -15,12 +15,40 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
+import os
 
 class File(object):
+    PERM_READ =  0x001
+    PERM_LIST =  0x002
+    PERM_WRITE = 0x004
+
     def __init__(self, storage, path):
         self.storage = storage
         self.path = path
         self.perms = {}
 
+    def set_all_perms(self, perms):
+        self.perms['all'] = perms
+
+    def set_group_perms(self, name, perms):
+        self.perms['g:%s' % name] = perms
+
+    def set_user_perms(self, name, perms):
+        self.perms['u:%s' % name] = perms
+
+    def get_all_perms(self):
+        return self.perms.get('all', None)
+
+    def get_group_perms(self, name):
+        return self.perms.get('g:%s' % name, None)
+
+    def get_user_perms(self, name):
+        return self.perms.get('u:%s' % name, None)
+
     def save(self):
         self.storage.save_file(self)
+
+    def parent(self):
+        if self.path == '/':
+            return None
+        return self.storage.get_file(os.path.dirname(self.path))

@@ -18,11 +18,12 @@
 
 import os
 from webob import Request
-from webob.exc import HTTPMovedPermanently, HTTPNotFound
+from webob.exc import HTTPMovedPermanently, HTTPNotFound, HTTPForbidden
 from paste import httpserver
 from paste.fileapp import FileApp
 
 from ass2m import Ass2m, NotWorkingDir
+from users import Anonymous
 
 class Ass2mFileApp(FileApp):
     def guess_type(self):
@@ -42,7 +43,7 @@ class Actions(object):
         self.environ = environ
         self.req = Request(environ)
         self.start_response = start_response
-        self.user = None
+        self.user = Anonymous()
 
     def error_notworkingdir(self):
         self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
@@ -84,8 +85,13 @@ class Actions(object):
         if not self.ass2m:
             return self.error_notworkingdir()
 
-        parsed_path = self.req.path_info[1:]
-        fpath = os.path.join(self.ass2m.root, parsed_path)
+        parsed_path = self.req.path_info
+        fpath = os.path.join(self.ass2m.root, parsed_path[1:])
+        f = self.ass2m.storage.get_file(parsed_path)
+        if not self.user.has_perms(f, f.PERM_READ):
+            resp = HTTPForbidden()
+            return resp(self.environ, self.start_response)
+
         if os.path.isfile(fpath):
             fapp = Ass2mFileApp(fpath)
             # serve the file, delegate everything to to FileApp
@@ -102,19 +108,19 @@ class Actions(object):
         return resp(self.environ, self.start_response)
 
     def listdir(self, relpath):
-        directory = os.path.join(self.ass2m.root, relpath)
+        directory = os.path.join(self.ass2m.root, relpath[1:])
         self.start_response('200 OK', [('Content-Type', 'text/html; charset=UTF-8')])
         yield """
 <html>
 <head>
-    <title>Index of /%s</title>
+    <title>Index of %s</title>
 </head>
 <body>
-<h1>Listing /%s</h1>
+<h1>Listing %s</h1>
 <ul>""" % (relpath, relpath)
         for filename in sorted(os.listdir(directory)):
-            f = self.ass2m.storage.get_file(os.path.join(directory, filename))
-            if self.user and not self.user.has_perms(f):
+            f = self.ass2m.storage.get_file(os.path.join(relpath, filename))
+            if not self.user.has_perms(f, f.PERM_LIST):
                 continue
             if os.path.isdir(os.path.join(directory, filename)):
                 yield '<li><strong><a href="%s/">%s/</a></strong></li>' % (filename, filename)

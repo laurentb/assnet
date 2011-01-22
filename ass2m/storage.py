@@ -21,7 +21,7 @@ from __future__ import with_statement
 import os
 import hashlib
 from ConfigParser import RawConfigParser
-from users import User
+from users import User, Anonymous
 from files import File
 
 class Group(object):
@@ -40,15 +40,21 @@ class Storage(object):
         os.mkdir(os.path.join(path, 'files'))
         storage = cls(path)
 
-        # Default perms on .ass2m
+        # Default perms on /.ass2m
         f = File(storage, '/.ass2m')
+        f.perms = {'all': 0}
+        f.save()
+
+        # Default perms on /
+        f = File(storage, '/')
+        f.perms = {'all': f.PERM_READ|f.PERM_LIST}
         f.save()
         return storage
 
     def get_user(self, name):
         config = self._get_config(os.path.join(self.path, 'users', name))
         if not config:
-            return None
+            return Anonymous(self)
 
         user = User(self, name)
         info = dict(config.items('info'))
@@ -75,22 +81,26 @@ class Storage(object):
         os.unlink(os.path.join(self.path, 'users', name))
 
     def get_file(self, path):
+        f = File(self, path)
         config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(path).hexdigest()))
         if not config:
-            return None
+            return f
 
-        f = File(self, path)
+        for key, value in config.items('perms'):
+            f.perms[key] = int(value)
         return f
 
     def save_file(self, f):
         sections = {}
+        sections['infos'] = {'path': f.path}
+        sections['perms'] = f.perms
         self._save_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()), sections)
 
     def _get_config(self, path):
         config = RawConfigParser()
         try:
-            with open(path, 'r') as f:
-                config.readfp(f)
+            with open(path, 'r') as fp:
+                config.readfp(fp)
         except IOError:
             return None
         return config
@@ -101,5 +111,5 @@ class Storage(object):
             config.add_section(sec)
             for key, value in items.iteritems():
                 config.set(sec, key, unicode(value))
-        with open(path, 'wb') as f:
-            config.write(f)
+        with open(path, 'wb') as fp:
+            config.write(fp)

@@ -22,7 +22,7 @@ class IUser(object):
     realname = None
     groups = []
 
-    def has_perms(self, f):
+    def has_perms(self, f, perm):
         raise NotImplementedError()
 
 class User(object):
@@ -36,8 +36,33 @@ class User(object):
     def save(self):
         self.storage.save_user(self)
 
+    def has_perms(self, f, perm):
+        f_perms = f.get_all_perms()
+        if f_perms is not None and f_perms & perm:
+            return True
+
+        for group in self.groups:
+            f_perms = f.get_group_perms(group)
+            if f_perms is not None and f.get_group_perms(group) & perm:
+                return True
+
+        f_perms = f.get_all_perms()
+        if f_perms is not None:
+            return f_perms
+
+        f_parent = f.parent()
+        return f_parent and self.has_perms(f_parent, perm)
+
 class Anonymous(IUser):
     name = '<anonymous>'
     email = None
     realname = 'Ano Nymous'
     groups = []
+
+    def has_perms(self, f, perm):
+        f_perms = f.get_all_perms()
+        if f_perms is not None:
+            return f_perms & perm
+
+        f_parent = f.parent()
+        return f_parent and self.has_perms(f_parent, perm)
