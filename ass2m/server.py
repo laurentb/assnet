@@ -85,9 +85,19 @@ class Actions(object):
         if not self.ass2m:
             return self.error_notworkingdir()
 
-        parsed_path = self.req.path_info
-        fpath = os.path.join(self.ass2m.root, parsed_path[1:])
-        f = self.ass2m.storage.get_file(parsed_path)
+        relpath = self.req.path_info
+        fpath = os.path.join(self.ass2m.root, relpath[1:])
+
+        if os.path.isdir(fpath):
+            if self.req.path_info[-1:] != '/':
+                resp = HTTPMovedPermanently(location=self.req.path_info+"/")
+                return resp(self.environ, self.start_response)
+            if relpath[-1] == '/':
+                # skip the terminated /
+                relpath = os.path.dirname(relpath)
+
+        # check perms
+        f = self.ass2m.storage.get_file(relpath)
         if not self.user.has_perms(f, f.PERM_READ):
             resp = HTTPForbidden()
             return resp(self.environ, self.start_response)
@@ -96,16 +106,11 @@ class Actions(object):
             fapp = Ass2mFileApp(fpath)
             # serve the file, delegate everything to to FileApp
             return fapp(self.environ, self.start_response)
-
-        if os.path.isdir(fpath):
-            if parsed_path[-1:] != "/" and len(parsed_path):
-                resp = HTTPMovedPermanently(location=self.req.path_info+"/")
-                return resp(self.environ, self.start_response)
-            else:
-                return self.listdir(parsed_path)
-
-        resp = HTTPNotFound()
-        return resp(self.environ, self.start_response)
+        elif os.path.isdir(fpath):
+            return self.listdir(relpath)
+        else:
+            resp = HTTPNotFound()
+            return resp(self.environ, self.start_response)
 
     def listdir(self, relpath):
         directory = os.path.join(self.ass2m.root, relpath[1:])
@@ -134,7 +139,7 @@ class Actions(object):
 </html>"""
 
 class Server(object):
-    def __init__(self, root = None):
+    def __init__(self, root=None):
         """
         The optional root parameter is used to force a root directory.
         If not present, the ASS2M_ROOT of environ (provided by the HTTP server)
