@@ -16,29 +16,28 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-import os
-from storage import Storage
+class IUser(object):
+    name = None
+    email = None
+    realname = None
+    groups = []
 
-class NotWorkingDir(Exception): pass
+    def has_perms(self, f):
+        raise NotImplementedError()
 
-class Ass2m(object):
-    DIRNAME = '.ass2m'
-
-    def __init__(self, path):
-        if isinstance(path, Storage):
-            storage = path
-        elif not path:
-            raise NotWorkingDir()
-        else:
-            while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
-                path = os.path.dirname(path)
-            if path == os.path.dirname(path):
-                raise NotWorkingDir()
-
-            storage = Storage(os.path.join(path, self.DIRNAME))
+class User(object):
+    def __init__(self, storage, name):
         self.storage = storage
-        self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))
+        self.name = name
+        self.email = None
+        self.realname = None
+        self.groups = []
 
-    @classmethod
-    def create(cls, path):
-        return cls(Storage.init(os.path.join(path, cls.DIRNAME)))
+    def save(self):
+        self.storage.save_user(self)
+
+class Anonymous(IUser):
+    name = '<anonymous>'
+    email = None
+    realname = 'Ano Nymous'
+    groups = []

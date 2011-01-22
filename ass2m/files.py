@@ -16,29 +16,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-import os
-from storage import Storage
-
-class NotWorkingDir(Exception): pass
-
-class Ass2m(object):
-    DIRNAME = '.ass2m'
-
-    def __init__(self, path):
-        if isinstance(path, Storage):
-            storage = path
-        elif not path:
-            raise NotWorkingDir()
-        else:
-            while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
-                path = os.path.dirname(path)
-            if path == os.path.dirname(path):
-                raise NotWorkingDir()
-
-            storage = Storage(os.path.join(path, self.DIRNAME))
+class File(object):
+    def __init__(self, storage, path):
         self.storage = storage
-        self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))
+        self.path = path
+        self.perms = {}
 
-    @classmethod
-    def create(cls, path):
-        return cls(Storage.init(os.path.join(path, cls.DIRNAME)))
+    def save(self):
+        self.storage.save_file(self)

@@ -1,5 +1,21 @@
 # -*- coding: utf-8 -*-
 
+# Copyright(C) 2011  Romain Bignon, Laurent Bachelier
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
 import os
 from webob import Request
 from webob.exc import HTTPMovedPermanently, HTTPNotFound
@@ -97,7 +113,7 @@ class Actions(object):
 <h1>Listing /%s</h1>
 <ul>""" % (relpath, relpath)
         for filename in sorted(os.listdir(directory)):
-            f = self.ass2m.get_file(os.path.join(directory, filename))
+            f = self.ass2m.storage.get_file(os.path.join(directory, filename))
             if self.user and not self.user.has_perms(f):
                 continue
             if os.path.isdir(os.path.join(directory, filename)):

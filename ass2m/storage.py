@@ -1,25 +1,33 @@
 # -*- coding: utf-8 -*-
 
+# Copyright(C) 2011  Romain Bignon, Laurent Bachelier
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
 from __future__ import with_statement
 
 import os
 import hashlib
 from ConfigParser import RawConfigParser
-
-class User(object):
-    def __init__(self, name):
-        self.name = name
-        self.email = None
+from users import User
+from files import File
 
 class Group(object):
     def __init__(self, name):
         self.name = name
         self.users = []
-
-class File(object):
-    def __init__(self, path):
-        self.path = path
-        self.perms = {}
 
 class Storage(object):
     def __init__(self, path):
@@ -30,29 +38,48 @@ class Storage(object):
         os.mkdir(path)
         os.mkdir(os.path.join(path, 'users'))
         os.mkdir(os.path.join(path, 'files'))
-        return cls(path)
+        storage = cls(path)
+
+        # Default perms on .ass2m
+        f = File(storage, '/.ass2m')
+        f.save()
+        return storage
 
     def get_user(self, name):
         config = self._get_config(os.path.join(self.path, 'users', name))
         if not config:
             return None
 
-        user = User(name)
+        user = User(self, name)
         info = dict(config.items('info'))
         user.email = info.get('email', None)
+        user.realname = info.get('realname', None)
         return user
+
+    def iter_users(self):
+        for name in os.listdir(os.path.join(self.path, 'users')):
+            user = self.get_user(name)
+            if user:
+                yield user
+
+    def user_exists(self, name):
+        return name in os.listdir(os.path.join(self.path, 'users'))
 
     def save_user(self, user):
         sections = {}
-        sections['info'] = {'email': user.email}
+        sections['info'] = {'email':    user.email,
+                            'realname': user.realname}
         self._save_config(os.path.join(self.path, 'users', user.name), sections)
+
+    def remove_user(self, name):
+        os.unlink(os.path.join(self.path, 'users', name))
 
     def get_file(self, path):
         config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(path).hexdigest()))
         if not config:
             return None
 
-        f = File(path)
+        f = File(self, path)
         return f
 
     def save_file(self, f):
