@@ -38,7 +38,7 @@ class User(object):
         self.storage.save_user(self)
 
     def has_perms(self, f, perm):
-        f_perms = f.get_all_perms()
+        f_perms = f.get_user_perms(self.name)
         if f_perms is not None and f_perms & perm:
             return True
 
