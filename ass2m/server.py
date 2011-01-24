@@ -21,6 +21,7 @@ from webob import Request
 from webob.exc import HTTPMovedPermanently, HTTPNotFound, HTTPForbidden
 from paste import httpserver
 from paste.fileapp import FileApp
+from mako.lookup import TemplateLookup
 
 from ass2m import Ass2m, NotWorkingDir
 from users import Anonymous
@@ -45,40 +46,20 @@ class Actions(object):
         self.start_response = start_response
         self.user = Anonymous()
 
+        # TODO find a way to locate template directories
+        self.lookup = TemplateLookup(directories=['data/templates'],
+                                    collection_size=20,
+                                    output_encoding='utf-8')
+
+
     def error_notworkingdir(self):
         self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
         if self.environ.has_key("ASS2M_ROOT"):
-            return """
-    <html>
-    <head>
-        <title>Error</title>
-    </head>
-    <body>
-    <h1>Internal error</h1>
-    <p>
-    The configured root path is not an ass2m working directory.<br />
-    Please use:
-    </p>
-    <pre>$ cd %s && ass2m init</pre>
-    <hr>
-    <address>ass2m</address>
-    </body>
-    </html>""" % self.environ["ASS2M_ROOT"]
+            return self.lookup.get_template('error_notworkingdir.html'). \
+                        render(root=self.environ["ASS2M_ROOT"])
         else:
-            return """
-    <html>
-    <head>
-        <title>Error</title>
-    </head>
-    <body>
-    <h1>Internal error</h1>
-    <p>
-    No root path was provided.
-    </p>
-    <hr>
-    <address>ass2m</address>
-    </body>
-    </html>"""
+            return self.lookup.get_template('error_norootpath.html'). \
+                        render()
 
 
     def answer(self):
