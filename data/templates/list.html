@@ -1,0 +1,12 @@
+<%inherit file="layout.html"/>
+
+<ul>
+    % for dir in dirs:
+        <li><strong><a href="${dir}/">${dir}/</a></strong></li>
+    % endfor
+    % for file in files:
+        <li><a href="${file}">${file}</a></li>
+    % endfor
+</ul>
+
+<%def name="title()">Index of ${relpath}</%def>

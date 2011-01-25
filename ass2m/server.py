@@ -93,31 +93,24 @@ class Actions(object):
             resp = HTTPNotFound()
             return resp(self.environ, self.start_response)
 
+
     def listdir(self, relpath):
         directory = os.path.join(self.ass2m.root, relpath[1:])
         self.start_response('200 OK', [('Content-Type', 'text/html; charset=UTF-8')])
-        yield """
-<html>
-<head>
-    <title>Index of %s</title>
-</head>
-<body>
-<h1>Listing %s</h1>
-<ul>""" % (relpath, relpath)
+        dirs = []
+        files = []
         for filename in sorted(os.listdir(directory)):
             f = self.ass2m.storage.get_file(os.path.join(relpath, filename))
             if not self.user.has_perms(f, f.PERM_LIST):
                 continue
             if os.path.isdir(os.path.join(directory, filename)):
-                yield '<li><strong><a href="%s/">%s/</a></strong></li>' % (filename, filename)
+                dirs.append(filename.decode('utf-8'))
             else:
-                yield '<li><a href="%s">%s</a></li>' % (filename, filename)
-        yield """
-</ul>
-<hr>
-<address>ass2m</address>
-</body>
-</html>"""
+                files.append(filename.decode('utf-8'))
+
+        return self.lookup.get_template('list.html'). \
+                    render(dirs=dirs, files=files, relpath=relpath)
+
 
 class Server(object):
     def __init__(self, root=None):
