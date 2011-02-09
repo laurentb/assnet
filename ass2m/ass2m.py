@@ -30,8 +30,11 @@ class Ass2m(object):
         elif not path:
             raise NotWorkingDir()
         else:
-            while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
-                path = os.path.dirname(path)
+            try:
+                while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
+                    path = os.path.dirname(path)
+            except OSError:
+                raise NotWorkingDir()
             if path == os.path.dirname(path):
                 raise NotWorkingDir()
 
