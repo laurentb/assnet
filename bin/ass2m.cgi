@@ -20,5 +20,5 @@
 from wsgiref.handlers import CGIHandler
 from ass2m.server import Server
 
-server = Server('/tmp/ass2m')
+server = Server()
 CGIHandler().run(server.process)
