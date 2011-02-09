@@ -38,7 +38,7 @@ class Ass2mFileApp(FileApp):
 class Actions(object):
     def __init__(self, environ, start_response):
         try:
-            self.ass2m = Ass2m(environ.get("ASS2M_ROOT"))
+            self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None))
         except NotWorkingDir:
             self.ass2m = None
         self.environ = environ
@@ -46,10 +46,12 @@ class Actions(object):
         self.start_response = start_response
         self.user = Anonymous()
 
-        # TODO find a way to locate template directories
-        self.lookup = TemplateLookup(directories=['data/templates'],
-                                    collection_size=20,
-                                    output_encoding='utf-8')
+        paths = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
+                 '/usr/share/ass2m',
+                 '/usr/local/share/ass2m']
+        self.lookup = TemplateLookup(directories=['%s/templates' % path for path in paths],
+                                     collection_size=20,
+                                     output_encoding='utf-8')
 
 
     def error_notworkingdir(self):
