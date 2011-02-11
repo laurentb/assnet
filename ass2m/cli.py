@@ -53,12 +53,31 @@ class Ass2mCLI(object):
         print ''
         print 'Commands:'
         print '    init'
+        print '    tree'
         print '    share PATH [CONTACTS..]'
         print '    contacts <add|list|remove>'
 
     @workdir
     def cmd_share(self, args):
         return
+
+    @workdir
+    def cmd_tree(self, args):
+        for root, directories, files in os.walk(os.getcwd()):
+            path = root[len(os.getcwd()):]
+            depth = path.count('/')
+            f = self.ass2m.storage.get_file(path)
+            parent = f.parent()
+
+            perms_s = ''
+            for key, perm in f.perms.iteritems():
+                if not parent or not key in parent.perms or parent.perms[key] != perm:
+                    perms_s += '%s(%s) ' % (key, f.perm_str(perm))
+
+            if len(perms_s) == 0:
+                continue
+
+            print '%-40s %s' % ('  ' * depth + path + '/', perms_s)
 
     @workdir
     def cmd_contacts(self, args):
