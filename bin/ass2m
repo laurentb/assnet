@@ -19,8 +19,8 @@
 
 
 import sys
-from ass2m.cli import Ass2mCLI
+from ass2m.cli import CLI
 
 if __name__ == '__main__':
-    app = Ass2mCLI()
-    sys.exit(app.process_command(sys.argv))
+    app = CLI()
+    sys.exit(app.main(sys.argv))

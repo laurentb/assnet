@@ -17,31 +17,71 @@
 
 
 import os
-from storage import Storage
+import re
 
-class NotWorkingDir(Exception): pass
+from .storage import Storage
+from .plugin import Plugin
 
 class Ass2m(object):
     DIRNAME = '.ass2m'
 
-    def __init__(self, path):
+    def __init__(self, path, parser=None):
         if isinstance(path, Storage):
             storage = path
-        elif not path:
-            raise NotWorkingDir()
-        else:
+        elif path:
             try:
                 while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
                     path = os.path.dirname(path)
             except OSError:
-                raise NotWorkingDir()
-            if path == os.path.dirname(path):
-                raise NotWorkingDir()
+                path = None
+            if path and path != os.path.dirname(path):
+                storage = Storage(os.path.join(path, self.DIRNAME))
+            else:
+                storage = None
 
-            storage = Storage(os.path.join(path, self.DIRNAME))
+        self.parser = parser
         self.storage = storage
-        self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))
+        if self.storage:
+            self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))
+        else:
+            self.root = None
 
-    @classmethod
-    def create(cls, path):
-        return cls(Storage.init(os.path.join(path, cls.DIRNAME)))
+        self.load_plugins()
+
+    def iter_existing_plugin_names(self):
+        try:
+            import plugins
+        except ImportError:
+            return
+        for path in plugins.__path__:
+            regexp = re.compile('([\w\d_]+).py$')
+            for f in os.listdir(path):
+                m = regexp.match(f)
+                if m and m.group(1) != '__init__':
+                    yield m.group(1)
+
+    def load_plugins(self):
+        self.plugins = {}
+        for existing_plugin_name in self.iter_existing_plugin_names():
+            self.load_plugin(existing_plugin_name)
+
+    def load_plugin(self, plugin_name):
+        package_name = 'ass2m.plugins.%s' % plugin_name
+        package = __import__(package_name, fromlist=[str(package_name)])
+
+        klass = None
+        for attrname in dir(package):
+            attr = getattr(package, attrname)
+            if isinstance(attr, type) and issubclass(attr, Plugin) and attr != Plugin:
+                klass = attr
+                break
+
+        if not klass:
+            return
+
+        plugin = klass(self)
+        self.plugins[plugin_name] = plugin
+
+    def create(self, path):
+        self.storage = Storage.init(os.path.join(path, self.DIRNAME))
+        self.root = os.path.realpath(os.path.join(self.storage.path, os.path.pardir))

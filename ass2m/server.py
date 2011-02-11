@@ -23,7 +23,7 @@ from paste import httpserver
 from paste.fileapp import FileApp
 from mako.lookup import TemplateLookup
 
-from ass2m import Ass2m, NotWorkingDir
+from ass2m import Ass2m
 from users import Anonymous
 
 class Ass2mFileApp(FileApp):
@@ -37,10 +37,7 @@ class Ass2mFileApp(FileApp):
 
 class Actions(object):
     def __init__(self, environ, start_response):
-        try:
-            self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None))
-        except NotWorkingDir:
-            self.ass2m = None
+        self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None))
         self.environ = environ
         self.req = Request(environ)
         self.start_response = start_response
@@ -65,7 +62,7 @@ class Actions(object):
 
 
     def answer(self):
-        if not self.ass2m:
+        if not self.ass2m.storage:
             return self.error_notworkingdir()
 
         relpath = self.req.path_info
