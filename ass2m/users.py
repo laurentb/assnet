@@ -25,7 +25,7 @@ class IUser(object):
     def has_perms(self, f, perm):
         raise NotImplementedError()
 
-class User(object):
+class User(IUser):
     def __init__(self, storage, name):
         self.storage = storage
         self.name = name

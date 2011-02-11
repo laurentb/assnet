@@ -22,7 +22,19 @@ class File(object):
     PERM_LIST =  0x002
     PERM_WRITE = 0x004
 
+    @staticmethod
+    def perm_str(perm):
+        s = ''
+        s += 'r' if perm & File.PERM_READ  else '-'
+        s += 'l' if perm & File.PERM_LIST  else '-'
+        s += 'w' if perm & File.PERM_WRITE else '-'
+        return s
+
     def __init__(self, storage, path):
+        # skip any trailing /
+        if len(path) > 0 and path[-1] == '/':
+            path = path[:-1]
+
         self.storage = storage
         self.path = path
         self.perms = {}
@@ -49,6 +61,9 @@ class File(object):
         self.storage.save_file(self)
 
     def parent(self):
-        if self.path == '/':
+        if self.path == '':
             return None
         return self.storage.get_file(os.path.dirname(self.path))
+
+    def get_disk_path(self):
+        return os.path.realpath(os.path.join(self.storage.path, '..', self.path[1:]))

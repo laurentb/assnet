@@ -46,7 +46,7 @@ class Storage(object):
         f.save()
 
         # Default perms on /
-        f = File(storage, '/')
+        f = File(storage, '')
         f.perms = {'all': f.PERM_READ|f.PERM_LIST}
         f.save()
         return storage
@@ -83,7 +83,7 @@ class Storage(object):
 
     def get_file(self, path):
         f = File(self, path)
-        config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(path).hexdigest()))
+        config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()))
         if not config:
             return f
 
