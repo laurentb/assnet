@@ -73,7 +73,7 @@ class Actions(object):
 
         if os.path.isdir(fpath):
             if self.req.path_info[-1:] != '/':
-                resp = HTTPMovedPermanently(location=self.req.path_info+"/")
+                resp = HTTPMovedPermanently(location=self.environ['REQUEST_URI']+"/")
                 return resp(self.environ, self.start_response)
             if relpath[-1] == '/':
                 # skip the terminated /
