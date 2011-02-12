@@ -69,8 +69,8 @@ class Actions(object):
         fpath = os.path.join(self.ass2m.root, relpath[1:])
 
         if os.path.isdir(fpath):
-            if self.req.path_info[-1:] != '/':
-                resp = HTTPMovedPermanently(location=self.environ.get('REQUEST_URI', '')+"/")
+            if self.req.path_info[-1] != '/':
+                resp = HTTPMovedPermanently(location='%s/' % self.environ.get('REQUEST_URI', self.req.path_info))
                 return resp(self.environ, self.start_response)
             if relpath[-1] == '/':
                 # skip the terminated /
