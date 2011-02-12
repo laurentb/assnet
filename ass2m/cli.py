@@ -30,4 +30,8 @@ class CLI(object):
         # is supplied.
         args = self.parser.parse_args(argv[1:])
         cmd = args.cmd(self.ass2m)
-        return cmd.cmd(args)
+        try:
+            return cmd.cmd(args)
+        except KeyboardInterrupt:
+            print 'Program killed by SIGINT'
+            return 1

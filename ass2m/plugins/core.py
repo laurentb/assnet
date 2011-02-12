@@ -124,6 +124,7 @@ class PermsCmd(Command):
 
         f.perms[args.who] = perms
         f.save()
+        print 'Permissions for %s on %s are now: %s' % (args.who, f.path, f.p2str(f.perms[args.who]))
 
 class CorePlugin(Plugin):
     def init(self):
