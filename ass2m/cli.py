@@ -30,4 +30,4 @@ class CLI(object):
         # is supplied.
         args = self.parser.parse_args(argv[1:])
         cmd = args.cmd(self.ass2m)
-        cmd.cmd(args)
+        return cmd.cmd(args)

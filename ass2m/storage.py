@@ -81,6 +81,19 @@ class Storage(object):
     def remove_user(self, name):
         os.unlink(os.path.join(self.path, 'users', name))
 
+    def get_disk_file(self, diskpath):
+        path = os.path.relpath(diskpath, os.path.realpath(os.path.join(self.path, os.path.pardir)))
+        if path.startswith('../'):
+            # Outside of working tree.
+            return None
+        if path == '.':
+            # Root
+            path = '/'
+        else:
+            path = '/' + path
+
+        return self.get_file(path)
+
     def get_file(self, path):
         f = File(self, path)
         config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()))

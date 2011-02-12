@@ -22,6 +22,12 @@ class Plugin(object):
     def __init__(self, ass2m):
         self.ass2m = ass2m
 
+    def init(self):
+        pass
+
+    def deinit(self):
+        pass
+
     def register_cli_command(self, *args):
         parser = self.ass2m.parser
         if not parser:
@@ -38,12 +44,15 @@ class Plugin(object):
             cmd = None
 
         for name in names:
+            # XXX hack to store and get the subparser object.
             if hasattr(parser, '_subparser_action'):
                 subparsers = parser._subparser_action
             else:
                 subparsers = parser.add_subparsers()
                 parser._subparser_action = subparsers
 
+            # XXX use this private member because argparse does not give any
+            # public method to get a subparser.
             if name in subparsers._name_parser_map:
                 parser = subparsers._name_parser_map[name]
             else:

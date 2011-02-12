@@ -22,13 +22,24 @@ class File(object):
     PERM_LIST =  0x002
     PERM_WRITE = 0x004
 
+    PERMS = (('r', PERM_READ),
+             ('l', PERM_LIST),
+             ('w', PERM_WRITE)
+            )
+
     @staticmethod
-    def perm_str(perm):
+    def p2str(perms):
         s = ''
-        s += 'r' if perm & File.PERM_READ  else '-'
-        s += 'l' if perm & File.PERM_LIST  else '-'
-        s += 'w' if perm & File.PERM_WRITE else '-'
+        for letter, perm in File.PERMS:
+            s += letter if (perms & perm) else '-'
         return s
+
+    @staticmethod
+    def str2p(s):
+        perms = 0
+        for letter in s:
+            perms |= dict(File.PERMS)[letter]
+        return perms
 
     def __init__(self, storage, path):
         # skip any trailing /
@@ -43,19 +54,19 @@ class File(object):
         self.perms['all'] = perms
 
     def set_group_perms(self, name, perms):
-        self.perms['g:%s' % name] = perms
+        self.perms['g.%s' % name] = perms
 
     def set_user_perms(self, name, perms):
-        self.perms['u:%s' % name] = perms
+        self.perms['u.%s' % name] = perms
 
-    def get_all_perms(self):
-        return self.perms.get('all', None)
+    def get_all_perms(self, default=None):
+        return self.perms.get('all', default)
 
-    def get_group_perms(self, name):
-        return self.perms.get('g:%s' % name, None)
+    def get_group_perms(self, name, default=None):
+        return self.perms.get('g.%s' % name, default)
 
-    def get_user_perms(self, name):
-        return self.perms.get('u:%s' % name, None)
+    def get_user_perms(self, name, default=None):
+        return self.perms.get('u.%s' % name, default)
 
     def save(self):
         self.storage.save_file(self)

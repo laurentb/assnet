@@ -64,8 +64,7 @@ class ContactsRemoveCmd(Command):
         print 'User %s has been removed.' % args.username
 
 class ContactsPlugin(Plugin):
-    def __init__(self, ass2m):
-        self.ass2m = ass2m
+    def init(self):
         self.register_cli_command('contacts', 'Contacts management')
         self.register_cli_command('contacts', 'add', ContactsAddCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)

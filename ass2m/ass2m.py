@@ -80,6 +80,7 @@ class Ass2m(object):
             return
 
         plugin = klass(self)
+        plugin.init()
         self.plugins[plugin_name] = plugin
 
     def create(self, path):
