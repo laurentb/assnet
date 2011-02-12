@@ -48,6 +48,7 @@ class File(object):
 
         self.storage = storage
         self.path = path
+        self.view = None
         self.perms = {}
 
     def set_all_perms(self, perms):

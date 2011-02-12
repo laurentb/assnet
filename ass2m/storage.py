@@ -54,7 +54,7 @@ class Storage(object):
     def get_user(self, name):
         config = self._get_config(os.path.join(self.path, 'users', name))
         if not config:
-            return Anonymous(self)
+            return Anonymous()
 
         user = User(self, name)
         info = dict(config.items('info'))
@@ -100,13 +100,16 @@ class Storage(object):
         if not config:
             return f
 
+        infos = dict(config.items('infos'))
+        f.view = infos.get('view', None)
         for key, value in config.items('perms'):
             f.perms[key] = int(value)
         return f
 
     def save_file(self, f):
         sections = {}
-        sections['infos'] = {'path': f.path}
+        sections['infos'] = {'path': f.path,
+                             'view': f.view}
         sections['perms'] = f.perms
         self._save_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()), sections)
 
