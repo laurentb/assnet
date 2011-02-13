@@ -17,6 +17,7 @@
 
 import sys
 
+from ass2m import Ass2m
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 from ass2m.users import User
@@ -38,6 +39,24 @@ class ContactsAddCmd(Command):
         user.email = self.ask('Enter the email address')
         user.save()
         print 'User %s correctly added.' % user.name
+
+class ContactsMergeCmd(Command):
+    DESCRIPTION = 'Merge contacts from another working directory'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('workdir')
+
+    def cmd(self, args):
+        ass2m = Ass2m(args.workdir)
+        if not ass2m.storage:
+            print >>sys.stderr, 'Error: Path "%s" is not a working directory' % args.workdir
+            return 1
+
+        for user in ass2m.storage.iter_users():
+            user.storage = self.ass2m.storage
+            user.save()
+            print 'Imported %s (%s <%s>)' % (user.name, user.realname, user.email)
 
 class ContactsListCmd(Command):
     DESCRIPTION = 'List contacts'
@@ -67,5 +86,6 @@ class ContactsPlugin(Plugin):
     def init(self):
         self.register_cli_command('contacts', 'Contacts management')
         self.register_cli_command('contacts', 'add', ContactsAddCmd)
+        self.register_cli_command('contacts', 'merge', ContactsMergeCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)
         self.register_cli_command('contacts', 'remove', ContactsRemoveCmd)
