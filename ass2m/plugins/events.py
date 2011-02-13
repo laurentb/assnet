@@ -24,6 +24,7 @@ from datetime import datetime
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
+from .contacts import ContactsSelection
 
 class Event(object):
     (USER_CONFIRMED,
@@ -45,9 +46,14 @@ class Event(object):
 
     def save(self):
         with open(self.f.get_disk_path(), 'w') as fp:
-            self.print_me(fp)
+            self._print(fp)
 
-    def print_me(self, fp):
+    def print_me(self):
+        print '-' * len(unicode(self.title))
+        self._print(sys.stdout)
+        print ''
+
+    def _print(self, fp):
         def binary(s):
             return unicode(s).encode('utf-8')
 
@@ -140,28 +146,74 @@ class EventCmd(Command):
                     print >>sys.stderr, 'Error: %s' % e
                     return 1
 
+                os.unlink(f.get_disk_path())
                 self.edit_event(event)
-                event.print_me(sys.stdout)
-
-                if self.ask('Do you want to save this event?', default=True):
-                    event.save()
-                else:
-                    os.unlink(f.get_disk_path())
             return 0
 
-        event.print_me(sys.stdout)
-        event.save()
+        r = ''
+        event.print_me()
+        while r != 'q':
+            r = self.ask('Choose an action (t/s/d/p/a to edit, ? to get help, or q to exit)',
+                         regexp='^(t|s|d|p|a|\?|q)$')
+            try:
+                if r == 't': self.edit_title(event)
+                if r == 's': self.edit_summary(event)
+                if r == 'd': self.edit_date(event)
+                if r == 'p': self.edit_place(event)
+                if r == 'a': self.edit_attendees(event)
+                if r == '?':
+                    print 't = edit title'
+                    print 's = edit summary'
+                    print 'd = edit date'
+                    print 'p = edit place'
+                    print 'a = edit attendees'
+                    continue
+                if r == 'q':
+                    continue
+            except (KeyboardInterrupt,EOFError):
+                print '\nAborted.'
+            else:
+                event.save()
+                event.print_me()
 
     def edit_event(self, event):
-        event.title = self.ask('Title')
-        event.summary = self.ask('Enter the summary of the event')
-        while not event.date:
-            date = self.ask('Enter date (yyyy-mm-dd hh:ss)')
+        self.edit_title(event)
+        self.edit_summary(event)
+        self.edit_date(event)
+        self.edit_place(event)
+        self.edit_attendees(event)
+        event.print_me()
+        if self.ask('Do you want to save this event?', default=True):
+            event.save()
+
+    def edit_title(self, event):
+        event.title = self.ask('Title', default=event.title)
+
+    def edit_summary(self, event):
+        event.summary = self.ask('Enter the summary of the event', default=event.summary)
+
+    def edit_date(self, date):
+        while 1:
+            date = self.ask('Enter date (yyyy-mm-dd hh:ss)',
+                            default=(event.date.strftime('%Y-%m-%d %H:%M')
+                                     if event.date else None))
             try:
                 event.date = datetime.strptime(date, '%Y-%m-%d %H:%M')
             except ValueError, v:
                 print >>sys.stderr, 'Error: %s' % v
-        event.place = self.ask('Enter a place')
+            else:
+                break
+
+    def edit_place(self, event):
+        event.place = self.ask('Enter a place', default=event.place)
+
+    def edit_attendees(self, event):
+        cs = ContactsSelection(self.ass2m, event.users.keys())
+        cs.main()
+        for deleted in (set(event.users.keys()) - set(cs.users)):
+            event.users.pop(deleted)
+        for added in set(cs.users) - set(event.users.keys()):
+            event.users[added] = event.USER_WAITING
 
 class EventsPlugin(Plugin):
     def init(self):
