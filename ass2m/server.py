@@ -17,12 +17,13 @@
 
 
 import os
-from webob import Request, Response
-from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
-from paste import httpserver
-from paste.fileapp import FileApp
 from mako.lookup import TemplateLookup
+from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
+from paste.fileapp import FileApp
+from webob import Request, Response
+from webob import html_escape
+from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
 
 from ass2m import Ass2m
 from users import Anonymous
@@ -75,10 +76,11 @@ class Actions(object):
         if not self.ass2m.storage:
             return self.error_notworkingdir()
 
+        self.authenticate()
         relpath = self.req.path_info
         fpath = os.path.join(self.ass2m.root, relpath[1:])
         if self.req.path_info == '/LOGIN':
-            return self.authenticate()
+            return self.login()
 
         if os.path.isdir(fpath):
             if self.req.path_info[-1] != '/':
@@ -125,22 +127,29 @@ class Actions(object):
 
     def authenticate(self):
         signer = AuthCookieSigner(secret=COOKIE_SECRET)
-        user = self.req.str_GET.get('user')
+        cookie = self.req.str_cookies.get('ass2m_auth')
+        user = cookie and signer.auth(cookie)
         if user:
-            cookie = signer.sign(user)
-            self.res.set_cookie('ass2m_auth', cookie)
-        else:
-            cookie = self.req.str_cookies.get('ass2m_auth')
-            user = cookie and signer.auth(cookie)
+            self.user = self.ass2m.storage.get_user(user)
 
-        if user:
-            page = '<html><body>Welcome %s</body></html>' % user
-        else:
-            page = ('<html><body><form><input name="user" />'
-                    '<input type="submit" /></form></body></html>')
-        self.res.body = page
+
+    def login(self):
+        signer = AuthCookieSigner(secret=COOKIE_SECRET)
+        form_user = self.req.str_GET.get('user')
+        if form_user:
+            # set cookie
+            cookie = signer.sign(form_user)
+            self.res.set_cookie('ass2m_auth', cookie)
+
+            self.user = self.ass2m.storage.get_user(form_user)
+
+        self.res.body = """<html><body>Current user: %s<br/>
+                        <form><label>Username</label><input name="user" />
+                        <input type="submit" /></form>
+                        </body></html>""" % html_escape(str(self.user))
 
         return self.res(self._environ, self._start_response)
+
 
 class Server(object):
     def __init__(self, root=None):
