@@ -57,7 +57,7 @@ class Storage(object):
             return Anonymous()
 
         user = User(self, name)
-        info = dict(config.items('info'))
+        info = dict([(k,v.decode('utf-8')) for k,v in config.items('info')])
         user.email = info.get('email', None)
         user.realname = info.get('realname', None)
         user.password = info.get('password', None)
@@ -74,8 +74,10 @@ class Storage(object):
 
     def save_user(self, user):
         sections = {}
-        sections['info'] = {'email':    user.email,
-                            'realname': user.realname}
+        sections['info'] = {'email':    user.email.encode('utf-8') if user.email else None,
+                            'realname': user.realname.encode('utf-8') if user.realname else None,
+                            'password': user.password.encode('utf-8') if user.password else None
+                           }
         self._save_config(os.path.join(self.path, 'users', user.name), sections)
 
     def remove_user(self, name):
@@ -127,6 +129,6 @@ class Storage(object):
         for sec, items in sections.iteritems():
             config.add_section(sec)
             for key, value in items.iteritems():
-                config.set(sec, key, unicode(value))
+                config.set(sec, key, value)
         with open(path, 'wb') as fp:
             config.write(fp)
