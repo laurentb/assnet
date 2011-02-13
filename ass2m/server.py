@@ -131,7 +131,7 @@ class Actions(object):
             self.res.set_cookie('ass2m_auth', cookie)
         else:
             cookie = self.req.str_cookies.get('ass2m_auth')
-            user = signer.auth(cookie)
+            user = cookie and signer.auth(cookie)
 
         if user:
             page = '<html><body>Welcome %s</body></html>' % user
