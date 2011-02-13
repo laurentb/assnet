@@ -18,7 +18,7 @@
 
 import os
 from webob import Request, Response
-from webob.exc import HTTPMovedPermanently, HTTPNotFound, HTTPForbidden
+from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
 from paste import httpserver
 from paste.fileapp import FileApp
 from mako.lookup import TemplateLookup
@@ -41,9 +41,10 @@ class Ass2mFileApp(FileApp):
 class Actions(object):
     def __init__(self, environ, start_response):
         self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None))
-        self.environ = environ
+        self._environ = environ
+        self._start_response = start_response
         self.req = Request(environ)
-        self.start_response = start_response
+        self.res = Response()
         self.user = Anonymous()
 
         paths = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
@@ -53,15 +54,21 @@ class Actions(object):
                                      collection_size=20,
                                      output_encoding='utf-8')
 
+        # defaults, may be changed later on
+        self.res.status = 200
+        self.res.headers['Content-Type'] = 'text/html; charset=UTF-8';
+
 
     def error_notworkingdir(self):
-        self.start_response('500 ERROR', [('Content-Type', 'text/html; charset=UTF-8')])
-        if self.environ.has_key("ASS2M_ROOT"):
-            return self.lookup.get_template('error_notworkingdir.html'). \
-                        render(root=self.environ["ASS2M_ROOT"])
+        self.res.status = 500
+        if self._environ.has_key("ASS2M_ROOT"):
+            self.res.body = self.lookup.get_template('error_notworkingdir.html'). \
+                        render(root=self._environ["ASS2M_ROOT"])
         else:
-            return self.lookup.get_template('error_norootpath.html'). \
+            self.res.body = self.lookup.get_template('error_norootpath.html'). \
                         render()
+
+        return self.res(self._environ, self._start_response)
 
 
     def answer(self):
@@ -75,8 +82,8 @@ class Actions(object):
 
         if os.path.isdir(fpath):
             if self.req.path_info[-1] != '/':
-                resp = HTTPMovedPermanently(location='%s/' % self.environ.get('REQUEST_URI', self.req.path_info))
-                return resp(self.environ, self.start_response)
+                self.res = HTTPFound(add_slash=True)
+                return self.res(self._environ, self._start_response)
             if relpath[-1] == '/':
                 # skip the terminated /
                 relpath = os.path.dirname(relpath)
@@ -84,23 +91,22 @@ class Actions(object):
         # check perms
         f = self.ass2m.storage.get_file(relpath)
         if not self.user.has_perms(f, f.PERM_READ):
-            resp = HTTPForbidden()
-            return resp(self.environ, self.start_response)
+            self.res = HTTPForbidden()
+            return self.res(self._environ, self._start_response)
 
         if os.path.isfile(fpath):
-            fapp = Ass2mFileApp(fpath)
             # serve the file, delegate everything to to FileApp
-            return fapp(self.environ, self.start_response)
+            self.res = Ass2mFileApp(fpath)
+            return self.res(self._environ, self._start_response)
         elif os.path.isdir(fpath):
             return self.listdir(relpath)
         else:
-            resp = HTTPNotFound()
-            return resp(self.environ, self.start_response)
+            self.res = HTTPNotFound()
+            return self.res(self._environ, self._start_response)
 
 
     def listdir(self, relpath):
         directory = os.path.join(self.ass2m.root, relpath[1:])
-        self.start_response('200 OK', [('Content-Type', 'text/html; charset=UTF-8')])
         dirs = []
         files = []
         for filename in sorted(os.listdir(directory)):
@@ -112,16 +118,17 @@ class Actions(object):
             else:
                 files.append(filename.decode('utf-8'))
 
-        return self.lookup.get_template('list.html'). \
+        self.res.body = self.lookup.get_template('list.html'). \
                     render(dirs=dirs, files=files, relpath=relpath)
+        return self.res(self._environ, self._start_response)
+
 
     def authenticate(self):
         signer = AuthCookieSigner(secret=COOKIE_SECRET)
         user = self.req.str_GET.get('user')
-        res = Response()
         if user:
             cookie = signer.sign(user)
-            res.set_cookie('ass2m_auth', cookie)
+            self.res.set_cookie('ass2m_auth', cookie)
         else:
             cookie = self.req.str_cookies.get('ass2m_auth')
             user = signer.auth(cookie)
@@ -131,9 +138,9 @@ class Actions(object):
         else:
             page = ('<html><body><form><input name="user" />'
                     '<input type="submit" /></form></body></html>')
-        res.body = page
+        self.res.body = page
 
-        return res(self.environ, self.start_response)
+        return self.res(self._environ, self._start_response)
 
 class Server(object):
     def __init__(self, root=None):
