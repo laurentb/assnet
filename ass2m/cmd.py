@@ -19,29 +19,15 @@ import sys
 import getpass
 import re
 
-class Command(object):
-    NAME = None
-    DESCRIPTION = None
-    ALIASES = ()
-    WORKDIR = True
 
-    def cmd(self, args):
-        raise NotImplementedError()
+__all__ = ['ConsolePart', 'Command']
 
-    @staticmethod
-    def configure_parser(parser):
-        return
 
-    def __init__(self, ass2m):
-        self.ass2m = ass2m
-
-    def run(self, args):
-        if self.WORKDIR and not self.ass2m.storage:
-            print >>sys.stderr, 'Error: Not a ass2m working directory.'
-            print >>sys.stderr, 'Please use "%s init"' % sys.argv[0]
-            return 0
-
-        return self.cmd(args)
+# TODO change name
+class ConsolePart(object):
+    # shell escape strings
+    BOLD   = '[1m'
+    NC     = '[0m'    # no color
 
     def ask(self, question, default=None, masked=False, regexp=None, choices=None):
         """
@@ -71,11 +57,21 @@ class Command(object):
         if masked:
             question = u'%s (hidden input)' % question
 
-        question += ': '
+        question += u': '
 
         correct = False
         while not correct:
-            line = getpass.getpass(question) if masked else raw_input(question)
+            if masked:
+                line = getpass.getpass(question)
+            else:
+                sys.stdout.write(question.encode('utf-8'))
+                sys.stdout.flush()
+                line = sys.stdin.readline()
+                if len(line) == 0:
+                    raise EOFError()
+                else:
+                    line = line.rstrip('\r\n')
+
             if not line and default is not None:
                 line = default
             if isinstance(line, str):
@@ -88,3 +84,27 @@ class Command(object):
             return line.lower() == 'y'
         else:
             return line
+
+class Command(ConsolePart):
+    NAME = None
+    DESCRIPTION = None
+    ALIASES = ()
+    WORKDIR = True
+
+    def cmd(self, args):
+        raise NotImplementedError()
+
+    @staticmethod
+    def configure_parser(parser):
+        return
+
+    def __init__(self, ass2m):
+        self.ass2m = ass2m
+
+    def run(self, args):
+        if self.WORKDIR and not self.ass2m.storage:
+            print >>sys.stderr, 'Error: Not a ass2m working directory.'
+            print >>sys.stderr, 'Please use "%s init"' % sys.argv[0]
+            return 0
+
+        return self.cmd(args)
