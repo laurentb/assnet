@@ -17,14 +17,17 @@
 
 
 import os
-from webob import Request
+from webob import Request, Response
 from webob.exc import HTTPMovedPermanently, HTTPNotFound, HTTPForbidden
 from paste import httpserver
 from paste.fileapp import FileApp
 from mako.lookup import TemplateLookup
+from paste.auth.cookie import AuthCookieSigner, new_secret
 
 from ass2m import Ass2m
 from users import Anonymous
+
+COOKIE_SECRET = new_secret()
 
 class Ass2mFileApp(FileApp):
     def guess_type(self):
@@ -67,6 +70,8 @@ class Actions(object):
 
         relpath = self.req.path_info
         fpath = os.path.join(self.ass2m.root, relpath[1:])
+        if self.req.path_info == '/LOGIN':
+            return self.authenticate()
 
         if os.path.isdir(fpath):
             if self.req.path_info[-1] != '/':
@@ -110,6 +115,25 @@ class Actions(object):
         return self.lookup.get_template('list.html'). \
                     render(dirs=dirs, files=files, relpath=relpath)
 
+    def authenticate(self):
+        signer = AuthCookieSigner(secret=COOKIE_SECRET)
+        user = self.req.str_GET.get('user')
+        res = Response()
+        if user:
+            cookie = signer.sign(user)
+            res.set_cookie('ass2m_auth', cookie)
+        else:
+            cookie = self.req.str_cookies.get('ass2m_auth')
+            user = signer.auth(cookie)
+
+        if user:
+            page = '<html><body>Welcome %s</body></html>' % user
+        else:
+            page = ('<html><body><form><input name="user" />'
+                    '<input type="submit" /></form></body></html>')
+        res.body = page
+
+        return res(self.environ, self.start_response)
 
 class Server(object):
     def __init__(self, root=None):
