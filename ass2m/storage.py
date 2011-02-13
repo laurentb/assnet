@@ -64,7 +64,7 @@ class Storage(object):
         return user
 
     def iter_users(self):
-        for name in os.listdir(os.path.join(self.path, 'users')):
+        for name in sorted(os.listdir(os.path.join(self.path, 'users'))):
             user = self.get_user(name)
             if user:
                 yield user
