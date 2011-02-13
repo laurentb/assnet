@@ -60,7 +60,7 @@ class Event(object):
         fp.write('%s\n\n' % binary(self.place))
         fp.write('Attendees:\n')
         stats = [0, 0, 0]
-        for username, state in sorted(self.users.items()):
+        for username, state in sorted(self.users.items(), key=lambda (k,v): (v,k)):
             realname = self.f.storage.get_user(username).realname
             checked = dict([(v, k) for k, v in self.STATES.iteritems()])[state]
             stats[state] += 1
