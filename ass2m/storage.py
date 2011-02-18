@@ -32,6 +32,14 @@ class Group(object):
 class Storage(object):
     def __init__(self, path):
         self.path = path
+        self.config = {}
+        cfg = self._get_config(os.path.join(self.path, 'config'))
+        if cfg:
+            for sec in cfg.sections():
+                self.config[sec] = dict(cfg.items(sec))
+
+    def save_config(self):
+        self._save_config(os.path.join(self.path, 'config'), self.config)
 
     @classmethod
     def init(cls, path):
