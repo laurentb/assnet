@@ -20,6 +20,7 @@ from __future__ import with_statement
 import re
 import os
 import sys
+from textwrap import wrap
 from datetime import datetime
 
 from ass2m.plugin import Plugin
@@ -59,7 +60,7 @@ class Event(object):
 
         fp.write('%s\n' % binary(self.title))
         fp.write('%s\n\n' % ('-' * len(unicode(self.title))))
-        fp.write('%s\n\n' % binary(self.summary))
+        fp.write('%s\n\n' % '\n'.join(wrap(binary(self.summary), 78)))
         fp.write('Date:\n')
         fp.write('%s\n\n' % (self.date.strftime('%Y-%m-%d %H:%M') if self.date else '1970-01-01 10:10'))
         fp.write('Place:\n')
@@ -192,7 +193,7 @@ class EventCmd(Command):
     def edit_summary(self, event):
         event.summary = self.ask('Enter the summary of the event', default=event.summary)
 
-    def edit_date(self, date):
+    def edit_date(self, event):
         while 1:
             date = self.ask('Enter date (yyyy-mm-dd hh:ss)',
                             default=(event.date.strftime('%Y-%m-%d %H:%M')
@@ -210,9 +211,9 @@ class EventCmd(Command):
     def edit_attendees(self, event):
         cs = ContactsSelection(self.ass2m, event.users.keys())
         cs.main()
-        for deleted in (set(event.users.keys()) - set(cs.users)):
+        for deleted in (set(event.users.keys()) - set(cs.sel_users)):
             event.users.pop(deleted)
-        for added in set(cs.users) - set(event.users.keys()):
+        for added in set(cs.sel_users) - set(event.users.keys()):
             event.users[added] = event.USER_WAITING
 
 class EventsPlugin(Plugin):

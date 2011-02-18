@@ -24,59 +24,116 @@ from ass2m.cmd import Command, ConsolePart
 from ass2m.users import User
 
 
-__all__ = ['ContactsSelection']
+__all__ = ['ContactsManagement', 'ContactsSelection']
 
 
-class ContactsSelection(ConsolePart):
-    def __init__(self, ass2m, users=[], groups=[]):
+class ContactsManagement(ConsolePart):
+    def __init__(self, ass2m):
         self.ass2m = ass2m
-        self.users = copy(users)
-        self.groups = copy(groups)
+        self.users = list(self.ass2m.storage.iter_users())
+
+    def add_contact(self, username=None):
+        try:
+            if username is None:
+                username = self.ask('Enter the username', regexp='^\w+$')
+
+            if self.ass2m.storage.user_exists(username):
+                print >>sys.stderr, 'Error: user %s already exists.' % username
+                return None
+            user = User(self.ass2m.storage, username)
+            self.edit_contact(user)
+            self.users.append(user)
+            print 'User %s correctly added.' % user.name
+            return user
+        except (EOFError,KeyboardInterrupt):
+            return None
+
+    def edit_contact(self, user):
+        user.realname = self.ask('Enter the realname', default=user.realname)
+        user.email = self.ask('Enter the email address', default=user.email, regexp='^[^ ]+@[^ ]+$')
+        user.save()
 
     def main(self):
-        self.print_menu()
-
-    def print_menu(self):
         r = ''
-        users = list(self.ass2m.storage.iter_users())
         while r != 'q':
             print ''
             print 'Contacts:'
-            for i, user in enumerate(users):
-                checked = 'x' if user.name in self.users else ' '
-                print '%s%2d)%s [%s] %s%-15s%s  "%s <%s>"' % (self.BOLD, i+1, self.NC, checked,
-                                                             self.BOLD, user.name, self.NC,
-                                                             user.realname, user.email)
-            r = self.ask('Select a contacts to check/uncheck (or q to stop)', regexp='^(\d+|q)$')
+            self.print_users()
+            try:
+                print '%s a)%s --add--' % (self.BOLD, self.NC)
+                print '%s q)%s --stop--' % (self.BOLD, self.NC)
+                print ''
+                r = self.print_menu()
+            except (KeyboardInterrupt,EOFError):
+                break
+
             if r.isdigit():
                 i = int(r) - 1
-                if i < 0 or i >= len(users):
+                if i < 0 or i >= len(self.users):
                     print >>sys.stderr, 'Error: %s is not a valid choice' % r
                     continue
-                user = users[i]
-                if user.name in self.users:
-                    self.users.remove(user.name)
-                else:
-                    self.users.append(user.name)
+                user = self.users[i]
+                self.select_user(user)
+            elif r == 'a':
+                self.add_contact()
 
+    def select_user(self, user):
+        self.edit_contact(user)
+
+    def print_menu(self):
+        return self.ask('Select a contacts to edit (a to add one, or q to stop)',
+                        regexp='^(\d+|q|a)$')
+
+    def print_users(self):
+        users = list(self.ass2m.storage.iter_users())
+        for i, user in enumerate(users):
+            self.print_user(i, user)
+
+    def print_user(self, i, user):
+        print '%s%2d)%s %s%-15s%s  "%s <%s>"' % (self.BOLD, i+1, self.NC,
+                                                 self.BOLD, user.name, self.NC,
+                                                 user.realname, user.email)
+
+class ContactsSelection(ContactsManagement):
+    def __init__(self, ass2m, sel_users=[], sel_groups=[]):
+        ContactsManagement.__init__(self, ass2m)
+        self.sel_users = copy(sel_users)
+        self.sel_groups = copy(sel_groups)
+
+    def print_menu(self):
+        return self.ask('Select a contacts to check/uncheck (a to add one, or q to stop)',
+                        regexp='^(\d+|q|a)$')
+
+    def print_user(self, i, user):
+        checked = 'x' if user.name in self.sel_users else ' '
+        print '%s%2d)%s [%s] %s%-15s%s  "%s <%s>"' % (self.BOLD, i+1, self.NC, checked,
+                                                      self.BOLD, user.name, self.NC,
+                                                      user.realname, user.email)
+
+    def select_user(self, user):
+        if user.name in self.sel_users:
+            self.sel_users.remove(user.name)
+        else:
+            self.sel_users.append(user.name)
 
 class ContactsAddCmd(Command):
     DESCRIPTION = 'Add a contact'
-    WORKDIR = True
 
     @staticmethod
     def configure_parser(parser):
         parser.add_argument('username')
 
     def cmd(self, args):
-        if self.ass2m.storage.user_exists(args.username):
-            print >>sys.stderr, 'Error: user %s already exists.' % args.username
+        cm = ContactsManagement(self.ass2m)
+        if not cm.add_contact(args.username):
             return 1
-        user = User(self.ass2m.storage, args.username)
-        user.realname = self.ask('Enter the realname')
-        user.email = self.ask('Enter the email address')
-        user.save()
-        print 'User %s correctly added.' % user.name
+
+class ContactsMenuCmd(Command):
+    DESCRIPTION = 'Display the contacts menu'
+
+    def cmd(self, args):
+        cm = ContactsManagement(self.ass2m)
+        cm.main()
 
 class ContactsMergeCmd(Command):
     DESCRIPTION = 'Merge contacts from another working directory'
@@ -101,8 +158,8 @@ class ContactsListCmd(Command):
     WORKDIR = True
 
     def cmd(self, args):
-        for user in self.ass2m.storage.iter_users():
-            print '* %s: %s <%s>' % (user.name, user.realname, user.email)
+        cm = ContactsManagement(self.ass2m)
+        cm.print_users()
 
 class ContactsRemoveCmd(Command):
     DESCRIPTION = 'Remove a contact'
@@ -122,8 +179,9 @@ class ContactsRemoveCmd(Command):
 
 class ContactsPlugin(Plugin):
     def init(self):
-        self.register_cli_command('contacts', 'Contacts management')
+        self.register_cli_command('contacts', 'Contacts Management')
         self.register_cli_command('contacts', 'add', ContactsAddCmd)
         self.register_cli_command('contacts', 'merge', ContactsMergeCmd)
+        self.register_cli_command('contacts', 'menu', ContactsMenuCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)
         self.register_cli_command('contacts', 'remove', ContactsRemoveCmd)

@@ -35,3 +35,5 @@ class CLI(object):
         except KeyboardInterrupt:
             print 'Program killed by SIGINT'
             return 1
+        except EOFError:
+            return 0
