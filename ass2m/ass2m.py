@@ -24,6 +24,8 @@ from .plugin import Plugin
 
 class Ass2m(object):
     DIRNAME = '.ass2m'
+    VERSION = '1.0-dev'
+    COPYRIGHT = 'Copyright(C) 2011 Romain Bignon, Laurent Bachelier'
 
     def __init__(self, path, parser=None):
         if isinstance(path, Storage):

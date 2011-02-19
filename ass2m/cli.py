@@ -24,6 +24,9 @@ class CLI(object):
     def __init__(self):
         self.parser = argparse.ArgumentParser(prog='ass2m')
         self.ass2m = Ass2m(os.getcwd(), self.parser)
+        self.parser.add_argument('-V', '--version', action='version',
+                                 version='%(prog)s ' + self.ass2m.VERSION +
+                                                 ' ' + self.ass2m.COPYRIGHT)
 
     def main(self, argv):
         # TODO use cmd.Cmd to have a REPL application when no command
