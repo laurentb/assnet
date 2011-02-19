@@ -57,7 +57,10 @@ class Context(object):
 
         # defaults, may be changed later on
         self.res.status = 200
-        self.res.headers['Content-Type'] = 'text/html; charset=UTF-8';
+        self.res.headers['Content-Type'] = 'text/html; charset=UTF-8'
+
+    def wsgi_response(self):
+        return self.res(self._environ, self._start_response)
 
 class Actions(object):
     def __init__(self, environ, start_response):
@@ -72,7 +75,7 @@ class Actions(object):
             self.ctx.res.body = self.ctx.lookup.get_template('error_norootpath.html'). \
                         render()
 
-        return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+        return self.ctx.wsgi_response()
 
 
     def answer(self):
@@ -88,7 +91,7 @@ class Actions(object):
         if os.path.isdir(fpath):
             if self.ctx.req.path_info[-1] != '/':
                 self.ctx.res = HTTPFound(add_slash=True)
-                return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+                return self.ctx.wsgi_response()
             if relpath[-1] == '/':
                 # skip the terminated /
                 relpath = os.path.dirname(relpath)
@@ -97,17 +100,17 @@ class Actions(object):
         f = self.ctx.ass2m.storage.get_file(relpath)
         if not self.ctx.user.has_perms(f, f.PERM_READ):
             self.ctx.res = HTTPForbidden()
-            return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+            return self.ctx.wsgi_response()
 
         if os.path.isfile(fpath):
             # serve the file, delegate everything to to FileApp
             self.ctx.res = Ass2mFileApp(fpath)
-            return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+            return self.ctx.wsgi_response()
         elif os.path.isdir(fpath):
             return self.listdir(relpath)
         else:
             self.ctx.res = HTTPNotFound()
-            return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+            return self.ctx.wsgi_response()
 
 
     def listdir(self, relpath):
@@ -125,7 +128,7 @@ class Actions(object):
 
         self.ctx.res.body = self.ctx.lookup.get_template('list.html'). \
                     render(dirs=dirs, files=files, relpath=relpath)
-        return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+        return self.ctx.wsgi_response()
 
 
     def authenticate(self):
@@ -151,7 +154,7 @@ class Actions(object):
                         <input type="submit" /></form>
                         </body></html>""" % html_escape(str(self.ctx.user))
 
-        return self.ctx.res(self.ctx._environ, self.ctx._start_response)
+        return self.ctx.wsgi_response()
 
 
 class Server(object):
