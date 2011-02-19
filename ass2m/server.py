@@ -127,7 +127,7 @@ class Actions(object):
                 files.append(filename.decode('utf-8'))
 
         self.ctx.res.body = self.ctx.lookup.get_template('list.html'). \
-                    render(dirs=dirs, files=files, relpath=relpath)
+                    render(dirs=dirs, files=files, relpath=relpath.decode('utf-8'))
         return self.ctx.wsgi_response()
 
 
