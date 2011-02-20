@@ -104,6 +104,7 @@ class Actions(object):
         relpath = self.ctx.req.path_info
         fpath = os.path.join(self.ctx.ass2m.root, relpath[1:])
 
+        # normalize paths of directories
         if os.path.isdir(fpath):
             if self.ctx.req.path_info[-1] != '/':
                 self.ctx.res = HTTPFound(add_slash=True)
