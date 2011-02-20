@@ -63,8 +63,8 @@ class Context(object):
         return self.res(self._environ, self._start_response)
 
 class Actions(object):
-    def __init__(self, environ, start_response):
-        self.ctx = Context(environ, start_response)
+    def __init__(self, ctx):
+        self.ctx = ctx
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500
@@ -175,6 +175,7 @@ class Server(object):
         """
         if self.root:
             environ["ASS2M_ROOT"] = self.root
-        actions = Actions(environ, start_response)
+        ctx = Context(environ, start_response)
+        actions = Actions(ctx)
         return actions.answer()
 
