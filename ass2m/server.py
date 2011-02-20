@@ -141,7 +141,7 @@ class Actions(object):
 
     def login(self):
         signer = AuthCookieSigner(secret=COOKIE_SECRET)
-        form_user = self.ctx.req.str_GET.get('user')
+        form_user = self.ctx.req.str_POST.get('user')
         if form_user:
             # set cookie
             cookie = signer.sign(form_user)
@@ -150,7 +150,7 @@ class Actions(object):
             self.ctx.user = self.ctx.ass2m.storage.get_user(form_user)
 
         self.ctx.res.body = """<html><body>Current user: %s<br/>
-                        <form><label>Username</label><input name="user" />
+                        <form method="post"><label>Username</label><input name="user" />
                         <input type="submit" /></form>
                         </body></html>""" % html_escape(str(self.ctx.user))
 
