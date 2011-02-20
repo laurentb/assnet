@@ -26,7 +26,8 @@ from webob import html_escape
 from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
 
 from ass2m import Ass2m
-from users import Anonymous
+from .users import Anonymous
+from .routes import Router, Route
 
 COOKIE_SECRET = new_secret()
 
@@ -39,9 +40,11 @@ class Ass2mFileApp(FileApp):
             content_type += "; charset=UTF-8"
         return (content_type, guess[1])
 
+
 class Context(object):
     def __init__(self, environ, start_response):
-        self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None))
+        self.router = Router()
+        self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None), router=self.router)
         self._environ = environ
         self._start_response = start_response
         self.req = Request(environ)
@@ -65,6 +68,12 @@ class Context(object):
 class Actions(object):
     def __init__(self, ctx):
         self.ctx = ctx
+        self._register_routes()
+
+    def _register_routes(self):
+        router = self.ctx.router
+        router.connect(Route(object_type = None, action="login"), self.login)
+        router.connect(Route(object_type = None, action="login", method="POST"), self.login)
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500
@@ -79,14 +88,21 @@ class Actions(object):
 
 
     def answer(self):
-        if not self.ctx.ass2m.storage:
+        ctx = self.ctx
+        router = ctx.router
+
+        if not ctx.ass2m.storage:
             return self.error_notworkingdir()
 
         self.authenticate()
+
+        # actions not related to a file or directory
+        call = router.match(None, ctx.req)
+        if call:
+            return call()
+
         relpath = self.ctx.req.path_info
         fpath = os.path.join(self.ctx.ass2m.root, relpath[1:])
-        if self.ctx.req.path_info == '/LOGIN':
-            return self.login()
 
         if os.path.isdir(fpath):
             if self.ctx.req.path_info[-1] != '/':
