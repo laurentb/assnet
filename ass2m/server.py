@@ -70,10 +70,22 @@ class Actions(object):
         self.ctx = ctx
         self._register_routes()
 
+
     def _register_routes(self):
         router = self.ctx.router
-        router.connect(Route(object_type = None, action="login"), self.login)
-        router.connect(Route(object_type = None, action="login", method="POST"), self.login)
+        router.connect(
+            Route(object_type = None, action="login"),
+            self.login)
+        router.connect(
+            Route(object_type = None, action="login", method="POST"),
+            self.login)
+        router.connect(
+            Route(object_type = "file", action="download"),
+            self.download_file)
+        router.connect(
+            Route(object_type = "directory", action="list", view="html"),
+            self.list_dir)
+
 
     def _authenticate(self):
         signer = AuthCookieSigner(secret=COOKIE_SECRET)
@@ -117,10 +129,16 @@ class Actions(object):
                 relpath = os.path.dirname(relpath)
 
         if os.path.isfile(fpath):
-            return self.download_file(relpath, fpath)
+            call = router.match("file", ctx.req)
         elif os.path.isdir(fpath):
-            return self.list_dir(relpath, fpath)
+            call = router.match("directory", ctx.req)
         else:
+            call = False
+
+        if call:
+            return call(relpath, fpath)
+        else:
+            # Either file or action/view not found
             self.ctx.res = HTTPNotFound()
             return self.ctx.wsgi_response()
 
