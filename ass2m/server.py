@@ -73,6 +73,11 @@ class Actions(object):
 
     def _register_routes(self):
         router = self.ctx.router
+
+        router.set_default_view(None, "html")
+        router.set_default_action("file", "download")
+        router.set_default_action("directory", "list")
+
         router.connect(
             Route(object_type = None, action="login"),
             self.login)
@@ -128,6 +133,7 @@ class Actions(object):
                 # remove the trailing "/" server-side
                 relpath = os.path.dirname(relpath)
 
+        # find the action to forward the request to
         if os.path.isfile(fpath):
             call = router.match("file", ctx.req)
         elif os.path.isdir(fpath):

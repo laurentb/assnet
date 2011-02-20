@@ -15,6 +15,7 @@ class RoutesTest(TestCase):
         self.app = TestApp(app)
         self.router = router
 
+
     def test_addAndMatch(self):
         def fn1():
             pass
@@ -24,9 +25,9 @@ class RoutesTest(TestCase):
         extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
         assert "<function fn1" in res.body
-
         res = self.app.get("/?action=plop&view=html", extra_environ=extra_environ)
         assert "False" == res.body
+
 
     def test_getOrPost(self):
         def fn1():
@@ -37,12 +38,13 @@ class RoutesTest(TestCase):
 
         self.router.connect(Route(object_type="file", action="list", view="html", method="GET"), fn1)
         self.router.connect(Route(object_type="file", action="list", view="html", method="POST"), fn2)
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
 
+        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
         assert "<function fn1" in res.body
         res = self.app.post("/?action=list&view=html", extra_environ=extra_environ)
         assert "<function fn2" in res.body
+
 
     def test_catchAllView(self):
         def fn1():
@@ -53,12 +55,13 @@ class RoutesTest(TestCase):
 
         self.router.connect(Route(object_type="file", action="list", view=None), fn1)
         self.router.connect(Route(object_type="file", action="list", view="html"), fn2)
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
 
+        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
         assert "<function fn1" in res.body
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
         assert "<function fn2" in res.body
+
 
     def test_catchAllViewAndPriority(self):
         def fn1():
@@ -69,10 +72,59 @@ class RoutesTest(TestCase):
 
         self.router.connect(Route(object_type="file", action="list", view="html"), fn1)
         self.router.connect(Route(object_type="file", action="list", view=None), fn2)
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
 
+        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
         assert "<function fn2" in res.body
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
         assert "<function fn2" in res.body
+
+
+    def test_setDefaultAction(self):
+        def fn1():
+            pass
+
+        def fn2():
+            pass
+
+        self.router.connect(Route(object_type="directory", action="list", view="html"), fn1)
+        self.router.set_default_action("directory", "list")
+
+        extra_environ = {"ASS2M_OBJECT_TYPE": "directory"}
+        res = self.app.get("/", extra_environ=extra_environ)
+        assert "False" == res.body
+        res = self.app.get("/?view=html", extra_environ=extra_environ)
+        assert "<function fn1" in res.body
+        res = self.app.get("/?action=tar&view=html", extra_environ=extra_environ)
+        assert "False" == res.body
+
+        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
+        res = self.app.get("/?view=html", extra_environ=extra_environ)
+        assert "False" == res.body
+
+
+    def test_setDefaultActionAndView(self):
+        def fn1():
+            pass
+
+        def fn2():
+            pass
+
+        def fn3():
+            pass
+
+        self.router.connect(Route(object_type="directory", action="list", view="html"), fn1)
+        self.router.connect(Route(object_type="directory", action="list", view="json"), fn2)
+        self.router.connect(Route(object_type="directory", action="tree", view="json"), fn3)
+        self.router.set_default_action("directory", "list")
+        self.router.set_default_view("list", "html")
+        self.router.set_default_view("tree", "json")
+        extra_environ = {"ASS2M_OBJECT_TYPE": "directory"}
+
+        res = self.app.get("/", extra_environ=extra_environ)
+        assert "<function fn1" in res.body
+        res = self.app.get("/?view=json", extra_environ=extra_environ)
+        assert "<function fn2" in res.body
+        res = self.app.get("/?action=tree", extra_environ=extra_environ)
+        assert "<function fn3" in res.body
 
