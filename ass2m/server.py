@@ -104,20 +104,21 @@ class Actions(object):
         relpath = self.ctx.req.path_info
         fpath = os.path.join(self.ctx.ass2m.root, relpath[1:])
 
-        # normalize paths of directories
-        if os.path.isdir(fpath):
-            if self.ctx.req.path_info[-1] != '/':
-                self.ctx.res = HTTPFound(add_slash=True)
-                return self.ctx.wsgi_response()
-            if relpath[-1] == '/':
-                # skip the terminated /
-                relpath = os.path.dirname(relpath)
-
         # check perms
         f = self.ctx.ass2m.storage.get_file(relpath)
         if not self.ctx.user.has_perms(f, f.PERM_READ):
             self.ctx.res = HTTPForbidden()
             return self.ctx.wsgi_response()
+
+        # normalize paths of directories
+        if os.path.isdir(fpath):
+            if self.ctx.req.path_info[-1] != '/':
+                # there should be a trailing in the client URL "/"
+                self.ctx.res = HTTPFound(add_slash=True)
+                return self.ctx.wsgi_response()
+            if relpath[-1] == '/':
+                # remove the trailing "/" server-side
+                relpath = os.path.dirname(relpath)
 
         if os.path.isfile(fpath):
             # serve the file, delegate everything to to FileApp
