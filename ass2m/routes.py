@@ -1,7 +1,7 @@
 class Route(object):
     def __init__(self, object_type, action, view = None, method = 'GET'):
         """
-        object_type: "file" or "folder"
+        object_type: "file" or "directory"
         action: arbitrary name
         view: arbitrary name. If none, will
         method: HTTP method, GET by default
