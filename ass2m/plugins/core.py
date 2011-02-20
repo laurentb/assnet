@@ -20,6 +20,11 @@ import os
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
+from ass2m.server import Actions
+
+from ass2m.routes import Route
+from paste.fileapp import FileApp
+
 
 class InitCmd(Command):
     DESCRIPTION = 'Initialize the current directory as working tree'
@@ -126,8 +131,55 @@ class PermsCmd(Command):
         f.save()
         print 'Permissions for %s on %s are now: %s' % (args.who, f.path, f.p2str(f.perms[args.who]))
 
+
+class Ass2mFileApp(FileApp):
+    def guess_type(self):
+        # add UTF-8 by default to text content-types
+        guess = FileApp.guess_type(self)
+        content_type = guess[0]
+        if content_type and "text/" in content_type and "charset=" not in content_type:
+            content_type += "; charset=UTF-8"
+        return (content_type, guess[1])
+
+
+class CoreActions(Actions):
+    def _register_routes(self):
+        router = self.ctx.router
+        router.connect(
+            Route(object_type = "file", action="download"),
+            self.download_file)
+        router.connect(
+            Route(object_type = "directory", action="list", view="html"),
+            self.list_dir)
+
+
+    def download_file(self, relpath, fpath):
+        # serve the file, delegate everything to to FileApp
+        self.ctx.res = Ass2mFileApp(fpath)
+        return self.ctx.wsgi_response()
+
+
+    def list_dir(self, relpath, fpath):
+        dirs = []
+        files = []
+        for filename in sorted(os.listdir(fpath)):
+            f = self.ctx.ass2m.storage.get_file(os.path.join(relpath, filename))
+            if not self.ctx.user.has_perms(f, f.PERM_LIST):
+                continue
+            if os.path.isdir(os.path.join(fpath, filename)):
+                dirs.append(filename.decode('utf-8'))
+            else:
+                files.append(filename.decode('utf-8'))
+
+        self.ctx.res.body = self.ctx.lookup.get_template('list.html'). \
+                    render(dirs=dirs, files=files, relpath=relpath.decode('utf-8'))
+        return self.ctx.wsgi_response()
+
+
 class CorePlugin(Plugin):
     def init(self):
         self.register_cli_command('init', InitCmd)
         self.register_cli_command('tree', TreeCmd)
         self.register_cli_command('perms', PermsCmd)
+
+        self.register_web_actions(CoreActions)

@@ -31,7 +31,7 @@ class Plugin(object):
     def register_cli_command(self, *args):
         parser = self.ass2m.parser
         if not parser:
-            # not a cli application, does not need to register command.
+            # not a cli application, does not need to register a command.
             return
 
         names = args[:-1]
@@ -61,3 +61,12 @@ class Plugin(object):
         if cmd:
             cmd.configure_parser(parser)
             parser.set_defaults(cmd=cmd)
+
+    def register_web_actions(self, klass):
+        ctx = self.ass2m.ctx
+        if not ctx:
+            # not a web application, does not need to register an action.
+            return
+
+        klass(ctx)
+
