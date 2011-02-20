@@ -75,7 +75,7 @@ class Actions(object):
         router.connect(Route(object_type = None, action="login"), self.login)
         router.connect(Route(object_type = None, action="login", method="POST"), self.login)
 
-    def authenticate(self):
+    def _authenticate(self):
         signer = AuthCookieSigner(secret=COOKIE_SECRET)
         cookie = self.ctx.req.str_cookies.get('ass2m_auth')
         user = cookie and signer.auth(cookie)
@@ -90,7 +90,7 @@ class Actions(object):
         if not ctx.ass2m.storage:
             return self.error_notworkingdir()
 
-        self.authenticate()
+        self._authenticate()
 
         # actions not related to a file or directory
         call = router.match(None, ctx.req)
