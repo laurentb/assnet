@@ -75,16 +75,12 @@ class Actions(object):
         router.connect(Route(object_type = None, action="login"), self.login)
         router.connect(Route(object_type = None, action="login", method="POST"), self.login)
 
-    def error_notworkingdir(self):
-        self.ctx.res.status = 500
-        if self.ctx.environ.has_key("ASS2M_ROOT"):
-            self.ctx.res.body = self.ctx.lookup.get_template('error_notworkingdir.html'). \
-                        render(root=self.ctx._environ["ASS2M_ROOT"])
-        else:
-            self.ctx.res.body = self.ctx.lookup.get_template('error_norootpath.html'). \
-                        render()
-
-        return self.ctx.wsgi_response()
+    def authenticate(self):
+        signer = AuthCookieSigner(secret=COOKIE_SECRET)
+        cookie = self.ctx.req.str_cookies.get('ass2m_auth')
+        user = cookie and signer.auth(cookie)
+        if user:
+            self.ctx.user = self.ctx.ass2m.storage.get_user(user)
 
 
     def answer(self):
@@ -121,25 +117,28 @@ class Actions(object):
                 relpath = os.path.dirname(relpath)
 
         if os.path.isfile(fpath):
-            # serve the file, delegate everything to to FileApp
-            self.ctx.res = Ass2mFileApp(fpath)
-            return self.ctx.wsgi_response()
+            return self.download_file(relpath, fpath)
         elif os.path.isdir(fpath):
-            return self.listdir(relpath)
+            return self.list_dir(relpath, fpath)
         else:
             self.ctx.res = HTTPNotFound()
             return self.ctx.wsgi_response()
 
 
-    def listdir(self, relpath):
-        directory = os.path.join(self.ctx.ass2m.root, relpath[1:])
+    def download_file(self, relpath, fpath):
+        # serve the file, delegate everything to to FileApp
+        self.ctx.res = Ass2mFileApp(fpath)
+        return self.ctx.wsgi_response()
+
+
+    def list_dir(self, relpath, fpath):
         dirs = []
         files = []
-        for filename in sorted(os.listdir(directory)):
+        for filename in sorted(os.listdir(fpath)):
             f = self.ctx.ass2m.storage.get_file(os.path.join(relpath, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
-            if os.path.isdir(os.path.join(directory, filename)):
+            if os.path.isdir(os.path.join(fpath, filename)):
                 dirs.append(filename.decode('utf-8'))
             else:
                 files.append(filename.decode('utf-8'))
@@ -147,14 +146,6 @@ class Actions(object):
         self.ctx.res.body = self.ctx.lookup.get_template('list.html'). \
                     render(dirs=dirs, files=files, relpath=relpath.decode('utf-8'))
         return self.ctx.wsgi_response()
-
-
-    def authenticate(self):
-        signer = AuthCookieSigner(secret=COOKIE_SECRET)
-        cookie = self.ctx.req.str_cookies.get('ass2m_auth')
-        user = cookie and signer.auth(cookie)
-        if user:
-            self.ctx.user = self.ctx.ass2m.storage.get_user(user)
 
 
     def login(self):
@@ -171,6 +162,18 @@ class Actions(object):
                         <form method="post"><label>Username</label><input name="user" />
                         <input type="submit" /></form>
                         </body></html>""" % html_escape(str(self.ctx.user))
+
+        return self.ctx.wsgi_response()
+
+
+    def error_notworkingdir(self):
+        self.ctx.res.status = 500
+        if self.ctx.environ.has_key("ASS2M_ROOT"):
+            self.ctx.res.body = self.ctx.lookup.get_template('error_notworkingdir.html'). \
+                        render(root=self.ctx._environ["ASS2M_ROOT"])
+        else:
+            self.ctx.res.body = self.ctx.lookup.get_template('error_norootpath.html'). \
+                        render()
 
         return self.ctx.wsgi_response()
 
