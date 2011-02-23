@@ -21,8 +21,8 @@ from __future__ import with_statement
 import os
 import hashlib
 from ConfigParser import RawConfigParser
-from users import User, Anonymous
-from files import File
+from .users import User, Anonymous
+from .files import File
 
 class Group(object):
     def __init__(self, name):
@@ -32,11 +32,7 @@ class Group(object):
 class Storage(object):
     def __init__(self, path):
         self.path = path
-        self.config = {}
-        cfg = self._get_config(os.path.join(self.path, 'config'))
-        if cfg:
-            for sec in cfg.sections():
-                self.config[sec] = dict(cfg.items(sec))
+        self.config = self._get_config(os.path.join(self.path, 'config')) or {}
 
     def save_config(self):
         self._save_config(os.path.join(self.path, 'config'), self.config)
@@ -61,11 +57,11 @@ class Storage(object):
 
     def get_user(self, name):
         config = self._get_config(os.path.join(self.path, 'users', name))
-        if not config:
+        if config is None:
             return Anonymous()
 
         user = User(self, name)
-        info = dict([(k,v.decode('utf-8')) for k,v in config.items('info')])
+        info = config.get('info', {})
         user.email = info.get('email', None)
         user.realname = info.get('realname', None)
         user.password = info.get('password', None)
@@ -81,12 +77,13 @@ class Storage(object):
         return name in os.listdir(os.path.join(self.path, 'users'))
 
     def save_user(self, user):
-        sections = {}
-        sections['info'] = {'email':    user.email.encode('utf-8') if user.email else None,
-                            'realname': user.realname.encode('utf-8') if user.realname else None,
-                            'password': user.password.encode('utf-8') if user.password else None
-                           }
-        self._save_config(os.path.join(self.path, 'users', user.name), sections)
+        config = self._get_config(os.path.join(self.path, 'users', user.name)) or {}
+        info = config.setdefault('info', {})
+        info['email'] = user.email if user.email else None
+        info['realname'] = user.realname if user.realname else None
+        info['password'] = user.password if user.password else None
+
+        self._save_config(os.path.join(self.path, 'users', user.name), config)
 
     def remove_user(self, name):
         os.unlink(os.path.join(self.path, 'users', name))
@@ -107,19 +104,21 @@ class Storage(object):
     def get_file(self, path):
         f = File(self, path)
         config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()))
-        if not config:
+        if config is None:
             return f
 
-        infos = dict(config.items('infos'))
+        infos = config.get('infos', {})
         f.view = infos.get('view', None)
-        for key, value in config.items('perms'):
+        for key, value in config.get('perms', {}).iteritems():
             f.perms[key] = int(value)
         return f
 
     def save_file(self, f):
-        sections = {}
-        sections['infos'] = {'path': f.path,
-                             'view': f.view}
+        sections = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest())) or {}
+        infos = sections.setdefault('infos', {})
+        infos['path'] = f.path,
+        infos['view'] = f.view
+
         sections['perms'] = f.perms
         self._save_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()), sections)
 
@@ -130,13 +129,20 @@ class Storage(object):
                 config.readfp(fp)
         except IOError:
             return None
-        return config
+
+        sections = {}
+        for sec in config.sections():
+            sections[sec] = dict([(k,v.decode('utf-8')) for k,v in config.items(sec)])
+
+        return sections
 
     def _save_config(self, path, sections):
         config = RawConfigParser()
         for sec, items in sections.iteritems():
             config.add_section(sec)
             for key, value in items.iteritems():
+                if isinstance(value, unicode):
+                    value = value.encode('utf-8')
                 config.set(sec, key, value)
         with open(path, 'wb') as fp:
             config.write(fp)
