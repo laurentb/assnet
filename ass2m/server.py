@@ -157,7 +157,7 @@ class DispatchActions(Actions):
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500
-        if self.ctx.environ.has_key("ASS2M_ROOT"):
+        if self.ctx._environ.has_key("ASS2M_ROOT"):
             self.ctx.res.body = self.ctx.lookup.get_template('error_notworkingdir.html'). \
                         render(root=self.ctx._environ["ASS2M_ROOT"])
         else:
