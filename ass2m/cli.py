@@ -23,7 +23,7 @@ from ass2m import Ass2m
 class CLI(object):
     def __init__(self):
         self.parser = argparse.ArgumentParser(prog='ass2m')
-        self.ass2m = Ass2m(os.getcwd(), self.parser)
+        self.ass2m = Ass2m(os.getcwd(), parser=self.parser)
         self.parser.add_argument('-V', '--version', action='version',
                                  version='%(prog)s ' + self.ass2m.VERSION +
                                                  ' ' + self.ass2m.COPYRIGHT)
