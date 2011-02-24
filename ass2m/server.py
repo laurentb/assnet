@@ -17,6 +17,7 @@
 
 
 import os
+from binascii import hexlify
 from mako.lookup import TemplateLookup
 from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
@@ -28,8 +29,6 @@ from ass2m import Ass2m
 from .users import Anonymous
 from .routes import Router, Route
 
-COOKIE_SECRET = new_secret()
-
 class Context(object):
     def __init__(self, environ, start_response):
         self.router = Router()
@@ -39,6 +38,12 @@ class Context(object):
         self.req = Request(environ)
         self.res = Response()
         self.user = Anonymous()
+
+        self.cookie_secret = self.ass2m.storage.config.setdefault("web", {}).get("cookie_secret")
+        if self.cookie_secret is None:
+            self.cookie_secret = hexlify(new_secret())
+            self.ass2m.storage.config["web"]["cookie_secret"] = self.cookie_secret
+            self.ass2m.storage.save_config()
 
         paths = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
                  '/usr/share/ass2m',
@@ -81,7 +86,7 @@ class DispatchActions(Actions):
 
 
     def _authenticate(self):
-        signer = AuthCookieSigner(secret=COOKIE_SECRET)
+        signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
         cookie = self.ctx.req.str_cookies.get('ass2m_auth')
         user = cookie and signer.auth(cookie)
         if user:
@@ -138,7 +143,7 @@ class DispatchActions(Actions):
 
 
     def login(self):
-        signer = AuthCookieSigner(secret=COOKIE_SECRET)
+        signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
         form_user = self.ctx.req.str_POST.get('user')
         if form_user:
             # set cookie
