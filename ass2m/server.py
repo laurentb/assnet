@@ -104,7 +104,7 @@ class DispatchActions(Actions):
 
         # actions not related to a file or directory
         call = router.match(None, ctx.req)
-        if call:
+        if call is not None:
             return call()
 
         relpath = self.ctx.req.path_info
@@ -132,9 +132,9 @@ class DispatchActions(Actions):
         elif os.path.isdir(fpath):
             call = router.match("directory", ctx.req)
         else:
-            call = False
+            call = None
 
-        if call:
+        if call is not None:
             return call(relpath, fpath)
         else:
             # Either file or action/view not found

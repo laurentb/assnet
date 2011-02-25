@@ -51,4 +51,4 @@ class Router(object):
             if route.match(object_type, action, view, method):
                 return call
 
-        return False
+        return None
