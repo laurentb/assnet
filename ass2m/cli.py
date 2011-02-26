@@ -34,7 +34,7 @@ class CLI(object):
         args = self.parser.parse_args(argv[1:])
         cmd = args.cmd(self.ass2m)
         try:
-            return cmd.cmd(args)
+            return cmd.run(args)
         except KeyboardInterrupt:
             print 'Program killed by SIGINT'
             return 1
