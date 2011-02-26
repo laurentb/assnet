@@ -24,7 +24,7 @@ class RoutesTest(TestCase):
 
         extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert "<function fn1" in res.body
+        assert repr(fn1) == res.body
         res = self.app.get("/?action=plop&view=html", extra_environ=extra_environ)
         assert "None" == res.body
 
@@ -41,9 +41,9 @@ class RoutesTest(TestCase):
 
         extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert "<function fn1" in res.body
+        assert repr(fn1) == res.body
         res = self.app.post("/?action=list&view=html", extra_environ=extra_environ)
-        assert "<function fn2" in res.body
+        assert repr(fn2) == res.body
 
 
     def test_catchAllView(self):
@@ -58,9 +58,9 @@ class RoutesTest(TestCase):
 
         extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
-        assert "<function fn1" in res.body
+        assert repr(fn1) == res.body
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert "<function fn2" in res.body
+        assert repr(fn2) == res.body
 
 
     def test_catchAllViewAndPriority(self):
@@ -75,9 +75,9 @@ class RoutesTest(TestCase):
 
         extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
-        assert "<function fn2" in res.body
+        assert repr(fn2) == res.body
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert "<function fn2" in res.body
+        assert repr(fn2) == res.body
 
 
     def test_setDefaultAction(self):
@@ -94,7 +94,7 @@ class RoutesTest(TestCase):
         res = self.app.get("/", extra_environ=extra_environ)
         assert "None" == res.body
         res = self.app.get("/?view=html", extra_environ=extra_environ)
-        assert "<function fn1" in res.body
+        assert repr(fn1) == res.body
         res = self.app.get("/?action=tar&view=html", extra_environ=extra_environ)
         assert "None" == res.body
 
@@ -122,9 +122,9 @@ class RoutesTest(TestCase):
         extra_environ = {"ASS2M_OBJECT_TYPE": "directory"}
 
         res = self.app.get("/", extra_environ=extra_environ)
-        assert "<function fn1" in res.body
+        assert repr(fn1) == res.body
         res = self.app.get("/?view=json", extra_environ=extra_environ)
-        assert "<function fn2" in res.body
+        assert repr(fn2) == res.body
         res = self.app.get("/?action=tree", extra_environ=extra_environ)
-        assert "<function fn3" in res.body
+        assert repr(fn3) == res.body
 
