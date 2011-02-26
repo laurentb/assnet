@@ -26,7 +26,7 @@ class RoutesTest(TestCase):
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
         assert "<function fn1" in res.body
         res = self.app.get("/?action=plop&view=html", extra_environ=extra_environ)
-        assert "False" == res.body
+        assert "None" == res.body
 
 
     def test_getOrPost(self):
@@ -92,15 +92,15 @@ class RoutesTest(TestCase):
 
         extra_environ = {"ASS2M_OBJECT_TYPE": "directory"}
         res = self.app.get("/", extra_environ=extra_environ)
-        assert "False" == res.body
+        assert "None" == res.body
         res = self.app.get("/?view=html", extra_environ=extra_environ)
         assert "<function fn1" in res.body
         res = self.app.get("/?action=tar&view=html", extra_environ=extra_environ)
-        assert "False" == res.body
+        assert "None" == res.body
 
         extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
         res = self.app.get("/?view=html", extra_environ=extra_environ)
-        assert "False" == res.body
+        assert "None" == res.body
 
 
     def test_setDefaultActionAndView(self):
