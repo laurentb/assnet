@@ -15,15 +15,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-import os
 import argparse
 
 from ass2m import Ass2m
 
 class CLI(object):
-    def __init__(self, working_dir=None):
-        if working_dir is None:
-            working_dir = os.getcwd()
+    def __init__(self, working_dir):
         self.working_dir = working_dir
         self.parser = argparse.ArgumentParser(prog='ass2m')
         self.ass2m = Ass2m(self.working_dir, parser=self.parser)

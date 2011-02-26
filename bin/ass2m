@@ -20,7 +20,10 @@
 
 import sys
 from ass2m.cli import CLI
+from os import getcwd, getenv
+
 
 if __name__ == '__main__':
-    app = CLI()
+    working_dir = getenv('ASS2M_DIR', getcwd())
+    app = CLI(working_dir)
     sys.exit(app.main(sys.argv))
