@@ -98,8 +98,9 @@ class Command(ConsolePart):
     def configure_parser(parser):
         return
 
-    def __init__(self, ass2m):
+    def __init__(self, ass2m, working_dir):
         self.ass2m = ass2m
+        self.working_dir = working_dir
 
     def run(self, args):
         if self.WORKDIR and not self.ass2m.storage:

@@ -21,9 +21,12 @@ import argparse
 from ass2m import Ass2m
 
 class CLI(object):
-    def __init__(self):
+    def __init__(self, working_dir=None):
+        if working_dir is None:
+            working_dir = os.getcwd()
+        self.working_dir = working_dir
         self.parser = argparse.ArgumentParser(prog='ass2m')
-        self.ass2m = Ass2m(os.getcwd(), parser=self.parser)
+        self.ass2m = Ass2m(self.working_dir, parser=self.parser)
         self.parser.add_argument('-V', '--version', action='version',
                                  version='%(prog)s ' + self.ass2m.VERSION +
                                                  ' ' + self.ass2m.COPYRIGHT)
@@ -32,7 +35,7 @@ class CLI(object):
         # TODO use cmd.Cmd to have a REPL application when no command
         # is supplied.
         args = self.parser.parse_args(argv[1:])
-        cmd = args.cmd(self.ass2m)
+        cmd = args.cmd(self.ass2m, self.working_dir)
         try:
             return cmd.run(args)
         except KeyboardInterrupt:

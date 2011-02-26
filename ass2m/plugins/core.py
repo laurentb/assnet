@@ -32,10 +32,10 @@ class InitCmd(Command):
 
     def cmd(self, args):
         if self.ass2m.storage:
-            print >>sys.stderr, 'Error: %s is already a working directory' % os.getcwd()
+            print >>sys.stderr, 'Error: %s is already a working directory' % self.working_dir
             return 1
 
-        self.ass2m.create(os.getcwd())
+        self.ass2m.create(self.working_dir)
         print 'Ass2m working directory created.'
 
 class TreeCmd(Command):
@@ -43,7 +43,7 @@ class TreeCmd(Command):
     WORKDIR = True
 
     def cmd(self, args):
-        for root, directories, files in os.walk(os.getcwd()):
+        for root, directories, files in os.walk(self.working_dir):
             path = root[len(self.ass2m.root):]
             depth = path.count('/')
             f = self.ass2m.storage.get_file(path)
