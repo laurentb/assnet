@@ -128,3 +128,22 @@ class RoutesTest(TestCase):
         res = self.app.get("/?action=tree", extra_environ=extra_environ)
         assert repr(fn3) == res.body
 
+
+    def test_manualPrecision(self):
+        def fn1():
+            pass
+
+        def fn2():
+            pass
+
+        self.router.connect(Route(object_type="file", action="list", view="html"), fn1)
+        route = Route(object_type="file", action="list", view=None)
+        route.precision = 42
+        self.router.connect(route, fn2)
+
+        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
+        res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
+        assert repr(fn2) == res.body
+        res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
+        assert repr(fn2) == res.body
+
