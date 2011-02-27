@@ -10,6 +10,10 @@ class Route(object):
         self.action = action
         self.view = view
         self.method = method
+        if self.view:
+            self.precision = 1
+        else:
+            self.precision = 0
 
     def match(self, object_type, action, view, method):
         return \
@@ -20,7 +24,7 @@ class Route(object):
 
 class Router(object):
     def __init__(self):
-        self.routes = []
+        self.routes = {}
         self.default_actions = {}
         self.default_views = {}
         self.default_view = None
@@ -31,7 +35,7 @@ class Router(object):
         route: Route object
         call: method to call if the route is matched
         """
-        self.routes.insert(0, (route, call))
+        self.routes.setdefault(route.precision, []).append((route, call))
 
     def set_default_action(self, object_type, action):
         self.default_actions[object_type] = action
@@ -47,8 +51,9 @@ class Router(object):
         view = req.str_GET.get("view", self.default_views.get(action, self.default_view))
         method = req.method
 
-        for route, call in self.routes:
-            if route.match(object_type, action, view, method):
-                return call
+        for precision in sorted(self.routes.keys(), reverse=True):
+            for route, call in self.routes[precision]:
+                if route.match(object_type, action, view, method):
+                    return call
 
         return None

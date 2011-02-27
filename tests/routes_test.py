@@ -63,7 +63,7 @@ class RoutesTest(TestCase):
         assert repr(fn2) == res.body
 
 
-    def test_catchAllViewAndPriority(self):
+    def test_catchAllViewAndPrecision(self):
         def fn1():
             pass
 
@@ -77,7 +77,7 @@ class RoutesTest(TestCase):
         res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
         assert repr(fn2) == res.body
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
+        assert repr(fn1) == res.body
 
 
     def test_setDefaultAction(self):
