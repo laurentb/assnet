@@ -106,6 +106,6 @@ class Command(ConsolePart):
         if self.WORKDIR and not self.ass2m.storage:
             print >>sys.stderr, 'Error: Not a ass2m working directory.'
             print >>sys.stderr, 'Please use "%s init"' % sys.argv[0]
-            return 0
+            return 1
 
         return self.cmd(args)
