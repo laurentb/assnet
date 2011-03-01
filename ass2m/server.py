@@ -22,16 +22,20 @@ from mako.lookup import TemplateLookup
 from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from webob import Request, Response
-from webob import html_escape
 from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
 
 from ass2m import Ass2m
 from .users import Anonymous
-from .routes import Router, Route
+from .routes import Router
 
 class Context(object):
     def __init__(self, environ, start_response):
-        self.router = Router()
+        router = Router()
+        router.set_default_view(None, "html")
+        router.set_default_action("file", "download")
+        router.set_default_action("directory", "list")
+        self.router = router
+
         self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None), ctx=self)
         self._environ = environ
         self._start_response = start_response
@@ -56,35 +60,21 @@ class Context(object):
         self.res.status = 200
         self.res.headers['Content-Type'] = 'text/html; charset=UTF-8'
 
+
     def wsgi_response(self):
         return self.res(self._environ, self._start_response)
 
 
-class Actions(object):
+class Action(object):
     def __init__(self, ctx):
         self.ctx = ctx
-        self._register_routes()
-
-    def _register_routes(self):
-        pass
 
 
-class DispatchActions(Actions):
-    def _register_routes(self):
-        router = self.ctx.router
-
-        router.set_default_view(None, "html")
-        router.set_default_action("file", "download")
-        router.set_default_action("directory", "list")
-
-        router.connect(
-            Route(object_type = None, action="login"),
-            self.login)
-        router.connect(
-            Route(object_type = None, action="login", method="POST"),
-            self.login)
+    def answer(self):
+        raise NotImplementedError()
 
 
+class Dispatcher(Action):
     def _authenticate(self):
         signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
         cookie = self.ctx.req.str_cookies.get('ass2m_auth')
@@ -103,9 +93,9 @@ class DispatchActions(Actions):
         self._authenticate()
 
         # actions not related to a file or directory
-        call = router.match(None, ctx.req)
-        if call is not None:
-            return call()
+        action = router.match(None, ctx.req)
+        if action is not None:
+            return action(ctx).answer()
 
         relpath = self.ctx.req.path_info
         fpath = os.path.join(self.ctx.ass2m.root, relpath[1:])
@@ -128,36 +118,18 @@ class DispatchActions(Actions):
 
         # find the action to forward the request to
         if os.path.isfile(fpath):
-            call = router.match("file", ctx.req)
+            action = router.match("file", ctx.req)
         elif os.path.isdir(fpath):
-            call = router.match("directory", ctx.req)
+            action = router.match("directory", ctx.req)
         else:
-            call = None
+            action = None
 
-        if call is not None:
-            return call(relpath, fpath)
+        if action is not None:
+            return action(ctx).answer(relpath, fpath)
         else:
             # Either file or action/view not found
             self.ctx.res = HTTPNotFound()
             return self.ctx.wsgi_response()
-
-
-    def login(self):
-        signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
-        form_user = self.ctx.req.str_POST.get('user')
-        if form_user:
-            # set cookie
-            cookie = signer.sign(form_user)
-            self.ctx.res.set_cookie('ass2m_auth', cookie)
-
-            self.ctx.user = self.ctx.ass2m.storage.get_user(form_user)
-
-        self.ctx.res.body = """<html><body>Current user: %s<br/>
-                        <form method="post"><label>Username</label><input name="user" />
-                        <input type="submit" /></form>
-                        </body></html>""" % html_escape(str(self.ctx.user))
-
-        return self.ctx.wsgi_response()
 
 
     def error_notworkingdir(self):
@@ -191,6 +163,6 @@ class Server(object):
         if self.root:
             environ["ASS2M_ROOT"] = self.root
         ctx = Context(environ, start_response)
-        actions = DispatchActions(ctx)
-        return actions.answer()
+        dispatcher = Dispatcher(ctx)
+        return dispatcher.answer()
 

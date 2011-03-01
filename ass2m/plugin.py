@@ -62,11 +62,11 @@ class Plugin(object):
             cmd.configure_parser(parser)
             parser.set_defaults(cmd=cmd)
 
-    def register_web_actions(self, klass):
+    def register_web_action(self, route, action):
         ctx = self.ass2m.ctx
         if not ctx:
             # not a web application, does not need to register an action.
             return
 
-        klass(ctx)
+        ctx.router.connect(route, action)
 

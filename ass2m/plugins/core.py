@@ -20,9 +20,9 @@ import os
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
-from ass2m.server import Actions
 
 from ass2m.routes import Route
+from ass2m.server import Action
 from paste.fileapp import FileApp
 
 
@@ -142,24 +142,15 @@ class Ass2mFileApp(FileApp):
         return (content_type, guess[1])
 
 
-class CoreActions(Actions):
-    def _register_routes(self):
-        router = self.ctx.router
-        router.connect(
-            Route(object_type = "file", action="download"),
-            self.download_file)
-        router.connect(
-            Route(object_type = "directory", action="list", view="html"),
-            self.list_dir)
-
-
-    def download_file(self, relpath, fpath):
+class DownloadAction(Action):
+    def answer(self, relpath, fpath):
         # serve the file, delegate everything to to FileApp
         self.ctx.res = Ass2mFileApp(fpath)
         return self.ctx.wsgi_response()
 
 
-    def list_dir(self, relpath, fpath):
+class ListAction(Action):
+    def answer(self, relpath, fpath):
         dirs = []
         files = []
         for filename in sorted(os.listdir(fpath)):
@@ -182,4 +173,10 @@ class CorePlugin(Plugin):
         self.register_cli_command('tree', TreeCmd)
         self.register_cli_command('perms', PermsCmd)
 
-        self.register_web_actions(CoreActions)
+        self.register_web_action(
+            Route(object_type = "file", action="download"),
+            DownloadAction)
+
+        self.register_web_action(
+            Route(object_type = "directory", action="list", view="html"),
+            ListAction)

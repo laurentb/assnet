@@ -23,6 +23,10 @@ from ass2m.plugin import Plugin
 from ass2m.cmd import Command, ConsolePart
 from ass2m.users import User
 
+from ass2m.routes import Route
+from ass2m.server import Action
+from paste.auth.cookie import AuthCookieSigner
+from webob import html_escape
 
 __all__ = ['ContactsManagement', 'ContactsSelection']
 
@@ -177,6 +181,26 @@ class ContactsRemoveCmd(Command):
         self.ass2m.storage.remove_user(args.username)
         print 'User %s has been removed.' % args.username
 
+
+class LoginAction(Action):
+    def answer(self):
+        signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
+        form_user = self.ctx.req.str_POST.get('user')
+        if form_user:
+            # set cookie
+            cookie = signer.sign(form_user)
+            self.ctx.res.set_cookie('ass2m_auth', cookie)
+
+            self.ctx.user = self.ctx.ass2m.storage.get_user(form_user)
+
+        self.ctx.res.body = """<html><body>Current user: %s<br/>
+                        <form method="post"><label>Username</label><input name="user" />
+                        <input type="submit" /></form>
+                        </body></html>""" % html_escape(str(self.ctx.user))
+
+        return self.ctx.wsgi_response()
+
+
 class ContactsPlugin(Plugin):
     def init(self):
         self.register_cli_command('contacts', 'Contacts Management')
@@ -185,3 +209,10 @@ class ContactsPlugin(Plugin):
         self.register_cli_command('contacts', 'menu', ContactsMenuCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)
         self.register_cli_command('contacts', 'remove', ContactsRemoveCmd)
+
+        self.register_web_action(
+            Route(object_type = None, action="login"),
+            LoginAction)
+        self.register_web_action(
+            Route(object_type = None, action="login", method="POST"),
+            LoginAction)
