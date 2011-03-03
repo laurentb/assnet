@@ -3,7 +3,7 @@ from ass2m.cli import CLI
 from tempfile import mkdtemp
 import shutil
 
-class RoutesTest(TestCase):
+class BaseCLITest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
         self.app = CLI(self.root)
