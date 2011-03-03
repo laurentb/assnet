@@ -46,9 +46,8 @@ class Context(object):
 
     def _init_paths(self):
         webpath = self.req.path_info
-        if webpath[-1] == '/':
-            # remove the trailing "/" server-side
-            webpath = os.path.dirname(webpath)
+        # remove the trailing "/" server-side, and other nice stuff
+        webpath = os.path.normpath(webpath)
 
         if self.ass2m.root:
             realpath = os.path.realpath(os.path.join(self.ass2m.root, webpath[1:]))
