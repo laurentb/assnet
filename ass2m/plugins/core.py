@@ -143,27 +143,27 @@ class Ass2mFileApp(FileApp):
 
 
 class DownloadAction(Action):
-    def answer(self, relpath, fpath):
+    def answer(self):
         # serve the file, delegate everything to to FileApp
-        self.ctx.res = Ass2mFileApp(fpath)
+        self.ctx.res = Ass2mFileApp(self.ctx.realpath)
         return self.ctx.wsgi_response()
 
 
 class ListAction(Action):
-    def answer(self, relpath, fpath):
+    def answer(self):
         dirs = []
         files = []
-        for filename in sorted(os.listdir(fpath)):
-            f = self.ctx.ass2m.storage.get_file(os.path.join(relpath, filename))
+        for filename in sorted(os.listdir(self.ctx.realpath)):
+            f = self.ctx.ass2m.storage.get_file(os.path.join(self.ctx.webpath, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
-            if os.path.isdir(os.path.join(fpath, filename)):
+            if os.path.isdir(os.path.join(self.ctx.realpath, filename)):
                 dirs.append(filename.decode('utf-8'))
             else:
                 files.append(filename.decode('utf-8'))
 
         self.ctx.res.body = self.ctx.lookup.get_template('list.html'). \
-                    render(dirs=dirs, files=files, relpath=relpath.decode('utf-8'))
+                    render(dirs=dirs, files=files, webpath=self.ctx.webpath.decode('utf-8'))
         return self.ctx.wsgi_response()
 
 

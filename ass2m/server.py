@@ -30,25 +30,51 @@ from .routes import Router
 
 class Context(object):
     def __init__(self, environ, start_response):
-        router = Router()
-        router.set_default_view(None, "html")
-        router.set_default_action("file", "download")
-        router.set_default_action("directory", "list")
-        self.router = router
+        self._init_routing()
 
-        self.ass2m = Ass2m(environ.get("ASS2M_ROOT", None), ctx=self)
+        self.ass2m = Ass2m(environ.get("ASS2M_ROOT"), ctx=self)
         self._environ = environ
         self._start_response = start_response
         self.req = Request(environ)
         self.res = Response()
         self.user = Anonymous()
 
+        self._init_paths()
+        self._init_cookie_secret()
+        self._init_templates()
+        self._init_default_response()
+
+    def _init_paths(self):
+        webpath = self.req.path_info
+        if webpath[-1] == '/':
+            # remove the trailing "/" server-side
+            webpath = os.path.dirname(webpath)
+
+        if self.ass2m.root:
+            realpath = os.path.realpath(os.path.join(self.ass2m.root, webpath[1:]))
+        else:
+            realpath = None
+
+        self.webpath = webpath
+        self.realpath = realpath
+
+    def _init_routing(self):
+        router = Router()
+        router.set_default_view(None, "html")
+        router.set_default_action("file", "download")
+        router.set_default_action("directory", "list")
+        self.router = router
+
+
+    def _init_cookie_secret(self):
         self.cookie_secret = self.ass2m.storage.config.setdefault("web", {}).get("cookie_secret")
         if self.cookie_secret is None:
             self.cookie_secret = hexlify(new_secret())
             self.ass2m.storage.config["web"]["cookie_secret"] = self.cookie_secret
             self.ass2m.storage.save_config()
 
+
+    def _init_templates(self):
         paths = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
                  '/usr/share/ass2m',
                  '/usr/local/share/ass2m']
@@ -56,6 +82,7 @@ class Context(object):
                                      collection_size=20,
                                      output_encoding='utf-8')
 
+    def _init_default_response(self):
         # defaults, may be changed later on
         self.res.status = 200
         self.res.headers['Content-Type'] = 'text/html; charset=UTF-8'
@@ -97,35 +124,29 @@ class Dispatcher(Action):
         if action is not None:
             return action(ctx).answer()
 
-        relpath = self.ctx.req.path_info
-        fpath = os.path.join(self.ctx.ass2m.root, relpath[1:])
-
         # check perms
-        f = self.ctx.ass2m.storage.get_file(relpath)
+        f = self.ctx.ass2m.storage.get_file(ctx.realpath)
         if not self.ctx.user.has_perms(f, f.PERM_READ):
             self.ctx.res = HTTPForbidden()
             return self.ctx.wsgi_response()
 
         # normalize paths of directories
-        if os.path.isdir(fpath):
+        if os.path.isdir(ctx.realpath):
             if self.ctx.req.path_info[-1] != '/':
-                # there should be a trailing in the client URL "/"
+                # there should be a trailing slash in the client URL
                 self.ctx.res = HTTPFound(add_slash=True)
                 return self.ctx.wsgi_response()
-            if relpath[-1] == '/':
-                # remove the trailing "/" server-side
-                relpath = os.path.dirname(relpath)
 
         # find the action to forward the request to
-        if os.path.isfile(fpath):
+        if os.path.isfile(ctx.realpath):
             action = router.match("file", ctx.req)
-        elif os.path.isdir(fpath):
+        elif os.path.isdir(ctx.realpath):
             action = router.match("directory", ctx.req)
         else:
             action = None
 
         if action is not None:
-            return action(ctx).answer(relpath, fpath)
+            return action(ctx).answer()
         else:
             # Either file or action/view not found
             self.ctx.res = HTTPNotFound()
