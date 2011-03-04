@@ -23,6 +23,7 @@ from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from webob import Request, Response
 from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
+import urlparse
 
 from ass2m import Ass2m
 from .users import Anonymous
@@ -100,6 +101,21 @@ class Action(object):
         raise NotImplementedError()
 
 
+class HTTPNormalizedPath(HTTPFound):
+    """
+    Like HTTPFound but keeps the QUERY_STRING.
+    """
+
+    def __call__(self, environ, start_response):
+        req = Request(environ)
+        url = self.location
+        if req.environ.get('QUERY_STRING'):
+            url += '?' + req.environ['QUERY_STRING']
+        self.location = urlparse.urljoin(req.path_url, url)
+        return super(HTTPNormalizedPath, self).__call__(
+            environ, start_response)
+
+
 class Dispatcher(Action):
     def _authenticate(self):
         signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
@@ -129,12 +145,15 @@ class Dispatcher(Action):
             self.ctx.res = HTTPForbidden()
             return self.ctx.wsgi_response()
 
-        # normalize paths of directories
-        if os.path.isdir(ctx.realpath):
-            if self.ctx.req.path_info[-1] != '/':
-                # there should be a trailing slash in the client URL
-                self.ctx.res = HTTPFound(add_slash=True)
-                return self.ctx.wsgi_response()
+        # normalize paths
+        goodpath = ctx.webpath
+        if os.path.isdir(ctx.realpath) and goodpath[-1] != "/":
+            # there should be a trailing slash in the client URL
+            # for directories but not for files
+            goodpath += "/"
+        if self.ctx.req.path_info != goodpath:
+            self.ctx.res = HTTPNormalizedPath(location=goodpath)
+            return self.ctx.wsgi_response()
 
         # find the action to forward the request to
         if os.path.isfile(ctx.realpath):
