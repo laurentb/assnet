@@ -7,6 +7,7 @@ from unittest import TestCase
 from webtest import TestApp
 
 from tempfile import mkdtemp
+import os
 import os.path
 import shutil
 
@@ -34,4 +35,43 @@ class BaseWebTest(TestCase):
 
         res = self.app.get("/penguins_are_cute")
         assert "HELLO" == res.body
+
+    def test_pathNormalization(self):
+        os.mkdir(os.path.join(self.root, "penguins"))
+        with file(os.path.join(self.root, "penguins", "gentoo"), 'a') as f:
+            f.write("The best penguin.")
+
+        # trailing slash for directories
+        res = self.app.get("/penguins/", status=200)
+
+        res = self.app.get("/penguins", status=302)
+        assert res.location == "http://localhost/penguins/"
+        res.follow(status=200)
+
+        res = self.app.get("/penguins?action=list", status=302)
+        assert res.location == "http://localhost/penguins/?action=list"
+        res.follow(status=200)
+
+        # no trailing slash for files
+        res = self.app.get("/penguins/gentoo", status=200)
+
+        res = self.app.get("/penguins/gentoo/", status=302)
+        assert res.location == "http://localhost/penguins/gentoo"
+        res.follow(status=200)
+
+        res = self.app.get("/penguins/gentoo/?action=download", status=302)
+        assert res.location == "http://localhost/penguins/gentoo?action=download"
+        res.follow(status=200)
+
+        # limit cases
+        res = self.app.get("/", status=200)
+
+        res = self.app.get("//", status=302)
+        assert res.location == "http://localhost/"
+        res.follow(status=200)
+
+        # This does not work (yet)
+        #res = self.app.get("///", status=302)
+        #assert res.location == "http://localhost/"
+        #res.follow(status=200)
 

@@ -49,6 +49,8 @@ class Context(object):
         webpath = self.req.path_info
         # remove the trailing "/" server-side, and other nice stuff
         webpath = os.path.normpath(webpath)
+        if webpath == ".":
+            webpath = "/"
 
         if self.ass2m.root:
             realpath = os.path.realpath(os.path.join(self.ass2m.root, webpath[1:]))
