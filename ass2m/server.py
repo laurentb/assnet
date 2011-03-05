@@ -203,7 +203,7 @@ class Server(object):
         WSGI interface
         """
         if self.root:
-            environ["ASS2M_ROOT"] = self.root
+            environ.setdefault("ASS2M_ROOT", self.root)
         ctx = Context(environ, start_response)
         dispatcher = Dispatcher(ctx)
         return dispatcher.answer()
