@@ -24,11 +24,6 @@ from ConfigParser import RawConfigParser
 from .users import User, Anonymous
 from .files import File
 
-class Group(object):
-    def __init__(self, name):
-        self.name = name
-        self.users = []
-
 class Storage(object):
     def __init__(self, path):
         self.path = path
