@@ -63,10 +63,10 @@ class Plugin(object):
             parser.set_defaults(cmd=cmd)
 
     def register_web_action(self, route, action):
-        ctx = self.ass2m.ctx
-        if not ctx:
+        router = self.ass2m.router
+        if not router:
             # not a web application, does not need to register an action.
             return
 
-        ctx.router.connect(route, action)
+        router.connect(route, action)
 

@@ -27,7 +27,7 @@ class Ass2m(object):
     VERSION = '1.0-dev'
     COPYRIGHT = 'Copyright(C) 2011 Romain Bignon, Laurent Bachelier'
 
-    def __init__(self, path, parser=None, ctx=None):
+    def __init__(self, path, parser=None, router=None):
         if isinstance(path, Storage):
             storage = path
         elif path:
@@ -42,7 +42,7 @@ class Ass2m(object):
                 storage = None
 
         self.parser = parser
-        self.ctx = ctx
+        self.router = router
         self.storage = storage
         if self.storage:
             self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))

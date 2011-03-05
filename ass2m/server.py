@@ -33,7 +33,7 @@ class Context(object):
     def __init__(self, environ, start_response):
         self._init_routing()
 
-        self.ass2m = Ass2m(environ.get("ASS2M_ROOT"), ctx=self)
+        self.ass2m = Ass2m(environ.get("ASS2M_ROOT"), router=self.router)
         self._environ = environ
         self._start_response = start_response
         self.req = Request(environ)
