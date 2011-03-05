@@ -69,11 +69,12 @@ class Context(object):
 
 
     def _init_cookie_secret(self):
-        self.cookie_secret = self.ass2m.storage.config.setdefault("web", {}).get("cookie_secret")
-        if self.cookie_secret is None:
-            self.cookie_secret = hexlify(new_secret())
-            self.ass2m.storage.config["web"]["cookie_secret"] = self.cookie_secret
-            self.ass2m.storage.save_config()
+        if self.ass2m.storage:
+            self.cookie_secret = self.ass2m.storage.config.setdefault("web", {}).get("cookie_secret")
+            if self.cookie_secret is None:
+                self.cookie_secret = hexlify(new_secret())
+                self.ass2m.storage.config["web"]["cookie_secret"] = self.cookie_secret
+                self.ass2m.storage.save_config()
 
 
     def _init_templates(self):

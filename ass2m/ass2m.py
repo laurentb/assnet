@@ -40,6 +40,8 @@ class Ass2m(object):
                 storage = Storage(os.path.join(path, self.DIRNAME))
             else:
                 storage = None
+        else:
+            storage = None
 
         self.parser = parser
         self.router = router
