@@ -148,14 +148,15 @@ class Dispatcher(Action):
             return self.ctx.wsgi_response()
 
         # normalize paths
-        goodpath = ctx.webpath
-        if os.path.isdir(ctx.realpath) and goodpath[-1] != "/":
-            # there should be a trailing slash in the client URL
-            # for directories but not for files
-            goodpath += "/"
-        if self.ctx.req.path_info != goodpath:
-            self.ctx.res = HTTPNormalizedPath(location=goodpath)
-            return self.ctx.wsgi_response()
+        if os.path.exists(ctx.realpath):
+            goodpath = ctx.webpath
+            if os.path.isdir(ctx.realpath) and goodpath[-1] != "/":
+                # there should be a trailing slash in the client URL
+                # for directories but not for files
+                goodpath += "/"
+            if self.ctx.req.path_info != goodpath:
+                self.ctx.res = HTTPNormalizedPath(location=goodpath)
+                return self.ctx.wsgi_response()
 
         # find the action to forward the request to
         if os.path.isfile(ctx.realpath):
