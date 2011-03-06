@@ -22,6 +22,10 @@ import re
 from .storage import Storage
 from .plugin import Plugin
 
+
+__all__ = ['Ass2m']
+
+
 class Ass2m(object):
     DIRNAME = '.ass2m'
     VERSION = '1.0-dev'

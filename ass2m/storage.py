@@ -24,6 +24,10 @@ from ConfigParser import RawConfigParser
 from .users import User, Anonymous
 from .files import File
 
+
+__all__ = ['Storage']
+
+
 class Storage(object):
     def __init__(self, path):
         self.path = path

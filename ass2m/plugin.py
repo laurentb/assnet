@@ -18,6 +18,10 @@
 
 from .cmd import Command
 
+
+__all__ = ['Plugin']
+
+
 class Plugin(object):
     def __init__(self, ass2m):
         self.ass2m = ass2m

@@ -26,6 +26,9 @@ from ass2m.server import Action
 from paste.fileapp import FileApp
 
 
+__all__ = ['CorePlugin']
+
+
 class InitCmd(Command):
     DESCRIPTION = 'Initialize the current directory as working tree'
     WORKDIR = False

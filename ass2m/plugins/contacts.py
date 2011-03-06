@@ -28,7 +28,8 @@ from ass2m.server import Action
 from paste.auth.cookie import AuthCookieSigner
 from webob import html_escape
 
-__all__ = ['ContactsManagement', 'ContactsSelection']
+
+__all__ = ['ContactsManagement', 'ContactsSelection', 'ContactsPlugin']
 
 
 class ContactsManagement(ConsolePart):
@@ -89,8 +90,7 @@ class ContactsManagement(ConsolePart):
                         regexp='^(\d+|q|a)$')
 
     def print_users(self):
-        users = list(self.ass2m.storage.iter_users())
-        for i, user in enumerate(users):
+        for i, user in enumerate(self.users):
             self.print_user(i, user)
 
     def print_user(self, i, user):

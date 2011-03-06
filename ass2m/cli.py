@@ -19,6 +19,10 @@ import argparse
 
 from ass2m import Ass2m
 
+
+__all__ = ['CLI']
+
+
 class CLI(object):
     def __init__(self, working_dir):
         self.working_dir = working_dir

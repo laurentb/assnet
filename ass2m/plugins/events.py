@@ -27,6 +27,10 @@ from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 from .contacts import ContactsSelection
 
+
+__all__ = ['EventsPlugin']
+
+
 class Event(object):
     (USER_CONFIRMED,
      USER_WAITING,

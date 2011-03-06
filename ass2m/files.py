@@ -17,6 +17,10 @@
 
 import os
 
+
+__all__ = ['File']
+
+
 class File(object):
     PERM_READ =  0x001
     PERM_LIST =  0x002
