@@ -8,7 +8,6 @@ from webtest import TestApp
 
 from tempfile import mkdtemp
 import os
-import os.path
 import shutil
 
 class BaseWebTest(TestCase):
