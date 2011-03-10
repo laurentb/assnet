@@ -22,23 +22,24 @@ class Ass2mTest(TestCase):
         assert ass2m.root is not None
         assert os.path.isdir(ass2m.root)
         assert os.path.samefile(ass2m.root, self.root)
-        assert isinstance(ass2m.storage.config, dict)
+        assert isinstance(ass2m.storage.get_config().data, dict)
 
         # test loading of an existing dir
         ass2m = Ass2m(self.root)
         assert ass2m.storage is not None
         assert ass2m.root is not None
         assert os.path.samefile(ass2m.root, self.root)
-        assert isinstance(ass2m.storage.config, dict)
+        assert isinstance(ass2m.storage.get_config().data, dict)
 
     def test_globalConfig(self):
         # create and set settings
         ass2m = Ass2m(self.root)
         ass2m.create(self.root)
-        ass2m.storage.config.setdefault("penguins", {})["cute"] = "yes"
-        ass2m.storage.save_config()
+        cfg = ass2m.storage.get_config()
+        cfg.data["penguins"]["cute"] = "yes"
+        cfg.save()
 
         # were they saved properly?
         ass2m = Ass2m(self.root)
-        assert ass2m.storage.config.setdefault("penguins", {}).get("cute") == "yes"
+        assert ass2m.storage.get_config().data["penguins"].get("cute") == "yes"
 

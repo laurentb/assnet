@@ -178,7 +178,7 @@ class ContactsRemoveCmd(Command):
             print >>sys.stderr, 'Error: user %s does not exist.' % args.username
             return 1
 
-        self.ass2m.storage.remove_user(args.username)
+        self.ass2m.storage.get_user(args.username).remove()
         print 'User %s has been removed.' % args.username
 
 

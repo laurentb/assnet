@@ -16,12 +16,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import os
-
+import hashlib
+from .obj import IObject
 
 __all__ = ['File']
 
 
-class File(object):
+class File(IObject):
     PERM_READ =  0x001
     PERM_LIST =  0x002
     PERM_WRITE = 0x004
@@ -54,6 +55,7 @@ class File(object):
         self.path = path
         self.view = None
         self.perms = {}
+        IObject.__init__(self, storage)
 
     def set_all_perms(self, perms):
         self.perms['all'] = perms
@@ -73,9 +75,6 @@ class File(object):
     def get_user_perms(self, name, default=None):
         return self.perms.get('u.%s' % name, default)
 
-    def save(self):
-        self.storage.save_file(self)
-
     def parent(self):
         if self.path == '':
             return None
@@ -83,3 +82,16 @@ class File(object):
 
     def get_disk_path(self):
         return os.path.realpath(os.path.join(self.storage.path, '..', self.path[1:]))
+
+    def _get_confname(self):
+        return os.path.join('files', hashlib.sha1(self.path).hexdigest())
+
+    def _postread(self):
+        self.view = self.data['info'].get('view')
+        for key, value in self.data.get('perms', {}).iteritems():
+            self.perms[key] = int(value)
+
+    def _prewrite(self):
+        self.data['info']['view'] = self.view
+        self.data['info']['path'] = self.path
+        self.data['perms'] = self.perms

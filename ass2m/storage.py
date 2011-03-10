@@ -19,28 +19,26 @@
 from __future__ import with_statement
 
 import os
-import hashlib
 from ConfigParser import RawConfigParser
 from .users import User, Anonymous
 from .files import File
+from .obj import IObject, ConfigDict
 
 
 __all__ = ['Storage']
 
 
+class GlobalConfig(IObject):
+    def _get_confname(self):
+        return 'config'
+
+
 class Storage(object):
     def __init__(self, path):
         self.path = path
-        self.config = self._get_config(os.path.join(self.path, 'config')) or {}
-
-    def save_config(self):
-        self._save_config(os.path.join(self.path, 'config'), self.config)
 
     @classmethod
     def init(cls, path):
-        os.mkdir(path)
-        os.mkdir(os.path.join(path, 'users'))
-        os.mkdir(os.path.join(path, 'files'))
         storage = cls(path)
 
         # Default perms on /.ass2m
@@ -50,42 +48,30 @@ class Storage(object):
 
         # Default perms on /
         f = File(storage, '')
-        f.perms = {'all': f.PERM_READ|f.PERM_LIST}
+        f.perms = {'all': File.PERM_READ|File.PERM_LIST}
         f.save()
+
         return storage
 
     def get_user(self, name):
-        config = self._get_config(os.path.join(self.path, 'users', name))
-        if config is None:
-            return Anonymous()
-
         user = User(self, name)
-        info = config.get('info', {})
-        user.email = info.get('email', None)
-        user.realname = info.get('realname', None)
-        user.password = info.get('password', None)
+        user.read()
+        if not user.exists:
+            return Anonymous()
         return user
 
     def iter_users(self):
-        for name in sorted(os.listdir(os.path.join(self.path, 'users'))):
-            user = self.get_user(name)
-            if user:
-                yield user
+        usersdir = os.path.join(self.path, 'users')
+        if os.path.exists(usersdir):
+            for name in sorted(os.listdir(usersdir)):
+                user = self.get_user(name)
+                if user:
+                    yield user
 
     def user_exists(self, name):
-        return name in os.listdir(os.path.join(self.path, 'users'))
-
-    def save_user(self, user):
-        config = self._get_config(os.path.join(self.path, 'users', user.name)) or {}
-        info = config.setdefault('info', {})
-        info['email'] = user.email if user.email else None
-        info['realname'] = user.realname if user.realname else None
-        info['password'] = user.password if user.password else None
-
-        self._save_config(os.path.join(self.path, 'users', user.name), config)
-
-    def remove_user(self, name):
-        os.unlink(os.path.join(self.path, 'users', name))
+        user = User(self, name)
+        user.read()
+        return user.exists
 
     def get_disk_file(self, diskpath):
         path = os.path.relpath(diskpath, os.path.realpath(os.path.join(self.path, os.path.pardir)))
@@ -102,26 +88,16 @@ class Storage(object):
 
     def get_file(self, path):
         f = File(self, path)
-        config = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()))
-        if config is None:
-            return f
-
-        infos = config.get('infos', {})
-        f.view = infos.get('view', None)
-        for key, value in config.get('perms', {}).iteritems():
-            f.perms[key] = int(value)
+        f.read()
         return f
 
-    def save_file(self, f):
-        sections = self._get_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest())) or {}
-        infos = sections.setdefault('infos', {})
-        infos['path'] = f.path,
-        infos['view'] = f.view
+    def get_config(self):
+        cfg = GlobalConfig(self)
+        cfg.read()
+        return cfg
 
-        sections['perms'] = f.perms
-        self._save_config(os.path.join(self.path, 'files', hashlib.sha1(f.path).hexdigest()), sections)
-
-    def _get_config(self, path):
+    def _read(self, name):
+        path = os.path.join(self.path, name)
         config = RawConfigParser()
         try:
             with open(path, 'r') as fp:
@@ -129,15 +105,19 @@ class Storage(object):
         except IOError:
             return None
 
-        sections = {}
+        data = ConfigDict()
         for sec in config.sections():
-            sections[sec] = dict([(k,v.decode('utf-8')) for k,v in config.items(sec)])
+            data[sec] = dict([(k,v.decode('utf-8')) for k,v in config.items(sec)])
 
-        return sections
+        return data
 
-    def _save_config(self, path, sections):
+    def _write(self, name, data):
+        path = os.path.join(self.path, name)
+        destdir = os.path.dirname(path)
+        if not os.path.exists(destdir):
+            os.makedirs(destdir)
         config = RawConfigParser()
-        for sec, items in sections.iteritems():
+        for sec, items in data.iteritems():
             config.add_section(sec)
             for key, value in items.iteritems():
                 if isinstance(value, unicode):
@@ -145,3 +125,7 @@ class Storage(object):
                 config.set(sec, key, value)
         with open(path, 'wb') as fp:
             config.write(fp)
+
+    def _remove(self, name):
+        path = os.path.join(self.path, name)
+        os.unlink(path)

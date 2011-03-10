@@ -19,6 +19,9 @@
 __all__ = ['Group', 'IUser', 'User', 'Anonymous']
 
 
+from .obj import IObject
+import os
+
 class Group(object):
     def __init__(self, name):
         self.name = name
@@ -36,7 +39,7 @@ class IUser(object):
     def __str__(self):
         return self.name
 
-class User(IUser):
+class User(IUser, IObject):
     def __init__(self, storage, name):
         self.storage = storage
         self.name = name
@@ -44,9 +47,7 @@ class User(IUser):
         self.realname = None
         self.password = None
         self.groups = []
-
-    def save(self):
-        self.storage.save_user(self)
+        IObject.__init__(self, storage)
 
     def has_perms(self, f, perm):
         f_perms = f.get_user_perms(self.name)
@@ -64,6 +65,19 @@ class User(IUser):
 
         f_parent = f.parent()
         return f_parent and self.has_perms(f_parent, perm)
+
+    def _get_confname(self):
+        return os.path.join('users', self.name)
+
+    def _postread(self):
+        self.email = self.data['info'].get('email')
+        self.realname = self.data['info'].get('realname')
+        self.password = self.data['info'].get('password')
+
+    def _prewrite(self):
+        self.data['info']['email'] = self.email if self.email else None
+        self.data['info']['realname'] = self.realname if self.realname else None
+        self.data['info']['password'] = self.password if self.password else None
 
 class Anonymous(IUser):
     name = '<anonymous>'
