@@ -88,6 +88,7 @@ class File(IObject):
 
     def _postread(self):
         self.view = self.data['info'].get('view')
+        self.perms.clear()
         for key, value in self.data.get('perms', {}).iteritems():
             self.perms[key] = int(value)
 
