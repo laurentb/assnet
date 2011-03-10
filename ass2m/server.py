@@ -146,7 +146,7 @@ class Dispatcher(Action):
             return action(ctx).answer()
 
         # check perms
-        f = self.ctx.ass2m.storage.get_file(ctx.realpath)
+        f = self.ctx.ass2m.storage.get_file(ctx.webpath)
         if not self.ctx.user.has_perms(f, f.PERM_READ):
             self.ctx.res = HTTPForbidden()
             return self.ctx.wsgi_response()
