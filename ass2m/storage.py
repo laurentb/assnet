@@ -126,6 +126,11 @@ class Storage(object):
         with open(path, 'wb') as fp:
             config.write(fp)
 
+    def _get_mtime(self, name):
+        path = os.path.join(self.path, name)
+        if os.path.exists(path):
+            return os.path.getmtime(path)
+
     def _remove(self, name):
         path = os.path.join(self.path, name)
         os.unlink(path)

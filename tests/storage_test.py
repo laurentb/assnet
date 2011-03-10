@@ -5,6 +5,7 @@ from unittest import TestCase
 from tempfile import mkdtemp
 import os
 import shutil
+from time import sleep
 
 class StorageTest(TestCase):
     def setUp(self):
@@ -84,3 +85,30 @@ class StorageTest(TestCase):
         cfg.read()
         assert cfg.exists is False
 
+    def test_mtime(self):
+        cfg = GlobalConfig(self.storage)
+        assert cfg._mtime is None
+        cfg.read()
+        # file does not exist
+        assert cfg._mtime is None
+        # file is written for the first time
+        cfg.save()
+        sleep(0.1)
+        assert cfg._mtime is not None
+        mtime1 = cfg._mtime
+        cfg.read()
+        # reload file, the file wasn't changed
+        assert mtime1 == cfg._mtime
+        cfg.data["penguin"]["gentoo"] = 42
+        cfg.save()
+        sleep(0.1)
+        # file changed
+        assert mtime1 < cfg._mtime
+        mtime2 = cfg._mtime
+        cfg.read()
+        # file didn't change
+        assert mtime2 == cfg._mtime
+        cfg.save()
+        sleep(0.1)
+        # no actual modifications of data, should not have been written
+        assert mtime2 == cfg._mtime
