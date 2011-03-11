@@ -36,7 +36,7 @@ class StorageTest(TestCase):
         cfg.read()
         assert cfg.exists is False
         assert len(cfg.data) == 0
-        cfg.data['penguin']['gentoo'] = 42
+        cfg.data['penguin']['gentoo'] = u"42"
         assert isinstance(cfg.data['platypus'], dict)
         assert len(cfg.data) == 2
 
@@ -47,7 +47,7 @@ class StorageTest(TestCase):
         assert cfg.exists is True
 
         assert len(cfg.data) == 0
-        cfg.data['penguin']['gentoo'] = 42
+        cfg.data['penguin']['gentoo'] = u"42"
         cfg.data['platypus']
         cfg.save()
         assert cfg.exists is True
@@ -99,10 +99,14 @@ class StorageTest(TestCase):
         cfg.read()
         # reload file, the file wasn't changed
         assert mtime1 == cfg._mtime
-        cfg.data['penguin']['gentoo'] = 42
+        cfg.data['penguin']['gentoo'] = u"42"
         cfg.save()
-        # file changed - no strict checking possible, sadly
-        assert mtime1 <= cfg._mtime
+        # cheat to avoid issues with too close mtimes
+        mtime = cfg._mtime + 1000
+        os.utime(os.path.join(self.storage.path, cfg._get_confname()), (mtime, mtime))
+        # file changed
+        cfg.read()
+        assert mtime1 < cfg._mtime
         mtime2 = cfg._mtime
         cfg.read()
         # file didn't change
@@ -113,14 +117,23 @@ class StorageTest(TestCase):
         # alter the same file via another object
         cfg2 = GlobalConfig(self.storage)
         cfg2.read()
-        cfg2.data['penguin']['gentoo'] = 1337
+        cfg2.data['penguin']['gentoo'] = u"1337"
         cfg2.save()
+        # cheat to avoid issues with too close mtimes
+        mtime = cfg2._mtime + 2000
+        os.utime(os.path.join(self.storage.path, cfg2._get_confname()), (mtime, mtime))
         cfg.read()
-        # file changed - no strict checking possible, sadly
-        assert mtime2 <= cfg2._mtime
         # file was properly reloaded
-        assert cfg._mtime == cfg2._mtime
-        cfg.data['penguin'].get('gentoo') == 1337
+        assert cfg._mtime > cfg2._mtime
+        assert cfg.data['penguin'].get('gentoo') == u"1337"
+        # cheat: alter the mtime of the saved file
+        cfg2.data['penguin']['gentoo'] = u"666"
+        cfg2.save()
+        mtime = cfg2._mtime - 9000
+        os.utime(os.path.join(self.storage.path, cfg._get_confname()), (mtime, mtime))
+        cfg.read()
+        # the file was NOT reloaded
+        assert cfg.data['penguin'].get('gentoo') == u"1337"
 
     def test_filePreAndPost(self):
         f = File(self.storage, '/penguin')
@@ -183,11 +196,11 @@ class StorageTest(TestCase):
 
     def test_configStorage(self):
         c = self.storage.get_config()
-        c.data['penguin']['gentoo'] = 42
+        c.data['penguin']['gentoo'] = u"42"
         c.save()
 
         c = self.storage.get_config()
-        c.data['penguin'].get('gentoo') == 42
+        assert c.data['penguin'].get('gentoo') == u"42"
 
     def test_getDiskFile(self):
         f = self.storage.get_file('/penguin')
