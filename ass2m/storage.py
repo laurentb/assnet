@@ -80,7 +80,7 @@ class Storage(object):
             return None
         if path == '.':
             # Root
-            path = '/'
+            path = ''
         else:
             path = '/' + path
 
