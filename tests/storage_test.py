@@ -6,7 +6,6 @@ from unittest import TestCase
 from tempfile import mkdtemp
 import shutil
 import os
-from time import sleep
 
 class StorageTest(TestCase):
     def setUp(self):
@@ -87,7 +86,7 @@ class StorageTest(TestCase):
         cfg.read()
         assert cfg.exists is False
 
-    def test_mtime(self):
+    def test_readWriteCache(self):
         cfg = GlobalConfig(self.storage)
         assert cfg._mtime is None
         cfg.read()
@@ -95,7 +94,6 @@ class StorageTest(TestCase):
         assert cfg._mtime is None
         # file is written for the first time
         cfg.save()
-        sleep(0.1)
         assert cfg._mtime is not None
         mtime1 = cfg._mtime
         cfg.read()
@@ -103,17 +101,26 @@ class StorageTest(TestCase):
         assert mtime1 == cfg._mtime
         cfg.data['penguin']['gentoo'] = 42
         cfg.save()
-        sleep(0.1)
-        # file changed
-        assert mtime1 < cfg._mtime
+        # file changed - no strict checking possible, sadly
+        assert mtime1 <= cfg._mtime
         mtime2 = cfg._mtime
         cfg.read()
         # file didn't change
         assert mtime2 == cfg._mtime
         cfg.save()
-        sleep(0.1)
         # no actual modifications of data, should not have been written
         assert mtime2 == cfg._mtime
+        # alter the same file via another object
+        cfg2 = GlobalConfig(self.storage)
+        cfg2.read()
+        cfg2.data['penguin']['gentoo'] = 1337
+        cfg2.save()
+        cfg.read()
+        # file changed - no strict checking possible, sadly
+        assert mtime2 <= cfg2._mtime
+        # file was properly reloaded
+        assert cfg._mtime == cfg2._mtime
+        cfg.data['penguin'].get('gentoo') == 1337
 
     def test_filePreAndPost(self):
         f = File(self.storage, '/penguin')
