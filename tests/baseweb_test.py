@@ -75,5 +75,5 @@ class BaseWebTest(TestCase):
         #res.follow(status=200)
 
     def test_notFound(self):
-        res = self.app.get("/penguins/", status=404)
-        res = self.app.get("/penguins", status=404)
+        self.app.get("/penguins/", status=404)
+        self.app.get("/penguins", status=404)
