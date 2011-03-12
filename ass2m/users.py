@@ -21,6 +21,8 @@ __all__ = ['Group', 'IUser', 'User', 'Anonymous']
 
 from .obj import IObject
 import os
+import hashlib
+from binascii import hexlify
 
 class Group(object):
     def __init__(self, name):
@@ -72,12 +74,37 @@ class User(IUser, IObject):
     def _postread(self):
         self.email = self.data['info'].get('email')
         self.realname = self.data['info'].get('realname')
-        self.password = self.data['info'].get('password')
+        self.password = len(self.data['auth'].get('password', '') \
+                            + self.data['auth'].get('salt', '')) > 0
 
     def _prewrite(self):
         self.data['info']['email'] = self.email if self.email else None
         self.data['info']['realname'] = self.realname if self.realname else None
-        self.data['info']['password'] = self.password if self.password else None
+        # only update password when set
+        if isinstance(self.password, basestring):
+            salt = hexlify(os.urandom(42))
+            version = 1
+            hpwd = self.hash_password(self.password, salt, version)
+            self.data['auth']['password'] = hpwd
+            self.data['auth']['salt'] = salt
+            self.data['auth']['version'] = version
+            self.password = True
+
+    @staticmethod
+    def hash_password(password, salt, version):
+        assert version == 1 # the only one supported for now
+        return hashlib.sha512(password + salt).hexdigest()
+
+    def is_valid_password(self, password):
+        assert isinstance(password, basestring)
+        if isinstance(self.password, basestring):
+            return self.password == password
+        if self.password is True:
+            hpwd = self.hash_password(password, \
+                    self.data['auth']['salt'], \
+                    int(self.data['auth']['version']))
+            return hpwd == self.data['auth']['password']
+
 
 class Anonymous(IUser):
     name = '<anonymous>'
