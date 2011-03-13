@@ -87,12 +87,13 @@ class File(IObject):
         return os.path.join('files', hashlib.sha1(self.path).hexdigest())
 
     def _postread(self):
-        self.view = self.data['info'].get('view')
+        self.view = self.data['info'].get('view', None)
         self.perms.clear()
         for key, value in self.data.get('perms', {}).iteritems():
             self.perms[key] = int(value)
 
     def _prewrite(self):
-        self.data['info']['view'] = self.view
+        if self.view is not None:
+            self.data['info']['view'] = self.view
         self.data['info']['path'] = self.path
         self.data['perms'] = self.perms
