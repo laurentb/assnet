@@ -198,8 +198,6 @@ class LoginAction(Action):
                         <input type="submit" /></form>
                         </body></html>""" % html_escape(str(self.ctx.user))
 
-        return self.ctx.wsgi_response()
-
 
 class ContactsPlugin(Plugin):
     def init(self):

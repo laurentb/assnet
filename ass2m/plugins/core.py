@@ -149,7 +149,6 @@ class DownloadAction(Action):
     def answer(self):
         # serve the file, delegate everything to to FileApp
         self.ctx.res = Ass2mFileApp(self.ctx.realpath)
-        return self.ctx.wsgi_response()
 
 
 class ListAction(Action):
@@ -165,9 +164,9 @@ class ListAction(Action):
             else:
                 files.append(filename.decode('utf-8'))
 
-        self.ctx.res.body = self.ctx.lookup.get_template('list.html'). \
-                    render(dirs=dirs, files=files, webpath=self.ctx.webpath.decode('utf-8'))
-        return self.ctx.wsgi_response()
+        self.ctx.template_vars['dirs'] = dirs
+        self.ctx.template_vars['files'] = files
+        self.ctx.res.body = self.ctx.render('list.html')
 
 
 class CorePlugin(Plugin):

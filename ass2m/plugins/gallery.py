@@ -49,10 +49,10 @@ class ListGalleryAction(Action):
                 with open(f.get_disk_path(), 'r') as f:
                     description = f.read()
 
-        self.ctx.res.body = self.ctx.lookup.get_template('list-gallery.html'). \
-                    render(dirs=dirs, photos=photos, description=description,
-                           webpath=self.ctx.webpath.decode('utf-8'))
-        return self.ctx.wsgi_response()
+        self.ctx.template_vars['dirs'] = dirs
+        self.ctx.template_vars['photos'] = photos
+        self.ctx.template_vars['description'] = description
+        self.ctx.res.body = self.ctx.render('list-gallery.html')
 
 class DownloadThumbnailAction(Action):
     DEFAULT_SIZE = 300
@@ -73,7 +73,6 @@ class DownloadThumbnailAction(Action):
         img.save(s, 'jpeg')
         self.ctx.res = DataApp(None, content_type='image/jpeg')
         self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.realpath))
-        return self.ctx.wsgi_response()
 
 class GalleryPlugin(Plugin):
     def init(self):

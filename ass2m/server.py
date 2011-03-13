@@ -44,6 +44,7 @@ class Context(object):
         self._init_cookie_secret()
         self._init_templates()
         self._init_default_response()
+        self._init_template_vars()
 
     def _init_paths(self):
         webpath = self.req.path_info
@@ -93,8 +94,17 @@ class Context(object):
         self.res.status = 200
         self.res.headers['Content-Type'] = 'text/html; charset=UTF-8'
 
+    def _init_template_vars(self):
+        self.template_vars = {
+            'ass2m_version': Ass2m.VERSION,
+            'webpath': self.webpath.decode('utf-8'),
+            'global': dict(),
+        }
 
-    def wsgi_response(self):
+    def render(self, template):
+        return self.lookup.get_template(template).render(**self.template_vars)
+
+    def respond(self):
         return self.res(self._environ, self._start_response)
 
 
@@ -143,13 +153,13 @@ class Dispatcher(Action):
         # actions not related to a file or directory
         action = router.match(None, ctx.req)
         if action is not None:
-            return action(ctx).answer()
+            return action(ctx)
 
         # check perms
         f = self.ctx.ass2m.storage.get_file(ctx.webpath)
         if not self.ctx.user.has_perms(f, f.PERM_READ):
             self.ctx.res = HTTPForbidden()
-            return self.ctx.wsgi_response()
+            return
 
         # normalize paths
         if os.path.exists(ctx.realpath):
@@ -160,7 +170,7 @@ class Dispatcher(Action):
                 goodpath += "/"
             if self.ctx.req.path_info != goodpath:
                 self.ctx.res = HTTPNormalizedPath(location=goodpath)
-                return self.ctx.wsgi_response()
+                return
 
         # find the action to forward the request to
         if os.path.isfile(ctx.realpath):
@@ -175,19 +185,15 @@ class Dispatcher(Action):
         else:
             # Either file or action/view not found
             self.ctx.res = HTTPNotFound()
-            return self.ctx.wsgi_response()
 
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500
-        if self.ctx._environ.has_key("ASS2M_ROOT"):
-            self.ctx.res.body = self.ctx.lookup.get_template('error_notworkingdir.html'). \
-                        render(root=self.ctx._environ["ASS2M_ROOT"])
+        if self.ctx._environ.has_key('ASS2M_ROOT'):
+            self.ctx.template_vars['root'] = self.ctx._environ['ASS2M_ROOT']
+            self.ctx.res.body = self.ctx.render('error_notworkingdir.html')
         else:
-            self.ctx.res.body = self.ctx.lookup.get_template('error_norootpath.html'). \
-                        render()
-
-        return self.ctx.wsgi_response()
+            self.ctx.res.body = self.ctx.render('error_norootpath.html')
 
 
 class Server(object):
@@ -210,5 +216,6 @@ class Server(object):
             environ.setdefault("ASS2M_ROOT", self.root)
         ctx = Context(environ, start_response)
         dispatcher = Dispatcher(ctx)
-        return dispatcher.answer()
+        dispatcher.answer()
+        return ctx.respond()
 
