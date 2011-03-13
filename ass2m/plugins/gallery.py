@@ -71,7 +71,8 @@ class DownloadThumbnailAction(Action):
         img.thumbnail((size,size))
         s = StringIO()
         img.save(s, 'jpeg')
-        self.ctx.res = DataApp(s.getvalue())
+        self.ctx.res = DataApp(None, content_type='image/jpeg')
+        self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.realpath))
         return self.ctx.wsgi_response()
 
 class GalleryPlugin(Plugin):
