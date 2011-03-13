@@ -162,14 +162,11 @@ class Dispatcher(Action):
                 self.ctx.res = HTTPNormalizedPath(location=goodpath)
                 return self.ctx.wsgi_response()
 
-        if f.view is not None:
-            router.set_default_view(None, f.view)
-
         # find the action to forward the request to
         if os.path.isfile(ctx.realpath):
-            action = router.match("file", ctx.req)
+            action = router.match("file", ctx.req, f.view)
         elif os.path.isdir(ctx.realpath):
-            action = router.match("directory", ctx.req)
+            action = router.match("directory", ctx.req, f.view)
         else:
             action = None
 

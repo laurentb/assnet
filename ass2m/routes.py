@@ -67,9 +67,10 @@ class Router(object):
         else:
             self.default_views[action] = view
 
-    def match(self, object_type, req):
+    def match(self, object_type, req, default_view = None):
         action = req.str_GET.get("action", self.default_actions.get(object_type))
-        view = req.str_GET.get("view", self.default_views.get(action, self.default_view))
+        default_view = default_view or self.default_views.get(action, self.default_view)
+        view = req.str_GET.get("view", default_view)
         method = req.method
 
         for precision in sorted(self.routes.keys(), reverse=True):
