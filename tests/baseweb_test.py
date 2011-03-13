@@ -26,7 +26,7 @@ class BaseWebTest(TestCase):
         res = self.app.get("/")
         assert "<h1>Index of /</h1>" in res.body
 
-        with file(os.path.join(self.root, "penguins_are_cute"), 'a') as f:
+        with open(os.path.join(self.root, "penguins_are_cute"), 'w') as f:
             f.write("HELLO")
 
         res = self.app.get("/")
@@ -37,7 +37,7 @@ class BaseWebTest(TestCase):
 
     def test_pathNormalization(self):
         os.mkdir(os.path.join(self.root, "penguins"))
-        with file(os.path.join(self.root, "penguins", "gentoo"), 'a') as f:
+        with open(os.path.join(self.root, "penguins", "gentoo"), 'w') as f:
             f.write("The best penguin.")
 
         # trailing slash for directories

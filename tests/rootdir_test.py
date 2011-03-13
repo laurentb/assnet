@@ -13,7 +13,7 @@ import shutil
 class RootDirTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        with file(os.path.join(self.root, "penguin"), 'a') as f:
+        with open(os.path.join(self.root, "penguin"), 'w') as f:
             f.write("HELLO")
         self.a_wd = os.path.join(self.root, 'a_wd')
         self.not_a_wd = os.path.join(self.root, 'not_a_wd')
