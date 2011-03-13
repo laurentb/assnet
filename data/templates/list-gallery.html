@@ -1,0 +1,17 @@
+<%inherit file="layout.html"/>
+
+% if description:
+<p id="description">${description}</p>
+% endif
+
+% for photo in photos:
+<a href="${photo}"><img src="${photo}?view=thumbnail&thumb_size=200" /></a>
+% endfor
+
+<ul>
+    % for dir in dirs:
+        <li><strong><a href="${dir}/">${dir}/</a></strong></li>
+    % endfor
+</ul>
+
+<%def name="title()">Gallery of ${webpath}</%def>
