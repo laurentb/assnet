@@ -119,3 +119,6 @@ class Anonymous(IUser):
 
         f_parent = f.parent()
         return f_parent and self.has_perms(f_parent, perm)
+
+    def is_valid_password(self, password):
+        return False
