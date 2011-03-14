@@ -50,7 +50,27 @@ class ContactsManagement(ConsolePart):
             self.users.append(user)
             print 'User %s correctly added.' % user.name
             return user
-        except (EOFError,KeyboardInterrupt):
+        except (EOFError, KeyboardInterrupt):
+            return None
+
+    def edit_contact_password(self, username):
+        try:
+            if not self.ass2m.storage.user_exists(username):
+                print >>sys.stderr, 'Error: user %s does not exists.' % username
+                return None
+            user = self.ass2m.storage.get_user(username)
+            password1 = self.ask('Enter the new password', masked=True)
+            password2 = self.ask('Confirm the new password', masked=True)
+            if len(password1) == 0:
+                return None
+            if password1 != password2:
+                print >>sys.stderr, 'Sorry, passwords do not match.'
+                return None
+            user.password = password1
+            user.save()
+            print 'Password of user %s changed.' % user.name
+            return user
+        except (EOFError, KeyboardInterrupt):
             return None
 
     def edit_contact(self, user):
@@ -132,6 +152,18 @@ class ContactsAddCmd(Command):
         if not cm.add_contact(args.username):
             return 1
 
+class ContactsPasswordCmd(Command):
+    DESCRIPTION = 'Change the password of a contact'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('username')
+
+    def cmd(self, args):
+        cm = ContactsManagement(self.ass2m)
+        if not cm.edit_contact_password(args.username):
+            return 1
+
 class ContactsMenuCmd(Command):
     DESCRIPTION = 'Display the contacts menu'
 
@@ -203,6 +235,7 @@ class ContactsPlugin(Plugin):
     def init(self):
         self.register_cli_command('contacts', 'Contacts Management')
         self.register_cli_command('contacts', 'add', ContactsAddCmd)
+        self.register_cli_command('contacts', 'password', ContactsPasswordCmd)
         self.register_cli_command('contacts', 'merge', ContactsMergeCmd)
         self.register_cli_command('contacts', 'menu', ContactsMenuCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)
