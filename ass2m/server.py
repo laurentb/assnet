@@ -153,7 +153,7 @@ class Dispatcher(Action):
         # actions not related to a file or directory
         action = router.match(None, ctx.req)
         if action is not None:
-            return action(ctx)
+            return action(ctx).answer()
 
         # check perms
         f = self.ctx.ass2m.storage.get_file(ctx.webpath)
