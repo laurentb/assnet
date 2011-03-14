@@ -1,0 +1,11 @@
+<%inherit file="layout.html"/>
+
+Current user: ${user.name|h}<br/>
+
+<form method="post">
+    <label>Username</label><input name="username" />
+    <label>Password</label><input name="password" />
+    <input type="submit" value="Login"/>
+</form>
+
+<%def name="title()">Login</%def>
