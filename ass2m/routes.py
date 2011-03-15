@@ -67,10 +67,18 @@ class Router(object):
         else:
             self.default_views[action] = view
 
-    def match(self, object_type, req, default_view = None):
+    def resolve(self, object_type, req, file_view = None):
+        """
+        Get the final parameters of a request, by processing all the defaults.
+        """
         action = req.str_GET.get("action", self.default_actions.get(object_type))
-        default_view = default_view or self.default_views.get(action, self.default_view)
+        default_view = file_view or self.default_views.get(action, self.default_view)
         view = req.str_GET.get("view", default_view)
+
+        return (action, view)
+
+    def match(self, object_type, req, file_view = None):
+        action, view = self.resolve(object_type, req, file_view)
         method = req.method
 
         for precision in sorted(self.routes.keys(), reverse=True):
