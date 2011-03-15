@@ -147,3 +147,14 @@ class RoutesTest(TestCase):
         res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
         assert repr(fn2) == res.body
 
+
+    def test_viewsList(self):
+        self.router.connect(Route(object_type="directory", action="list", view="html"), None)
+        self.router.connect(Route(object_type="directory", action="list", view="json"), None)
+        self.router.connect(Route(object_type="directory", action="tree", view="xml"), None)
+        self.router.connect(Route(object_type="file", action="list", view="yaml"), None)
+        self.router.connect(Route(object_type="directory", action="list", view=None), None)
+
+        assert sorted(self.router.available_views("directory", "list")) == ["html", "json"]
+        assert sorted(self.router.available_views("directory", "tar")) == []
+        assert sorted(self.router.available_views("file", "list")) == ["yaml"]

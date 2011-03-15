@@ -36,12 +36,16 @@ class Route(object):
         else:
             self.precision = 0
 
-    def match(self, object_type, action, view, method):
+    def amatch(self, object_type, action, method):
         return \
             self.object_type == object_type and \
             self.action == action and \
-            (self.view == view or self.view is None) and \
             self.method == method
+
+    def match(self, object_type, action, view, method):
+        return \
+            self.amatch(object_type, action, method) and \
+            (self.view == view or self.view is None)
 
 class Router(object):
     def __init__(self):
@@ -76,6 +80,17 @@ class Router(object):
         view = req.str_GET.get("view", default_view)
 
         return (action, view)
+
+    def available_views(self, object_type, action):
+        """
+        Get all the available views for an object type / action.
+        Do note that it won't return views that are handled with a catch-all route
+        (view = None).
+        """
+        for routes in self.routes.itervalues():
+            for route, call in routes:
+                if route.amatch(object_type, action, 'GET') and route.view:
+                    yield route.view
 
     def match(self, object_type, req, file_view = None):
         action, view = self.resolve(object_type, req, file_view)
