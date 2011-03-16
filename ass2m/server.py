@@ -174,17 +174,23 @@ class Dispatcher(Action):
 
         # find the action to forward the request to
         if os.path.isfile(ctx.realpath):
-            action = router.match("file", ctx.req, f.view)
+            object_type = "file"
         elif os.path.isdir(ctx.realpath):
-            action = router.match("directory", ctx.req, f.view)
+            object_type = "directory"
         else:
-            action = None
+            self.ctx.res = HTTPNotFound('File not found')
+            return
 
+        ctx.template_vars["action"], ctx.template_vars["view"] = \
+            router.resolve(object_type, ctx.req, f.view)
+        ctx.template_vars["views"] = \
+            sorted(router.available_views(object_type, ctx.template_vars["action"]))
+        action = router.match(object_type, ctx.req, f.view)
         if action is not None:
             return action(ctx).answer()
-        else:
-            # Either file or action/view not found
-            self.ctx.res = HTTPNotFound()
+
+        # action/view not found
+        self.ctx.res = HTTPNotFound('No route found')
 
 
     def error_notworkingdir(self):
