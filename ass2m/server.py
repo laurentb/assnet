@@ -17,6 +17,7 @@
 
 
 import os
+import posixpath
 from binascii import hexlify
 from mako.lookup import TemplateLookup
 from paste import httpserver
@@ -49,7 +50,7 @@ class Context(object):
     def _init_paths(self):
         webpath = self.req.path_info
         # remove the trailing "/" server-side, and other nice stuff
-        webpath = os.path.normpath(webpath)
+        webpath = posixpath.normpath(webpath)
         if webpath == ".":
             webpath = "/"
 

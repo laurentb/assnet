@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import os
+import posixpath
 import Image
 import mimetypes
 from cStringIO import StringIO
@@ -31,7 +32,7 @@ class ListGalleryAction(Action):
         photos = []
         description = None
         for filename in sorted(os.listdir(self.ctx.realpath)):
-            f = self.ctx.ass2m.storage.get_file(os.path.join(self.ctx.webpath, filename))
+            f = self.ctx.ass2m.storage.get_file(posixpath.join(self.ctx.webpath, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
 

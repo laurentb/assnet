@@ -17,6 +17,7 @@
 
 import sys
 import os
+import posixpath
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
@@ -156,7 +157,7 @@ class ListAction(Action):
         dirs = []
         files = []
         for filename in sorted(os.listdir(self.ctx.realpath)):
-            f = self.ctx.ass2m.storage.get_file(os.path.join(self.ctx.webpath, filename))
+            f = self.ctx.ass2m.storage.get_file(posixpath.join(self.ctx.webpath, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
             if os.path.isdir(os.path.join(self.ctx.realpath, filename)):
