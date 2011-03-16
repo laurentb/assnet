@@ -118,21 +118,6 @@ class Action(object):
         raise NotImplementedError()
 
 
-class HTTPNormalizedPath(HTTPFound):
-    """
-    Like HTTPFound but keeps the QUERY_STRING.
-    """
-
-    def __call__(self, environ, start_response):
-        req = Request(environ)
-        url = self.location
-        if req.environ.get('QUERY_STRING'):
-            url += '?' + req.environ['QUERY_STRING']
-        self.location = urlparse.urljoin(req.path_url, url)
-        return super(HTTPNormalizedPath, self).__call__(
-            environ, start_response)
-
-
 class Dispatcher(Action):
     def _authenticate(self):
         signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
@@ -170,7 +155,9 @@ class Dispatcher(Action):
                 # for directories but not for files
                 goodpath += "/"
             if self.ctx.req.path_info != goodpath:
-                self.ctx.res = HTTPNormalizedPath(location=goodpath)
+                goodlocation = urlparse.urljoin(ctx.req.application_url + goodpath, \
+                        '?' + ctx.req.query_string)
+                self.ctx.res = HTTPFound(location=goodlocation)
                 return
 
         # find the action to forward the request to
