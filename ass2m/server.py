@@ -183,7 +183,7 @@ class Dispatcher(Action):
 
         ctx.template_vars["action"], ctx.template_vars["view"] = \
             router.resolve(object_type, ctx.req, f.view)
-        ctx.template_vars["views"] = \
+        ctx.template_vars["available_views"] = \
             sorted(router.available_views(object_type, ctx.template_vars["action"]))
         action = router.match(object_type, ctx.req, f.view)
         if action is not None:

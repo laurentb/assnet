@@ -1,0 +1,12 @@
+<%def name="viewslist()">
+    <ul>
+        % for available_view in available_views:
+            % if available_view == view:
+            <li><strong><a href="${webpath}?view=${available_view}">${available_view}</a></strong></li>
+            % else:
+                <li><a href="${webpath}?view=${available_view}">${available_view}</a></li>
+            % endif
+        % endfor
+    </ul>
+</%def>
+

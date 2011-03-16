@@ -1,4 +1,7 @@
 <%inherit file="layout.html"/>
+<%namespace name="partials" file="partials.html"/>
+
+${partials.viewslist()}
 
 % if description:
 <p id="description">${description}</p>
