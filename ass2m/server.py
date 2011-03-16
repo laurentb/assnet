@@ -142,9 +142,9 @@ class Dispatcher(Action):
             return action(ctx).answer()
 
         # check perms
-        f = self.ctx.ass2m.storage.get_file(ctx.webpath)
-        if not self.ctx.user.has_perms(f, f.PERM_READ):
-            self.ctx.res = HTTPForbidden()
+        f = ctx.ass2m.storage.get_file(ctx.webpath)
+        if not ctx.user.has_perms(f, f.PERM_READ):
+            ctx.res = HTTPForbidden()
             return
 
         # normalize paths
@@ -154,10 +154,10 @@ class Dispatcher(Action):
                 # there should be a trailing slash in the client URL
                 # for directories but not for files
                 goodpath += "/"
-            if self.ctx.req.path_info != goodpath:
+            if ctx.req.path_info != goodpath:
                 goodlocation = urlparse.urljoin(ctx.req.application_url + goodpath, \
                         '?' + ctx.req.query_string)
-                self.ctx.res = HTTPFound(location=goodlocation)
+                ctx.res = HTTPFound(location=goodlocation)
                 return
 
         # find the action to forward the request to
@@ -166,7 +166,7 @@ class Dispatcher(Action):
         elif os.path.isdir(ctx.realpath):
             object_type = "directory"
         else:
-            self.ctx.res = HTTPNotFound('File not found')
+            ctx.res = HTTPNotFound('File not found')
             return
 
         ctx.template_vars["action"], ctx.template_vars["view"] = \
@@ -178,7 +178,7 @@ class Dispatcher(Action):
             return action(ctx).answer()
 
         # action/view not found
-        self.ctx.res = HTTPNotFound('No route found')
+        ctx.res = HTTPNotFound('No route found')
 
 
     def error_notworkingdir(self):
