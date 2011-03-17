@@ -18,6 +18,7 @@
 
 import os
 import posixpath
+import re
 from binascii import hexlify
 from mako.lookup import TemplateLookup
 from paste import httpserver
@@ -31,6 +32,8 @@ from .users import Anonymous
 from .routes import Router
 
 class Context(object):
+    SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+' % re.escape(r'/.'))
+
     def __init__(self, environ, start_response):
         self._init_routing()
 
@@ -50,9 +53,10 @@ class Context(object):
     def _init_paths(self):
         webpath = self.req.path_info
         # remove the trailing "/" server-side, and other nice stuff
+        webpath = self.SANITIZE_REGEXP.sub('/', webpath)
         webpath = posixpath.normpath(webpath)
-        if webpath == ".":
-            webpath = "/"
+        if webpath == '.':
+            webpath = '/'
 
         if self.ass2m.root:
             realpath = os.path.realpath(os.path.join(self.ass2m.root, webpath[1:]))

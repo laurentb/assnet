@@ -69,10 +69,23 @@ class BaseWebTest(TestCase):
         assert res.location == "http://localhost/"
         res.follow(status=200)
 
-        # This does not work (yet)
-        #res = self.app.get("///", status=302)
-        #assert res.location == "http://localhost/"
-        #res.follow(status=200)
+        # more sanitization
+        res = self.app.get("/penguins///", status=302)
+        assert res.location == "http://localhost/penguins/"
+        res.follow(status=200)
+        res = self.app.get("/penguins/..//..", status=302)
+        assert res.location == "http://localhost/"
+        res.follow(status=200)
+        res = self.app.get("/../", status=302)
+        assert res.location == "http://localhost/"
+        res.follow(status=200)
+        res = self.app.get(r"/penguins\..\penguins/..", status=302)
+        assert res.location == "http://localhost/"
+        res.follow(status=200)
+        res = self.app.get(r"/penguins\\\gentoo\\", status=302)
+        assert res.location == "http://localhost/penguins/gentoo"
+        res.follow(status=200)
+
 
     def test_notFound(self):
         self.app.get("/penguins/", status=404)
