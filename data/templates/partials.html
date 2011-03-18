@@ -2,9 +2,9 @@
     <ul>
         % for available_view in available_views:
             % if available_view == view:
-            <li><strong><a href="${webpath}?view=${available_view}">${available_view}</a></strong></li>
+            <li><strong><a href="${url}?view=${available_view}">${available_view}</a></strong></li>
             % else:
-                <li><a href="${webpath}?view=${available_view}">${available_view}</a></li>
+                <li><a href="${url}?view=${available_view}">${available_view}</a></li>
             % endif
         % endfor
     </ul>

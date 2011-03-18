@@ -32,7 +32,7 @@ class ListGalleryAction(Action):
         photos = []
         description = None
         for filename in sorted(os.listdir(self.ctx.realpath)):
-            f = self.ctx.ass2m.storage.get_file(posixpath.join(self.ctx.webpath, filename))
+            f = self.ctx.ass2m.storage.get_file(posixpath.join(self.ctx.path, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
 

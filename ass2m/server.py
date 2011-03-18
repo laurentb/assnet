@@ -51,19 +51,20 @@ class Context(object):
         self._init_template_vars()
 
     def _init_paths(self):
-        webpath = self.req.path_info
+        path = self.req.path_info
         # remove the trailing "/" server-side, and other nice stuff
-        webpath = self.SANITIZE_REGEXP.sub('/', webpath)
-        webpath = posixpath.normpath(webpath)
-        if webpath == '.':
-            webpath = '/'
+        path = self.SANITIZE_REGEXP.sub('/', path)
+        path = posixpath.normpath(path)
+        if path == '.':
+            path = '/'
 
         if self.ass2m.root:
-            realpath = os.path.realpath(os.path.join(self.ass2m.root, webpath[1:]))
+            realpath = os.path.realpath(os.path.join(self.ass2m.root, path[1:]))
         else:
             realpath = None
 
-        self.webpath = webpath
+        self.path = path
+        self.url = urlparse.urlparse(self.req.application_url).path + path
         self.realpath = realpath
 
     def _init_routing(self):
@@ -102,7 +103,8 @@ class Context(object):
     def _init_template_vars(self):
         self.template_vars = {
             'ass2m_version': Ass2m.VERSION,
-            'webpath': self.webpath.decode('utf-8'),
+            'path': self.path.decode('utf-8'),
+            'url': self.url.decode('utf-8'),
             'global': dict(),
         }
 
@@ -146,14 +148,14 @@ class Dispatcher(Action):
             return action(ctx).answer()
 
         # check perms
-        f = ctx.ass2m.storage.get_file(ctx.webpath)
+        f = ctx.ass2m.storage.get_file(ctx.path)
         if not ctx.user.has_perms(f, f.PERM_READ):
             ctx.res = HTTPForbidden()
             return
 
         # normalize paths
         if os.path.exists(ctx.realpath):
-            goodpath = ctx.webpath
+            goodpath = ctx.path
             if os.path.isdir(ctx.realpath) and goodpath[-1] != "/":
                 # there should be a trailing slash in the client URL
                 # for directories but not for files
