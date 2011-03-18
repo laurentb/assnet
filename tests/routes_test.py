@@ -151,6 +151,7 @@ class RoutesTest(TestCase):
     def test_viewsList(self):
         self.router.connect(Route(object_type="directory", action="list", view="html"), None)
         self.router.connect(Route(object_type="directory", action="list", view="json"), None)
+        self.router.connect(Route(object_type="directory", action="list", view="yaml", public = False), None)
         self.router.connect(Route(object_type="directory", action="tree", view="xml"), None)
         self.router.connect(Route(object_type="file", action="list", view="yaml"), None)
         self.router.connect(Route(object_type="directory", action="list", view=None), None)

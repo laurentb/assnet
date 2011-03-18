@@ -20,7 +20,7 @@ __all__ = ['Route', 'Router']
 
 
 class Route(object):
-    def __init__(self, object_type, action, view = None, method = 'GET'):
+    def __init__(self, object_type, action, view = None, method = 'GET', public = True):
         """
         object_type: "file" or "directory", or None for global actions
         action: Arbitrary name
@@ -31,6 +31,7 @@ class Route(object):
         self.action = action
         self.view = view
         self.method = method
+        self.public = public
         if self.view:
             self.precision = 1
         else:
@@ -89,7 +90,7 @@ class Router(object):
         """
         for routes in self.routes.itervalues():
             for route, call in routes:
-                if route.amatch(object_type, action, 'GET') and route.view:
+                if route.amatch(object_type, action, 'GET') and route.view and route.public:
                     yield route.view
 
     def match(self, object_type, req, file_view = None):
