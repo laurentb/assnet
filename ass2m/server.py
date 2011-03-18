@@ -25,6 +25,7 @@ from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from webob import Request, Response
 from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
+from paste.url import URL
 import urlparse
 
 from ass2m import Ass2m
@@ -50,6 +51,7 @@ class Context(object):
         self._init_default_response()
         self._init_template_vars()
 
+
     def _init_paths(self):
         path = self.req.path_info
         # remove the trailing "/" server-side, and other nice stuff
@@ -63,9 +65,16 @@ class Context(object):
         else:
             realpath = None
 
+        query_vars = self.req.str_GET.items()
+        # Path of the file relative to the Ass2m root
         self.path = path
-        self.url = urlparse.urlparse(self.req.application_url).path + path
+        # Absolute path of the file on the system
         self.realpath = realpath
+        # URL after Ass2m web application base URL
+        self.relurl = URL(path.decode('utf-8'), query_vars)
+        # Complete URL
+        self.url = URL(urlparse.urlparse(self.req.application_url).path.decode('utf-8') + path.decode('utf-8'), query_vars)
+
 
     def _init_routing(self):
         router = Router()
@@ -104,7 +113,7 @@ class Context(object):
         self.template_vars = {
             'ass2m_version': Ass2m.VERSION,
             'path': self.path.decode('utf-8'),
-            'url': self.url.decode('utf-8'),
+            'url': self.url,
             'global': dict(),
         }
 
@@ -161,9 +170,8 @@ class Dispatcher(Action):
                 # for directories but not for files
                 goodpath += "/"
             if ctx.req.path_info != goodpath:
-                goodlocation = urlparse.urljoin(ctx.req.application_url + goodpath, \
-                        '?' + ctx.req.query_string)
-                ctx.res = HTTPFound(location=goodlocation)
+                goodlocation = URL(ctx.req.application_url + goodpath, vars=ctx.url.vars)
+                ctx.res = HTTPFound(location=goodlocation.href)
                 return
 
         # find the action to forward the request to

@@ -1,10 +1,14 @@
 <%def name="viewslist()">
+<%
+view_links = [(available_view, url.setvar(view=available_view).href) \
+                for available_view in available_views]
+%>
     <ul>
-        % for available_view in available_views:
+        % for available_view, view_url in view_links:
             % if available_view == view:
-            <li><strong><a href="${url}?view=${available_view}">${available_view}</a></strong></li>
+            <li><strong><a href="${view_url}">${available_view}</a></strong></li>
             % else:
-                <li><a href="${url}?view=${available_view}">${available_view}</a></li>
+            <li><a href="${view_url}">${available_view}</a></li>
             % endif
         % endfor
     </ul>
