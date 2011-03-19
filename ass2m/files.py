@@ -100,6 +100,8 @@ class File(IObject):
 
     def _postread(self):
         self.view = self.data['info'].get('view', None)
+        if self.view in ["", "None"]:
+            self.view = None
         self.perms.clear()
         for key, value in self.data.get('perms', {}).iteritems():
             self.perms[key] = int(value)
@@ -107,5 +109,7 @@ class File(IObject):
     def _prewrite(self):
         if self.view is not None:
             self.data['info']['view'] = self.view
+        else:
+            self.data['info'].pop('view', None)
         self.data['info']['path'] = self.path
         self.data['perms'] = self.perms
