@@ -4,17 +4,17 @@
 ${partials.viewslist()}
 
 % if description:
-<p id="description">${description}</p>
+    <p id="description">${description | h}</p>
 % endif
 
 % for photo in photos:
-<a href="${photo}"><img src="${photo}?view=thumbnail&thumb_size=200" /></a>
+    <a href="${photo}"><img src="${photo}?view=thumbnail&thumb_size=200" /></a>
 % endfor
 
 <ul>
     % for dir in dirs:
-        <li><strong><a href="${dir}/">${dir}/</a></strong></li>
+        <li><strong><a href="${dir}/">${dir | h}/</a></strong></li>
     % endfor
 </ul>
 
-<%def name="title()">Gallery of ${path}</%def>
+<%def name="title()">Gallery of ${path | h}</%def>

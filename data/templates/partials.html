@@ -6,9 +6,9 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
     <ul>
         % for available_view, view_url in view_links:
             % if available_view == view:
-            <li><strong><a href="${view_url}">${available_view}</a></strong></li>
+            <li><strong><a href="${view_url}">${available_view | h}</a></strong></li>
             % else:
-            <li><a href="${view_url}">${available_view}</a></li>
+            <li><a href="${view_url}">${available_view | h}</a></li>
             % endif
         % endfor
     </ul>
