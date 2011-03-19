@@ -149,18 +149,18 @@ class Ass2mFileApp(FileApp):
 class DownloadAction(Action):
     def answer(self):
         # serve the file, delegate everything to to FileApp
-        self.ctx.res = Ass2mFileApp(self.ctx.realpath)
+        self.ctx.res = Ass2mFileApp(self.ctx.file.get_realpath())
 
 
 class ListAction(Action):
     def answer(self):
         dirs = []
         files = []
-        for filename in sorted(os.listdir(self.ctx.realpath)):
-            f = self.ctx.ass2m.storage.get_file(posixpath.join(self.ctx.path, filename))
+        for filename in sorted(os.listdir(self.ctx.file.get_realpath())):
+            f = self.ctx.ass2m.storage.get_file(posixpath.join('/', self.ctx.path, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
-            if os.path.isdir(os.path.join(self.ctx.realpath, filename)):
+            if os.path.isdir(os.path.join(self.ctx.file.get_realpath(), filename)):
                 dirs.append(filename)
             else:
                 files.append(filename)

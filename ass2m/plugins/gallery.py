@@ -31,8 +31,8 @@ class ListGalleryAction(Action):
         dirs = []
         photos = []
         description = None
-        for filename in sorted(os.listdir(self.ctx.realpath)):
-            f = self.ctx.ass2m.storage.get_file(posixpath.join(self.ctx.path, filename))
+        for filename in sorted(os.listdir(self.ctx.file.get_realpath())):
+            f = self.ctx.ass2m.storage.get_file(posixpath.join('/', self.ctx.path, filename))
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
 
@@ -59,7 +59,7 @@ class DownloadThumbnailAction(Action):
     DEFAULT_SIZE = 300
 
     def answer(self):
-        img = Image.open(self.ctx.realpath)
+        img = Image.open(self.ctx.file.get_realpath())
 
         try:
             size = int(self.ctx.req.str_GET['thumb_size'])
@@ -73,7 +73,7 @@ class DownloadThumbnailAction(Action):
         s = StringIO()
         img.save(s, 'jpeg')
         self.ctx.res = DataApp(None, content_type='image/jpeg')
-        self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.realpath))
+        self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.file.get_realpath()))
 
 class GalleryPlugin(Plugin):
     def init(self):

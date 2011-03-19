@@ -51,30 +51,28 @@ class Context(object):
         self._init_default_response()
         self._init_template_vars()
 
-
     def _init_paths(self):
         path = self.req.path_info
         # remove the trailing "/" server-side, and other nice stuff
         path = self.SANITIZE_REGEXP.sub('/', path)
         path = posixpath.normpath(path)
-        if path == '.':
-            path = '/'
+        if path in ('.', '/'):
+            path = ''
 
         if self.ass2m.root:
-            realpath = os.path.realpath(os.path.join(self.ass2m.root, path[1:]))
+            f = self.ass2m.storage.get_file(path)
         else:
-            realpath = None
+            f = None
 
         query_vars = self.req.str_GET.items()
         # Path of the file relative to the Ass2m root
         self.path = path
         # Absolute path of the file on the system
-        self.realpath = realpath
+        self.file = f
         # URL after Ass2m web application base URL
         self.relurl = URL(path, query_vars)
         # Complete URL
         self.url = URL(urlparse.urlparse(self.req.application_url).path + path, query_vars)
-
 
     def _init_routing(self):
         router = Router()
@@ -82,7 +80,6 @@ class Context(object):
         router.set_default_action("file", "download")
         router.set_default_action("directory", "list")
         self.router = router
-
 
     def _init_cookie_secret(self):
         if not self.ass2m.storage:
@@ -94,7 +91,6 @@ class Context(object):
             self.cookie_secret = hexlify(new_secret())
             config.data["web"]["cookie_secret"] = self.cookie_secret
             config.save()
-
 
     def _init_templates(self):
         paths = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
@@ -113,7 +109,7 @@ class Context(object):
     def _init_template_vars(self):
         self.template_vars = {
             'ass2m_version': Ass2m.VERSION,
-            'path': self.path,
+            'path': self.path or "/",
             'url': self.url,
             'global': dict(),
         }
@@ -129,7 +125,6 @@ class Action(object):
     def __init__(self, ctx):
         self.ctx = ctx
 
-
     def answer(self):
         raise NotImplementedError()
 
@@ -141,7 +136,6 @@ class Dispatcher(Action):
         user = cookie and signer.auth(cookie)
         if user:
             self.ctx.user = self.ctx.ass2m.storage.get_user(user)
-
 
     def answer(self):
         ctx = self.ctx
@@ -158,15 +152,15 @@ class Dispatcher(Action):
             return action(ctx).answer()
 
         # check perms
-        f = ctx.ass2m.storage.get_file(ctx.path)
+        f = ctx.file
         if not ctx.user.has_perms(f, f.PERM_READ):
             ctx.res = HTTPForbidden()
             return
 
         # normalize paths
-        if os.path.exists(ctx.realpath):
-            goodpath = ctx.path
-            if os.path.isdir(ctx.realpath) and goodpath[-1] != "/":
+        if f.file_exists():
+            goodpath = ctx.path if len(ctx.path) else "/"
+            if f.isdir() and goodpath[-1] != "/":
                 # there should be a trailing slash in the client URL
                 # for directories but not for files
                 goodpath += "/"
@@ -176,9 +170,9 @@ class Dispatcher(Action):
                 return
 
         # find the action to forward the request to
-        if os.path.isfile(ctx.realpath):
+        if f.isfile():
             object_type = "file"
-        elif os.path.isdir(ctx.realpath):
+        elif f.isdir():
             object_type = "directory"
         else:
             ctx.res = HTTPNotFound('File not found')
@@ -194,7 +188,6 @@ class Dispatcher(Action):
 
         # action/view not found
         ctx.res = HTTPNotFound('No route found')
-
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500

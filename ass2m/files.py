@@ -83,6 +83,18 @@ class File(IObject):
     def get_realpath(self):
         return os.path.realpath(os.path.join(self.storage.path, '..', self.path[1:]))
 
+    def file_exists(self):
+        """
+        Tests if the real file exists (not the File storage object)
+        """
+        return os.path.exists(self.get_realpath())
+
+    def isdir(self):
+        return os.path.isdir(self.get_realpath())
+
+    def isfile(self):
+        return os.path.isfile(self.get_realpath())
+
     def _get_confname(self):
         return os.path.join('files', hashlib.sha1(self.path).hexdigest())
 
