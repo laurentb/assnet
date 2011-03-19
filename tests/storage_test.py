@@ -208,6 +208,6 @@ class StorageTest(TestCase):
         f.save()
 
         path = os.path.join(self.root, 'penguin')
-        f = self.storage.get_disk_file(path)
+        f = self.storage.get_file_from_realpath(path)
         assert f.view == 'html'
         assert f.path == '/penguin'

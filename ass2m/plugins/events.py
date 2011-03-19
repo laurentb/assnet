@@ -50,7 +50,7 @@ class Event(object):
         self.users = {}
 
     def save(self):
-        with open(self.f.get_disk_path(), 'w') as fp:
+        with open(self.f.get_realpath(), 'w') as fp:
             self._print(fp)
 
     def print_me(self):
@@ -86,7 +86,7 @@ class Event(object):
          READ_PLACE,
          READ_ATTENDEES) = range(6)
 
-        with open(self.f.get_disk_path(), 'r') as fp:
+        with open(self.f.get_realpath(), 'r') as fp:
             state = READ_TITLE
             for line in fp.xreadlines():
                 line = line.strip().decode('utf-8')
@@ -135,7 +135,7 @@ class EventCmd(Command):
         parser.add_argument('filename')
 
     def cmd(self, args):
-        f = self.ass2m.storage.get_disk_file(args.filename)
+        f = self.ass2m.storage.get_file_from_realpath(args.filename)
         if not f:
             print >>sys.stderr, 'Error: file "%s" is not in the working tree.' % args.filename
             return 1
@@ -151,7 +151,7 @@ class EventCmd(Command):
                     print >>sys.stderr, 'Error: %s' % e
                     return 1
 
-                os.unlink(f.get_disk_path())
+                os.unlink(f.get_realpath())
                 self.edit_event(event)
             return 0
 

@@ -80,7 +80,7 @@ class File(IObject):
             return None
         return self.storage.get_file(os.path.dirname(self.path))
 
-    def get_disk_path(self):
+    def get_realpath(self):
         return os.path.realpath(os.path.join(self.storage.path, '..', self.path[1:]))
 
     def _get_confname(self):

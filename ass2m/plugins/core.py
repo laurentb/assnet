@@ -78,7 +78,7 @@ class PermsCmd(Command):
             print >>sys.stderr, 'Error: Path "%s" does not exist.' % args.path
             return 1
 
-        f = self.ass2m.storage.get_disk_file(os.path.realpath(args.path))
+        f = self.ass2m.storage.get_file_from_realpath(os.path.realpath(args.path))
         if not f:
             print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % args.path
             return 1

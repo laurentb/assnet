@@ -73,8 +73,8 @@ class Storage(object):
         user.read()
         return user.exists
 
-    def get_disk_file(self, diskpath):
-        path = os.path.relpath(diskpath, os.path.realpath(os.path.join(self.path, os.path.pardir)))
+    def get_file_from_realpath(self, realpath):
+        path = os.path.relpath(realpath, os.path.realpath(os.path.join(self.path, os.path.pardir)))
         if path.startswith('../'):
             # Outside of working tree.
             return None
