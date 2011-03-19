@@ -71,9 +71,9 @@ class Context(object):
         # Absolute path of the file on the system
         self.realpath = realpath
         # URL after Ass2m web application base URL
-        self.relurl = URL(path.decode('utf-8'), query_vars)
+        self.relurl = URL(path, query_vars)
         # Complete URL
-        self.url = URL(urlparse.urlparse(self.req.application_url).path.decode('utf-8') + path.decode('utf-8'), query_vars)
+        self.url = URL(urlparse.urlparse(self.req.application_url).path + path, query_vars)
 
 
     def _init_routing(self):
@@ -101,8 +101,9 @@ class Context(object):
                  '/usr/share/ass2m',
                  '/usr/local/share/ass2m']
         self.lookup = TemplateLookup(directories=['%s/templates' % path for path in paths],
-                                     collection_size=20,
-                                     output_encoding='utf-8')
+                         collection_size=20,
+                         output_encoding='utf-8', input_encoding='utf-8',
+                         default_filters=['decode.utf8'])
 
     def _init_default_response(self):
         # defaults, may be changed later on
@@ -112,7 +113,7 @@ class Context(object):
     def _init_template_vars(self):
         self.template_vars = {
             'ass2m_version': Ass2m.VERSION,
-            'path': self.path.decode('utf-8'),
+            'path': self.path,
             'url': self.url,
             'global': dict(),
         }

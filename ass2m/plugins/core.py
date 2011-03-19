@@ -161,9 +161,9 @@ class ListAction(Action):
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
             if os.path.isdir(os.path.join(self.ctx.realpath, filename)):
-                dirs.append(filename.decode('utf-8'))
+                dirs.append(filename)
             else:
-                files.append(filename.decode('utf-8'))
+                files.append(filename)
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files

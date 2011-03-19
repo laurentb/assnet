@@ -37,7 +37,7 @@ class ListGalleryAction(Action):
                 continue
 
             if os.path.isdir(f.get_disk_path()):
-                dirs.append(filename.decode('utf-8'))
+                dirs.append(filename)
                 continue
 
             if not self.ctx.user.has_perms(f, f.PERM_READ):
@@ -45,7 +45,7 @@ class ListGalleryAction(Action):
 
             mimetype = mimetypes.guess_type(f.get_disk_path())[0]
             if mimetype is not None and mimetype.startswith('image'):
-                photos.append(filename.decode('utf-8'))
+                photos.append(filename)
             elif filename == 'DESCRIPTION':
                 with open(f.get_disk_path(), 'r') as f:
                     description = f.read()
