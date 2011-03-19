@@ -1,0 +1,5 @@
+#!/bin/sh
+VALID=0
+./tools/pyflakes.sh || VALID=1
+./tools/run_tests.sh || VALID=1
+exit $VALID
