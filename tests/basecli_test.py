@@ -1,9 +1,10 @@
 from unittest import TestCase
 from ass2m.cli import CLI
 from tempfile import mkdtemp
+import os
+import re
 import shutil
 import sys
-import re
 from StringIO import StringIO
 
 class BaseCLITest(TestCase):
@@ -38,3 +39,13 @@ class BaseCLITest(TestCase):
         output = self.endCapture()
         assert re.match(re.escape(r'/')+r'\s+'+re.escape(r'all(rl-)'), output, re.S)
         assert re.match(".+"+re.escape(r'/.ass2m/')+r'\s+'+re.escape(r'all(---)'), output, re.S)
+
+    def test_findRoot(self):
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'init']) in (0, None)
+        self.endCapture()
+
+        subdir = os.path.join(self.root, "penguins")
+        os.mkdir(subdir)
+        subapp = CLI(subdir)
+        assert subapp.main(['ass2m_test', 'tree']) in (0, None)
