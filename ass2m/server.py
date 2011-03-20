@@ -64,6 +64,13 @@ class Context(object):
         else:
             f = None
 
+        if f and f.isfile():
+            self.object_type = "file"
+        elif f and f.isdir():
+            self.object_type = "directory"
+        else:
+            self.object_type = None
+
         query_vars = self.req.str_GET.items()
         # Path of the file relative to the Ass2m root
         self.path = path
@@ -169,20 +176,18 @@ class Dispatcher(Action):
                 ctx.res = HTTPFound(location=goodlocation.href)
                 return
 
-        # find the action to forward the request to
-        if f.isfile():
-            object_type = "file"
-        elif f.isdir():
-            object_type = "directory"
-        else:
+        # no object type means no real file exists
+        if ctx.object_type is None:
             ctx.res = HTTPNotFound('File not found')
             return
 
+        # find out current action/view and available views
         ctx.template_vars["action"], ctx.template_vars["view"] = \
-            router.resolve(object_type, ctx.req, f.view)
+            router.resolve(ctx.object_type, ctx.req, f.view)
         ctx.template_vars["available_views"] = \
-            sorted(router.available_views(object_type, ctx.template_vars["action"]))
-        action = router.match(object_type, ctx.req, f.view)
+            sorted(router.available_views(ctx.object_type, ctx.template_vars["action"]))
+        # find the action to forward the request to
+        action = router.match(ctx.object_type, ctx.req, f.view)
         if action is not None:
             return action(ctx).answer()
 
