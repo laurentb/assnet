@@ -16,7 +16,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import os
-import posixpath
 import Image
 import mimetypes
 from cStringIO import StringIO
@@ -31,22 +30,21 @@ class ListGalleryAction(Action):
         dirs = []
         photos = []
         description = None
-        for filename in sorted(os.listdir(self.ctx.file.get_realpath())):
-            f = self.ctx.ass2m.storage.get_file(posixpath.join('/', self.ctx.path, filename))
+        for f in self.ctx.file.iter_children():
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
 
-            if os.path.isdir(f.get_realpath()):
-                dirs.append(filename)
+            if f.isdir():
+                dirs.append(f.get_name())
                 continue
 
             if not self.ctx.user.has_perms(f, f.PERM_READ):
                 continue
 
-            mimetype = mimetypes.guess_type(f.get_realpath())[0]
+            mimetype = mimetypes.guess_type(f.get_name())[0]
             if mimetype is not None and mimetype.startswith('image'):
-                photos.append(filename)
-            elif filename == 'DESCRIPTION':
+                photos.append(f.get_name())
+            elif f.get_name() == 'DESCRIPTION':
                 with open(f.get_realpath(), 'r') as f:
                     description = f.read()
 

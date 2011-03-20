@@ -17,7 +17,6 @@
 
 import sys
 import os
-import posixpath
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
@@ -156,14 +155,13 @@ class ListAction(Action):
     def answer(self):
         dirs = []
         files = []
-        for filename in sorted(os.listdir(self.ctx.file.get_realpath())):
-            f = self.ctx.ass2m.storage.get_file(posixpath.join('/', self.ctx.path, filename))
+        for f in self.ctx.file.iter_children():
             if not self.ctx.user.has_perms(f, f.PERM_LIST):
                 continue
-            if os.path.isdir(os.path.join(self.ctx.file.get_realpath(), filename)):
-                dirs.append(filename)
+            if f.isdir():
+                dirs.append(f.get_name())
             else:
-                files.append(filename)
+                files.append(f.get_name())
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files

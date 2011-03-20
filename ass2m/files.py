@@ -16,6 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import os
+import posixpath
 import hashlib
 from .obj import IObject
 
@@ -78,7 +79,7 @@ class File(IObject):
     def parent(self):
         if self.path == '':
             return None
-        return self.storage.get_file(os.path.dirname(self.path))
+        return self.storage.get_file(posixpath.dirname(self.path))
 
     def get_realpath(self):
         return os.path.realpath(os.path.join(self.storage.path, '..', self.path[1:]))
@@ -94,6 +95,18 @@ class File(IObject):
 
     def isfile(self):
         return os.path.isfile(self.get_realpath())
+
+    def iter_children(self):
+        if self.isdir():
+            filenames = sorted(os.listdir(self.get_realpath()))
+            for filename in filenames:
+                yield self.storage.get_file(posixpath.join("/", self.path, filename))
+
+    def get_name(self):
+        return posixpath.basename(self.path)
+
+    def get_children(self):
+        dict([(f.get_filename(), f) for f in self.iter_children()])
 
     def _get_confname(self):
         return os.path.join('files', hashlib.sha1(self.path).hexdigest())
