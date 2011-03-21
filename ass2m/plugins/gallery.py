@@ -30,7 +30,8 @@ class ListGalleryAction(Action):
         dirs = []
         photos = []
         description = None
-        for filename, f in self.ctx.get_files().iteritems():
+        for f in self.ctx.iter_files():
+            filename = f.get_name()
             if f.isdir():
                 dirs.append(filename)
             elif self.ctx.user.has_perms(f, f.PERM_READ):

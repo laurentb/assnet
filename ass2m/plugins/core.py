@@ -161,11 +161,11 @@ class ListAction(Action):
     def answer(self):
         dirs = []
         files = []
-        for filename, f in self.ctx.get_files().iteritems():
+        for f in self.ctx.iter_files():
             if f.isdir():
-                dirs.append(filename)
+                dirs.append(f.get_name())
             else:
-                files.append(filename)
+                files.append(f.get_name())
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files

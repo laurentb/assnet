@@ -133,9 +133,6 @@ class Context(object):
                 if self.user.has_perms(f, f.PERM_LIST):
                     yield f
 
-    def get_files(self):
-        return dict([(f.get_name(), f) for f in self.iter_files()])
-
 
 class Action(object):
     def __init__(self, ctx):

@@ -118,9 +118,6 @@ class File(IObject):
     def get_name(self):
         return posixpath.basename(self.path)
 
-    def get_children(self):
-        return dict([(f.get_name(), f) for f in self.iter_children()])
-
     def _get_confname(self):
         return os.path.join('files', hashlib.sha1(self.path).hexdigest())
 
