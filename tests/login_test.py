@@ -45,5 +45,6 @@ class LoginTest(TestCase):
         form = res.form
         form['username'] = 'penguin'
         form['password'] = 'monkey1'
-        res = form.submit()
+        res = form.submit(status=302)
+        res = res.follow(status=200)
         assert 'Current user: penguin' in res.body

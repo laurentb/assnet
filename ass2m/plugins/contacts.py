@@ -26,6 +26,7 @@ from ass2m.users import User
 from ass2m.routes import Route
 from ass2m.server import Action
 from paste.auth.cookie import AuthCookieSigner
+from webob.exc import HTTPFound
 
 
 __all__ = ['ContactsManagement', 'ContactsSelection', 'ContactsPlugin']
@@ -223,8 +224,9 @@ class LoginAction(Action):
             if user and user.is_valid_password(form_password):
                 # set cookie
                 cookie = signer.sign(form_username)
+                self.ctx.res = HTTPFound(location=self.ctx.url.href)
                 self.ctx.res.set_cookie('ass2m_auth', cookie)
-                self.ctx.user = user
+                return
 
         self.ctx.res.body = self.ctx.render('login.html')
 
