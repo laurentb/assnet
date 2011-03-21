@@ -24,7 +24,10 @@ from textwrap import wrap
 from datetime import datetime
 
 from ass2m.plugin import Plugin
+from ass2m.routes import Route
+from ass2m.server import Action
 from ass2m.cmd import Command
+
 from .contacts import ContactsSelection
 
 
@@ -220,6 +223,20 @@ class EventCmd(Command):
         for added in set(cs.sel_users) - set(event.users.keys()):
             event.users[added] = event.USER_WAITING
 
+class EventAction(Action):
+    def answer(self):
+        event = Event(self.ctx.file)
+        try:
+            event.load()
+        except IOError:
+            return
+
+        self.ctx.template_vars['event'] = event
+        self.ctx.res.body = self.ctx.render('event.html')
+
 class EventsPlugin(Plugin):
     def init(self):
         self.register_cli_command('event', EventCmd)
+        self.register_web_action(
+            Route(object_type = "file", action="download", view="event"),
+            EventAction)

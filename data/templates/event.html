@@ -1,0 +1,20 @@
+<%inherit file="layout.html"/>
+
+<h2>${event.title | h}</h2>
+
+<p>${event.summary | h}</p>
+
+<h3>Date</h3>
+<p>${event.date | h}</p>
+
+<h3>Place</h3>
+<p>${event.place | h}</p>
+
+<h3>Attendees</h3>
+<ul>
+% for name, state in event.users.iteritems():
+    <li>${name | h}</li>
+% endfor
+</ul>
+
+<%def name="title()">Event ${path | h}</%def>
