@@ -211,3 +211,48 @@ class StorageTest(TestCase):
         f = self.storage.get_file_from_realpath(path)
         assert f.view == 'html'
         assert f.path == '/penguin'
+
+    def test_getChildren(self):
+        os.mkdir(os.path.join(self.root, 'penguins'))
+        with open(os.path.join(self.root, 'penguins', 'gentoo'), 'w') as f:
+            f.write('')
+        with open(os.path.join(self.root, 'penguins', 'emperor'), 'w') as f:
+            f.write('')
+        with open(os.path.join(self.root, 'penguins', 'king'), 'w') as f:
+            f.write('')
+
+        f = self.storage.get_file('')
+        assert f.get_name() == ''
+        assert f.isdir()
+        assert not f.isfile()
+        children = list(f.iter_children())
+        assert len(children) == 1
+
+        f = children[0]
+        assert f.path == '/penguins'
+        assert f.get_name() == 'penguins'
+        assert f.isdir()
+        assert not f.isfile()
+        children = list(f.iter_children())
+        assert len(children) == 3
+
+        f = children[0]
+        assert f.path == '/penguins/emperor'
+        assert f.get_name() == 'emperor'
+        assert f.isfile()
+        assert not f.isdir()
+
+        f = f.parent()
+        assert f.path == '/penguins'
+        assert f.get_name() == 'penguins'
+        assert f.isdir()
+        assert not f.isfile()
+
+        f = f.parent()
+        assert f.path == ''
+        assert f.get_name() == ''
+        assert f.isdir()
+        assert not f.isfile()
+
+        f = f.parent()
+        assert f is None
