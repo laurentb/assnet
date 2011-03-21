@@ -56,6 +56,14 @@ class Event(object):
         with open(self.f.get_realpath(), 'w') as fp:
             self._print(fp)
 
+        self.f.clear_user_perms()
+        for username in self.users.iterkeys():
+            self.f.set_user_perms(username, self.f.PERM_WRITE|
+                                            self.f.PERM_READ|
+                                            self.f.PERM_LIST)
+        self.f.view = 'event'
+        self.f.save()
+
     def print_me(self):
         print '-' * len(unicode(self.title))
         self._print(sys.stdout)
