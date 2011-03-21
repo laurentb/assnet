@@ -80,6 +80,8 @@ class Context(object):
         self.relurl = URL(path, query_vars)
         # Complete URL
         self.url = URL(urlparse.urlparse(self.req.application_url).path + path, query_vars)
+        # Root application URL (for links to special actions)
+        self.root_url = URL(urlparse.urlparse(self.req.application_url).path)
 
     def _init_routing(self):
         router = Router()
@@ -118,6 +120,7 @@ class Context(object):
             'ass2m_version': Ass2m.VERSION,
             'path': self.path or "/",
             'url': self.url,
+            'root_url': self.root_url,
             'global': dict(),
         }
 

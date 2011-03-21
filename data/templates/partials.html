@@ -19,7 +19,7 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
   % if user:
      Logged as ${user.name | h}
   % else:
-     <a href="?action=login">Login</a>
+      <a href="${root_url.setvar(action="login").href}">Login</a>
   % endif
 </div>
 </%def>
