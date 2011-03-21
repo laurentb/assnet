@@ -18,6 +18,7 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
 <div id="login">
   % if user:
      Logged as ${user.name | h}
+     <a href="${root_url.setvar(action="logout").href}">Logout</a>
   % else:
       <a href="${root_url.setvar(action="login").href}">Login</a>
   % endif

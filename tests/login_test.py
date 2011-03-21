@@ -48,3 +48,11 @@ class LoginTest(TestCase):
         res = form.submit(status=302)
         res = res.follow(status=200)
         assert 'Current user: penguin' in res.body
+
+        res = self.app.get('/')
+        assert 'Login' not in res.body
+        assert 'Logged as penguin' in res.body
+        res = self.app.get('/?action=logout', status=302)
+        res = res.follow(status=200)
+        assert 'Login' in res.body
+        assert 'Logged as' not in res.body

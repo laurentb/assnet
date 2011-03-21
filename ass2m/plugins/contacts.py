@@ -231,6 +231,13 @@ class LoginAction(Action):
         self.ctx.res.body = self.ctx.render('login.html')
 
 
+class LogoutAction(Action):
+    def answer(self):
+        referer = self.ctx.req.referer or self.ctx.root_url.href
+        self.ctx.res = HTTPFound(location=referer)
+        self.ctx.res.delete_cookie('ass2m_auth')
+
+
 class ContactsPlugin(Plugin):
     def init(self):
         self.register_cli_command('contacts', 'Contacts Management')
@@ -247,3 +254,6 @@ class ContactsPlugin(Plugin):
         self.register_web_action(
             Route(object_type = None, action="login", method="POST"),
             LoginAction)
+        self.register_web_action(
+            Route(object_type = None, action="logout"),
+            LogoutAction)
