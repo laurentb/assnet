@@ -28,19 +28,19 @@ class LoginTest(TestCase):
 
     def test_defaultDirs(self):
         res = self.app.get('/?action=login', status=200)
-        assert 'Current user: &lt;anonymous&gt;' in res.body
+        assert 'Not logged in.' in res.body
 
         form = res.form
         form['username'] = 'invalid'
         form['password'] = 'invalid'
         res = form.submit()
-        assert 'Current user: &lt;anonymous&gt;' in res.body
+        assert 'Not logged in.' in res.body
 
         form = res.form
         form['username'] = 'penguin'
         form['password'] = 'invalid'
         res = form.submit()
-        assert 'Current user: &lt;anonymous&gt;' in res.body
+        assert 'Not logged in.' in res.body
 
         form = res.form
         form['username'] = 'penguin'

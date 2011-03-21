@@ -1,6 +1,10 @@
 <%inherit file="layout.html"/>
 
-Current user: ${user.name | h}<br/>
+% if user:
+    Current user: ${user.name | h}<br/>
+% else:
+    Not logged in.
+% endif
 
 <form method="post">
     <label>Username</label><input name="username" />

@@ -158,7 +158,8 @@ class Dispatcher(Action):
             return self.error_notworkingdir()
 
         self._authenticate()
-        ctx.template_vars["user"] = ctx.user
+        ctx.template_vars["user"] = ctx.user if ctx.user.exists else None
+
 
         # actions not related to a file or directory
         action = router.match(None, ctx.req)

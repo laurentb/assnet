@@ -111,6 +111,7 @@ class Anonymous(IUser):
     email = None
     realname = 'Ano Nymous'
     groups = []
+    exists = False
 
     def has_perms(self, f, perm):
         f_perms = f.get_all_perms()
