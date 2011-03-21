@@ -76,6 +76,19 @@ class File(IObject):
     def get_user_perms(self, name, default=None):
         return self.perms.get('u.%s' % name, default)
 
+    def clear_all_perms(self):
+        self.perms.pop('all', None)
+
+    def clear_group_perms(self):
+        for name in self.perms.keys():
+            if name.startswith('g.'):
+                self.perms.pop(name)
+
+    def clear_user_perms(self):
+        for name in self.perms.keys():
+            if name.startswith('u.'):
+                self.perms.pop(name)
+
     def parent(self):
         if self.path == '':
             return None
