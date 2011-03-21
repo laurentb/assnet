@@ -45,22 +45,28 @@ class TreeCmd(Command):
     DESCRIPTION = 'Display the working tree'
     WORKDIR = True
 
+    def print_perms(self, path, depth):
+        f = self.ass2m.storage.get_file(path)
+        parent = f.parent()
+
+        perms_s = ''
+        for key, perms in f.perms.iteritems():
+            if not parent or not key in parent.perms or parent.perms[key] != perms:
+                perms_s += '%s(%s) ' % (key, f.p2str(perms))
+
+        if len(perms_s) == 0:
+            return
+
+        print '%-40s %s' % ('  ' * depth + path, perms_s)
+
     def cmd(self, args):
         for root, directories, files in os.walk(self.working_dir):
             path = root[len(self.ass2m.root):]
             depth = path.count('/')
-            f = self.ass2m.storage.get_file(path)
-            parent = f.parent()
 
-            perms_s = ''
-            for key, perms in f.perms.iteritems():
-                if not parent or not key in parent.perms or parent.perms[key] != perms:
-                    perms_s += '%s(%s) ' % (key, f.p2str(perms))
-
-            if len(perms_s) == 0:
-                continue
-
-            print '%-40s %s' % ('  ' * depth + path + '/', perms_s)
+            self.print_perms(path + '/', depth)
+            for filename in files:
+                self.print_perms(os.path.join(path, filename), depth+1)
 
 class PermsCmd(Command):
     DESCRIPTION = 'Change permissions of a path'
