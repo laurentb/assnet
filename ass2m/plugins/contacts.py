@@ -226,7 +226,6 @@ class LoginAction(Action):
                 self.ctx.res.set_cookie('ass2m_auth', cookie)
                 self.ctx.user = user
 
-        self.ctx.template_vars['user'] = self.ctx.user
         self.ctx.res.body = self.ctx.render('login.html')
 
 

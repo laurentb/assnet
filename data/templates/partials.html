@@ -14,3 +14,19 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
     </ul>
 </%def>
 
+<%def name="loginbox()">
+<div id="login">
+  % if user:
+     Logged as ${user.name | h}
+  % else:
+     <a href="?action=login">Login</a>
+  % endif
+</div>
+</%def>
+
+<%def name="toolbox()">
+<header>
+${viewslist()}
+${loginbox()}
+</header>
+</%def>
