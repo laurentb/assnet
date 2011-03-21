@@ -30,23 +30,16 @@ class ListGalleryAction(Action):
         dirs = []
         photos = []
         description = None
-        for f in self.ctx.file.iter_children():
-            if not self.ctx.user.has_perms(f, f.PERM_LIST):
-                continue
-
+        for filename, f in self.ctx.get_files().iteritems():
             if f.isdir():
-                dirs.append(f.get_name())
-                continue
-
-            if not self.ctx.user.has_perms(f, f.PERM_READ):
-                continue
-
-            mimetype = mimetypes.guess_type(f.get_name())[0]
-            if mimetype is not None and mimetype.startswith('image'):
-                photos.append(f.get_name())
-            elif f.get_name() == 'DESCRIPTION':
-                with open(f.get_realpath(), 'r') as f:
-                    description = f.read()
+                dirs.append(filename)
+            elif self.ctx.user.has_perms(f, f.PERM_READ):
+                mimetype = mimetypes.guess_type(filename)[0]
+                if mimetype is not None and mimetype.startswith('image'):
+                    photos.append(filename)
+                elif filename == 'DESCRIPTION':
+                    with open(f.get_realpath(), 'r') as f:
+                        description = f.read()
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['photos'] = photos

@@ -155,13 +155,11 @@ class ListAction(Action):
     def answer(self):
         dirs = []
         files = []
-        for f in self.ctx.file.iter_children():
-            if not self.ctx.user.has_perms(f, f.PERM_LIST):
-                continue
+        for filename, f in self.ctx.get_files().iteritems():
             if f.isdir():
-                dirs.append(f.get_name())
+                dirs.append(filename)
             else:
-                files.append(f.get_name())
+                files.append(filename)
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files

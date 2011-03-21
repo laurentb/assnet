@@ -127,6 +127,15 @@ class Context(object):
     def respond(self):
         return self.res(self._environ, self._start_response)
 
+    def iter_files(self):
+        if self.object_type == "directory":
+            for f in self.file.iter_children():
+                if self.user.has_perms(f, f.PERM_LIST):
+                    yield f
+
+    def get_files(self):
+        return dict([(f.get_name(), f) for f in self.iter_files()])
+
 
 class Action(object):
     def __init__(self, ctx):
