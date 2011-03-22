@@ -239,7 +239,31 @@ class EventAction(Action):
         except IOError:
             return
 
+        user_state = None
+        error_message = None
+        confirm_message = None
+
+        if self.ctx.user.name in event.users:
+            form_action = self.ctx.req.str_POST.get('action')
+            if form_action:
+                if form_action == "Confirm":
+                    event.users[self.ctx.user.name] = event.USER_CONFIRMED
+                elif form_action == "Decline":
+                    event.users[self.ctx.user.name] = event.USER_DECLINED
+
+                try:
+                    event.save()
+                except IOError, e:
+                    error_message = unicode(e)
+                else:
+                    confirm_message = 'Your state has been changed!'
+
+            user_state = event.users[self.ctx.user.name]
+
         self.ctx.template_vars['event'] = event
+        self.ctx.template_vars['user_state'] = user_state
+        self.ctx.template_vars['error_message'] = error_message
+        self.ctx.template_vars['confirm_message'] = confirm_message
         self.ctx.res.body = self.ctx.render('event.html')
 
 class EventsPlugin(Plugin):
@@ -247,4 +271,7 @@ class EventsPlugin(Plugin):
         self.register_cli_command('event', EventCmd)
         self.register_web_action(
             Route(object_type = "file", action="download", view="event"),
+            EventAction)
+        self.register_web_action(
+            Route(object_type = "file", action="download", view="event", method="POST"),
             EventAction)
