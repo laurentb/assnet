@@ -233,17 +233,18 @@ class EventCmd(Command):
 
 class EventAction(Action):
     def answer(self):
-        event = Event(self.ctx.file)
-        try:
-            event.load()
-        except IOError:
-            return
-
         user_state = None
         error_message = None
         confirm_message = None
 
-        if self.ctx.user.name in event.users:
+        event = Event(self.ctx.file)
+        try:
+            event.load()
+        except IOError, e:
+            error_message = unicode(e)
+
+        if self.ctx.user.has_perms(event.f, event.f.PERM_WRITE) and \
+           self.ctx.user.name in event.users:
             form_action = self.ctx.req.str_POST.get('action')
             if form_action:
                 if form_action == "Confirm":
@@ -255,6 +256,7 @@ class EventAction(Action):
                     event.save()
                 except IOError, e:
                     error_message = unicode(e)
+                    event.load()
                 else:
                     confirm_message = 'Your state has been changed!'
 
