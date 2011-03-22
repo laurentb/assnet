@@ -90,3 +90,13 @@ class BaseWebTest(TestCase):
     def test_notFound(self):
         self.app.get("/penguins/", status=404)
         self.app.get("/penguins", status=404)
+
+
+    def test_listWithParent(self):
+        os.mkdir(os.path.join(self.root, "penguins"))
+        res = self.app.get("/", status=200)
+        assert "Parent directory" not in res.body
+        res = self.app.get("/penguins/", status=200)
+        assert "Parent directory" in res.body
+        res = res.click("Parent directory")
+        assert "<h1>Index of /</h1>" in res.body

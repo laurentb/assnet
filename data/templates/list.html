@@ -4,6 +4,9 @@
 ${partials.toolbox()}
 
 <ul>
+    % if path != '/':
+        <li><em><a href="../">Parent directory</a></em></li>
+    % endif
     % for dir in dirs:
         <li><strong><a href="${dir}/">${dir | h}/</a></strong></li>
     % endfor
