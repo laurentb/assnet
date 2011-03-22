@@ -84,10 +84,13 @@ class Event(object):
         stats = [0, 0, 0]
         for username, state in sorted(self.users.items(), key=lambda (k,v): (v,k)):
             realname = self.f.storage.get_user(username).realname
-            checked = dict([(v, k) for k, v in self.STATES.iteritems()])[state]
+            checked = self.get_sign(state)
             stats[state] += 1
             fp.write('[%s] %s (%s)\n' % (checked, binary(username), binary(realname)))
         fp.write('-- %d confirmed, %d waiting, %d declined\n' % (stats[0], stats[1], stats[2]))
+
+    def get_sign(self, state):
+        return dict([(v, k) for k, v in self.STATES.iteritems()])[state]
 
     def load(self):
         (READ_TITLE,
@@ -136,6 +139,10 @@ class Event(object):
                         self.users[m.group(2)] = self.STATES[m.group(1)]
                     else:
                         state = READ_FIELD_TITLE
+
+    def iter_users(self):
+        for username in sorted(self.users.keys(), key=unicode.lower):
+            yield self.f.storage.get_user(username)
 
 class EventCmd(Command):
     DESCRIPTION = 'Create or edit an event'
