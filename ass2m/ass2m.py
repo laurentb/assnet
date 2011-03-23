@@ -36,7 +36,7 @@ class Ass2m(object):
             storage = path
         elif path:
             try:
-                while not self.DIRNAME in os.listdir(path) and path != os.path.dirname(path):
+                while not os.path.isdir(os.path.join(path, self.DIRNAME)) and path != os.path.dirname(path):
                     path = os.path.dirname(path)
             except OSError:
                 path = None
