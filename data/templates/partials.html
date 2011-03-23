@@ -15,19 +15,21 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
 </%def>
 
 <%def name="loginbox()">
-<div id="login">
-  % if user:
-     Logged as ${user.name | h}
-     <a href="${root_url.setvar(action="logout").href}">Logout</a>
-  % else:
-      <a href="${root_url.setvar(action="login").href}">Login</a>
-  % endif
-</div>
+    <div id="login">
+    % if user:
+        Logged as ${display_user(user)}
+        <a href="${root_url.setvar(action="logout").href}">Logout</a>
+    % else:
+        <a href="${root_url.setvar(action="login").href}">Login</a>
+    % endif
+    </div>
 </%def>
 
 <%def name="toolbox()">
-<header>
-${viewslist()}
-${loginbox()}
-</header>
+    <header>
+        ${viewslist()}
+        ${loginbox()}
+    </header>
 </%def>
+
+<%def name="display_user(u)"><abbr title="${u.realname | h}">${u.name | h}</abbr></%def>

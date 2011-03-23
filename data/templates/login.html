@@ -1,10 +1,13 @@
 <%inherit file="layout.html"/>
+<%namespace name="partials" file="partials.html"/>
 
+<p>
 % if user:
-    Current user: ${user.name | h}<br/>
+    Current user: ${partials.display_user(user)}<br/>
 % else:
     Not logged in.
 % endif
+</p>
 
 <form method="post">
     <label>Username</label><input name="username" />

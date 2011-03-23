@@ -47,11 +47,11 @@ class LoginTest(TestCase):
         form['password'] = 'monkey1'
         res = form.submit(status=302)
         res = res.follow(status=200)
-        assert 'Current user: penguin' in res.body
+        assert 'Current user: <abbr title="Penguin">penguin</abbr>' in res.body
 
         res = self.app.get('/')
         assert 'Login' not in res.body
-        assert 'Logged as penguin' in res.body
+        assert 'Logged as <abbr title="Penguin">penguin</abbr>' in res.body
         res = self.app.get('/?action=logout', status=302)
         res = res.follow(status=200)
         assert 'Login' in res.body

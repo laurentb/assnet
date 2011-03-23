@@ -32,7 +32,7 @@ ${partials.loginbox()}
 % for event_user in event.iter_users():
     <% state = event.users[event_user.name] %>
     <li class="${event_classes[state] | h}">
-        [${event.get_sign(state) | h}] <abbr title="${event_user.realname | h}">${event_user.name | h}
+        [${event.get_sign(state) | h}] ${partials.display_user(event_user)}
     </li>
 % endfor
 </ul>
