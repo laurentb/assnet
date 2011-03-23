@@ -225,7 +225,7 @@ class LoginAction(Action):
                 # set cookie
                 cookie = signer.sign(form_username)
                 self.ctx.res = HTTPFound(location=self.ctx.url.href)
-                self.ctx.res.set_cookie('ass2m_auth', cookie)
+                self.ctx.res.set_cookie('ass2m_auth', cookie, httponly=True)
                 return
 
         self.ctx.res.body = self.ctx.render('login.html')
