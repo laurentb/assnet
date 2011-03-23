@@ -59,4 +59,6 @@ ${partials.loginbox()}
     </form>
 % endif
 
+<a href="${url.setvar(action='download', view='raw').href}">Download as text</a>
+
 <%def name="title()">Event ${path | h}</%def>

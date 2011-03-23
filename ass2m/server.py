@@ -86,6 +86,7 @@ class Context(object):
     def _init_routing(self):
         router = Router()
         router.set_default_view(None, "html")
+        router.set_default_view("download", "raw")
         router.set_default_action("file", "download")
         router.set_default_action("directory", "list")
         self.router = router

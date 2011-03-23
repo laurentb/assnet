@@ -179,7 +179,7 @@ class CorePlugin(Plugin):
         self.register_cli_command('perms', PermsCmd)
 
         self.register_web_action(
-            Route(object_type = "file", action="download"),
+            Route(object_type = "file", action="download", view="raw"),
             DownloadAction)
 
         self.register_web_action(
