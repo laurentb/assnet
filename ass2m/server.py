@@ -123,6 +123,7 @@ class Context(object):
             'url': self.url,
             'root_url': self.root_url,
             'global': dict(),
+            'stylesheets': ['main.css'],
         }
 
     def render(self, template):

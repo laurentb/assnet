@@ -24,7 +24,8 @@ class BaseWebTest(TestCase):
             f.write('body { background-color: pink; }')
         # monkeypatching
         self.data_paths = Context.DATA_PATHS
-        Context.DATA_PATHS = [os.path.join(self.root, 'doesnotexist'), datapath]
+        Context.DATA_PATHS.insert(0, datapath)
+        Context.DATA_PATHS.insert(0, os.path.join(self.root, 'doesnotexist'))
 
     def tearDown(self):
         if self.root:
@@ -39,3 +40,10 @@ class BaseWebTest(TestCase):
         self.app.get('/?action=asset&file=none.css', status=404)
 
         self.app.get('/?action=asset&file=../../.ass2m/config', status=412)
+
+    def test_stylesheets(self):
+        res = self.app.get('/', status=200)
+        assert '<link rel="stylesheet" type="text/css" href="/?action=asset&file=main.css" />' in res.body
+
+        res = self.app.get('/test_data/?view=gallery', status=200)
+        assert '<link rel="stylesheet" type="text/css" href="/?action=asset&file=main.css" />' in res.body
