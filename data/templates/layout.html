@@ -1,5 +1,8 @@
 <html>
 <head>
+    % if available_views:
+        ${altrels()}
+    % endif
     <title>${self.title()}</title>
     % for stylesheet in stylesheets:
         <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet)}" />
@@ -12,3 +15,17 @@ ${self.body()}
 <address><a href="http://ass2m.org/">ass2m</a> ${ass2m_version | h}</address>
 </body>
 </html>
+
+<%def name="altrels()">
+    <%
+    view_links = [(available_view, url.setvar(view=available_view).href) \
+                    for available_view in available_views]
+    %>
+    % for available_view, view_url in view_links:
+        % if available_view == view:
+            <link rel="canonical" href="${view_url}" />
+        % else:
+            <link rel="alternate" title="Alternate view ${available_view | h}" href="${view_url}" />
+        % endif
+    % endfor
+</%def>
