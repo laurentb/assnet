@@ -17,6 +17,7 @@
 
 import sys
 import os
+import re
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
@@ -24,6 +25,7 @@ from ass2m.cmd import Command
 from ass2m.routes import Route
 from ass2m.server import Action
 from paste.fileapp import FileApp
+from webob.exc import HTTPNotFound, HTTPPreconditionFailed
 
 
 __all__ = ['CorePlugin']
@@ -172,6 +174,22 @@ class ListAction(Action):
         self.ctx.res.body = self.ctx.render('list.html')
 
 
+class AssetAction(Action):
+    SANITIZE_REGEXP = re.compile(r'\w+\.\w+')
+    def answer(self):
+        filename = self.ctx.req.str_GET.get('file')
+        if self.SANITIZE_REGEXP.match(filename):
+            paths = [os.path.join(path, 'assets') for path in self.ctx.DATA_PATHS]
+            for path in paths:
+                realpath = os.path.join(path, filename)
+                if os.path.isfile(realpath):
+                    self.ctx.res = Ass2mFileApp(realpath)
+                    return
+            self.ctx.res = HTTPNotFound()
+        else:
+            self.ctx.res = HTTPPreconditionFailed()
+
+
 class CorePlugin(Plugin):
     def init(self):
         self.register_cli_command('init', InitCmd)
@@ -181,6 +199,10 @@ class CorePlugin(Plugin):
         self.register_web_action(
             Route(object_type = "file", action="download", view="raw"),
             DownloadAction)
+
+        self.register_web_action(
+            Route(object_type = None, action="asset"),
+            AssetAction)
 
         self.register_web_action(
             Route(object_type = "directory", action="list", view="html"),

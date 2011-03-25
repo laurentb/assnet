@@ -34,6 +34,9 @@ from .routes import Router
 
 class Context(object):
     SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+' % re.escape(r'/.'))
+    DATA_PATHS = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
+             '/usr/share/ass2m',
+             '/usr/local/share/ass2m']
 
     def __init__(self, environ, start_response):
         self._init_routing()
@@ -103,11 +106,8 @@ class Context(object):
             config.save()
 
     def _init_templates(self):
-        paths = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
-                 '/usr/share/ass2m',
-                 '/usr/local/share/ass2m']
-        self.lookup = TemplateLookup(directories=['%s/templates' % path for path in paths],
-                         collection_size=20,
+        paths = [os.path.join(path, 'templates') for path in self.DATA_PATHS]
+        self.lookup = TemplateLookup(directories=paths, collection_size=20,
                          output_encoding='utf-8', input_encoding='utf-8',
                          default_filters=['decode.utf8'])
 
