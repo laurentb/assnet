@@ -1,0 +1,77 @@
+/* HTML5 elements that are not known to older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+    display: block;
+}
+
+body {
+    background-color: #F5F5F5;
+}
+
+a, a:active {
+    text-decoration: none;
+    color: blue;
+}
+
+a:visited {
+    color: #48468F;
+}
+
+a:hover,
+a:focus {
+    text-decoration: underline;
+    color: red;
+}
+
+article {
+    background-color: white;
+    border-top: 1px solid gray;
+    border-bottom: 1px solid gray;
+    padding-top: 10px;
+    padding-bottom: 14px;
+}
+
+section {
+    padding-bottom: 9px;
+}
+
+header {
+    font-size: large;
+}
+
+header nav menu {
+    list-style-type: none;
+}
+
+
+header nav menu li {
+    display: inline;
+}
+
+footer {
+    font-size: medium;
+    font-family: monospace;
+    color: #787878;
+    padding-top: 4px;
+}
+
+ul.list li.dir {
+    font-weight: bold;
+}
+
+ul.list li.parent {
+    font-style: italic;
+}
+
+img {
+    border: 0;
+}

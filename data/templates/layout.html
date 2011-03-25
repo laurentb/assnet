@@ -15,10 +15,9 @@
     <link rel="top" href="${root_url.href}" />
 </head>
 <body>
-<h1>${self.title()}</h1>
-${self.body()}
-<hr>
-<address><a href="http://ass2m.org/">ass2m</a> ${ass2m_version | h}</address>
+    <header>${self.header()}</header>
+    ${next.body()}
+    <footer>${self.footer()}</footer>
 </body>
 </html>
 
@@ -34,4 +33,12 @@ ${self.body()}
             <link rel="alternate" title="Alternate view ${available_view | h}" href="${view_url}" />
         % endif
     % endfor
+</%def>
+
+<%def name="header()">
+    <h1>${self.title()}</h1>
+</%def>
+
+<%def name="footer()">
+    <address><a href="http://ass2m.org/">ass2m</a> ${ass2m_version | h}</address>
 </%def>

@@ -1,18 +1,23 @@
 <%inherit file="layout.html"/>
 <%namespace name="partials" file="partials.html"/>
 
-${partials.toolbox()}
-
-<ul>
+<article>
+<ul class="list">
     % if path != '/':
-        <li><em><a href="../">Parent directory</a></em></li>
+        <li class="parent"><a href="../">Parent directory</a></li>
     % endif
     % for dir in dirs:
-        <li><strong><a href="${dir}/">${dir | h}/</a></strong></li>
+        <li class="dir"><a href="${dir}/">${dir | h}/</a></li>
     % endfor
     % for file in files:
-        <li><a href="${file}">${file | h}</a></li>
+        <li class="file"><a href="${file}">${file | h}</a></li>
     % endfor
 </ul>
+</article>
 
 <%def name="title()">Index of ${path | h}</%def>
+
+<%def name="header()">
+    ${parent.header()}
+    ${partials.toolbox()}
+</%def>

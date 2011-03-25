@@ -8,8 +8,6 @@ event_classes = {
 }
 %>
 
-${partials.loginbox()}
-
 <h2>${event.title | h}</h2>
 
 % if error_message is not None:
@@ -62,3 +60,8 @@ ${partials.loginbox()}
 <a href="${url.setvar(action='download', view='raw').href}">Download as text</a>
 
 <%def name="title()">Event ${path | h}</%def>
+
+<%def name="header()">
+    ${parent.header()}
+    ${partials.loginbox()}
+</%def>

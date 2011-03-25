@@ -1,18 +1,22 @@
 <%inherit file="layout.html"/>
 <%namespace name="partials" file="partials.html"/>
 
-<p>
+<article>
+<section>
 % if user:
     Current user: ${partials.display_user(user)}<br/>
 % else:
     Not logged in.
 % endif
-</p>
+</section>
 
+<section>
 <form method="post">
     <label>Username</label><input name="username" />
     <label>Password</label><input name="password" />
     <input type="submit" value="Login"/>
 </form>
+</section>
+</article>
 
 <%def name="title()">Login</%def>

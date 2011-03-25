@@ -1,20 +1,29 @@
 <%inherit file="layout.html"/>
 <%namespace name="partials" file="partials.html"/>
 
-${partials.toolbox()}
-
+<article>
+<section>
 % if description:
-    <p id="description">${description | h}</p>
+    <section id="description">${description | h}</section>
 % endif
+</section>
 
+<section>
 % for photo in photos:
     <a href="${photo}"><img src="${photo}?view=thumbnail&thumb_size=200" /></a>
 % endfor
 
-<ul>
+<ul class="list">
     % for dir in dirs:
-        <li><strong><a href="${dir}/">${dir | h}/</a></strong></li>
+        <li class="dir"><a href="${dir}/">${dir | h}/</a></li>
     % endfor
 </ul>
+</section>
+</article>
 
 <%def name="title()">Gallery of ${path | h}</%def>
+
+<%def name="header()">
+    ${parent.header()}
+    ${partials.toolbox()}
+</%def>
