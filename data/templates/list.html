@@ -2,17 +2,28 @@
 <%namespace name="partials" file="partials.html"/>
 
 <article>
-<ul class="list">
+<table summary="Directory listing" class="list">
+<thead>
+    <tr><th>Name</th></tr>
+</thead>
+<tbody>
     % if path != '/':
-        <li class="parent"><a href="../">Parent directory</a></li>
+    <tr class="parent">
+        <td class="filename"><a href="../">Parent directory</a></td>
+    </tr>
     % endif
     % for dir in dirs:
-        <li class="dir"><a href="${dir}/">${dir | h}/</a></li>
+    <tr class="dir">
+        <td class="filename"><a href="${dir}/">${dir | h}/</a></td>
+    </tr>
     % endfor
     % for file in files:
-        <li class="file"><a href="${file}">${file | h}</a></li>
+    <tr class="file">
+        <td class="filename"><a href="${file}">${file | h}</a></td>
+    </tr>
     % endfor
-</ul>
+</tbody>
+</table>
 </article>
 
 <%def name="title()">Index of ${path | h}</%def>

@@ -77,12 +77,22 @@ footer address {
     font-style: normal;
 }
 
-ul.list li.dir {
+table.list tr.dir th.filename {
     font-weight: bold;
 }
 
-ul.list li.parent {
+table.list tr.parent th.filename {
     font-style: italic;
+}
+
+table.list th,
+table.list td {
+    text-align: left;
+    padding-right: 14px;
+}
+
+table.list th {
+    padding-bottom: 3px;
 }
 
 img {
