@@ -77,7 +77,7 @@ class Context(object):
         query_vars = self.req.str_GET.items()
         # Path of the file relative to the Ass2m root
         self.path = path
-        # Absolute path of the file on the system
+        # File object, related to the real one on the file system
         self.file = f
         # URL after Ass2m web application base URL
         self.relurl = URL(path, query_vars)
