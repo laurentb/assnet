@@ -10,6 +10,7 @@ from tempfile import mkdtemp
 import os
 import shutil
 import json
+from datetime import datetime
 
 class ApiTest(TestCase):
     def setUp(self):
@@ -32,29 +33,37 @@ class ApiTest(TestCase):
         if self.root:
             shutil.rmtree(self.root)
 
-    def test_listAndDownload(self):
+    def test_jsonList(self):
         res = self.app.get('/?view=json', status=200)
         data = json.loads(res.body)
         assert len(data) > 0
         assert len(data['files']) == 3
-
-        res = self.app.get('/?view=text', status=200)
-        assert len(res.body.split('\n')) == 3
-
-        res = self.app.get('/empty/?view=text', status=200)
-        assert len(res.body) == 0
+        assert data['files']['penguins']['type'] == 'directory'
+        assert data['files']['penguins_are_cute']['type'] == 'file'
 
         res = self.app.get('/empty/?view=json', status=200)
         data = json.loads(res.body)
         assert len(data) > 0
         assert len(data['files']) == 0
 
+    def test_textList(self):
+        res = self.app.get('/?view=text', status=200)
+        assert len(res.body.split('\n')) == 3
+
+        res = self.app.get('/empty/?view=text', status=200)
+        assert len(res.body) == 0
+
+    def test_jsonInfo(self):
         # info on a directory
         res = self.app.get('/?action=info&view=json', status=200)
         data = json.loads(res.body)
         assert data['type'] == 'directory'
+        assert data['size'] == None
+        assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S.%f').year > 0
 
         # info on a file
         res = self.app.get('/penguins/gentoo?action=info&view=json', status=200)
         data = json.loads(res.body)
         assert data['type'] == 'file'
+        assert data['size'] == 17
+        assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S.%f').year > 0

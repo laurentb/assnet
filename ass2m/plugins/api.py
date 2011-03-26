@@ -33,8 +33,11 @@ class InfoAction(Action):
         fileinfo = dict()
         if f.isdir():
             fileinfo['type'] = 'directory'
+            fileinfo['size'] = None
         else:
             fileinfo['type'] = 'file'
+            fileinfo['size'] = f.get_size()
+        fileinfo['mtime'] = f.get_mtime().isoformat()
         return fileinfo
 
 
