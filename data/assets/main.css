@@ -15,6 +15,7 @@ section {
 
 body {
     background-color: #F5F5F5;
+    color: black;
 }
 
 a, a:active {
@@ -55,6 +56,14 @@ header nav menu {
 
 header nav menu li {
     display: inline;
+    background-color: white;
+    padding: 0.5em;
+    border: 1px solid gray;
+}
+
+header nav menu li.selected a {
+    font-weight: bold;
+    color: black;
 }
 
 footer {
@@ -62,6 +71,10 @@ footer {
     font-family: monospace;
     color: #787878;
     padding-top: 4px;
+}
+
+footer address {
+    font-style: normal;
 }
 
 ul.list li.dir {

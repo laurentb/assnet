@@ -6,7 +6,7 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
     <menu>
         % for available_view, view_url in view_links:
             % if available_view == view:
-            <li><strong><a href="${view_url}">${available_view | h}</a></strong></li>
+            <li class="selected"><a href="${view_url}">${available_view | h}</a></li>
             % else:
             <li><a href="${view_url}">${available_view | h}</a></li>
             % endif
@@ -17,9 +17,9 @@ view_links = [(available_view, url.setvar(view=available_view).href) \
 <%def name="loginbox()">
     % if user:
         Logged as ${display_user(user)}
-        <a href="${root_url.setvar(action="logout").href}">Logout</a>
+        <a href="${root_url.setvar(action='logout').href}">Logout</a>
     % else:
-        <a href="${root_url.setvar(action="login").href}">Login</a>
+        <a href="${root_url.setvar(action='login').href}">Login</a>
     % endif
 </%def>
 
