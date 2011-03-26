@@ -222,6 +222,7 @@ class StorageTest(TestCase):
             f.write('')
 
         f = self.storage.get_file('')
+        assert f.path == ''
         assert f.get_name() == ''
         assert f.isdir()
         assert not f.isfile()
@@ -256,3 +257,36 @@ class StorageTest(TestCase):
 
         f = f.parent()
         assert f is None
+
+    def test_getAttrs(self):
+        os.mkdir(os.path.join(self.root, 'penguins'))
+        with open(os.path.join(self.root, 'penguins', 'gentoo'), 'w') as f:
+            f.write('The best penguin.')
+        with open(os.path.join(self.root, 'penguins', 'emperor'), 'w') as f:
+            f.write('')
+
+        f = self.storage.get_file('')
+        assert f.get_mtime().year > 0
+
+        f = self.storage.get_file('/penguins/gentoo')
+        assert f.get_size() == 17
+        assert f.get_mtime().year > 0
+        assert f.get_human_size() == '17.0 B'
+
+        f = self.storage.get_file('/penguins/emperor')
+        assert f.get_size() == 0
+        assert f.get_mtime().year > 0
+        assert f.get_human_size() == '0 B'
+
+    def test_getHumanSize(self):
+        class Chafouin(File):
+            def __init__(self, fakesize):
+                self.fakesize = fakesize
+            def get_size(self):
+                return self.fakesize
+
+        assert Chafouin(1).get_human_size() == '1.0 B'
+        assert Chafouin(1024).get_human_size() == '1.0 KiB'
+        assert Chafouin(4*1024+128).get_human_size() == '4.1 KiB'
+        assert Chafouin(4*1024*1024).get_human_size() == '4.0 MiB'
+        assert Chafouin(42*1024*1024*1024).get_human_size() == '42.0 GiB'

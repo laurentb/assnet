@@ -18,6 +18,9 @@
 import os
 import posixpath
 import hashlib
+from math import log
+from datetime import datetime
+
 from .obj import IObject
 
 __all__ = ['File']
@@ -96,6 +99,20 @@ class File(IObject):
 
     def get_realpath(self):
         return os.path.realpath(os.path.join(self.storage.path, '..', self.path[1:]))
+
+    def get_size(self):
+        return os.path.getsize(self.get_realpath())
+
+    def get_mtime(self):
+        return datetime.fromtimestamp(os.path.getmtime(self.get_realpath()))
+
+    def get_human_size(self):
+        size = self.get_size()
+        if size:
+            units = ('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB')
+            exponent = int(log(size, 1024))
+            return "%.1f %s" % (float(size) / pow(1024, exponent), units[exponent])
+        return '0 B'
 
     def file_exists(self):
         """
