@@ -5,7 +5,7 @@ from tempfile import mkdtemp
 import shutil
 import os
 
-class StorageTest(TestCase):
+class UsersTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
         self.storage = Storage.init(os.path.join(self.root, 'store'))

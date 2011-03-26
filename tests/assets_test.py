@@ -10,7 +10,7 @@ from tempfile import mkdtemp
 import os
 import shutil
 
-class BaseWebTest(TestCase):
+class AssetsTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
         ass2m = Ass2m(self.root)
