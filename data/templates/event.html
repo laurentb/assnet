@@ -2,40 +2,50 @@
 <%namespace name="partials" file="partials.html"/>
 <%
 event_classes = {
-    event.USER_WAITING: 'event_waiting',
-    event.USER_CONFIRMED: 'event_confirmed',
-    event.USER_DECLINED: 'event_declined',
+    event.USER_WAITING: 'waiting',
+    event.USER_CONFIRMED: 'confirmed',
+    event.USER_DECLINED: 'declined',
 }
 %>
 
+<article class="info event">
+<section>
 <h2>${event.title | h}</h2>
 
 % if error_message is not None:
-    <p class="error_message">${error_message | h}</p>
+    <p class="error message"><span>${error_message | h}</span</p>
 % endif
 % if confirm_message is not None:
-    <p class="confirm_message">${confirm_message | h}</p>
+    <p class="confirm message"><span>${confirm_message | h}</span></p>
 % endif
 
 <p>${event.summary | h}</p>
+</section>
 
+<section>
 <h3>Date</h3>
-<p>${event.date | h}</p>
+<p><time datetime="${event.date.strftime('%Y-%m-%dT%H:%M') | h}">${event.date.strftime('%Y-%m-%d %H:%M') | h}</time></p>
+</section>
 
+<section>
 <h3>Place</h3>
 <p>${event.place | h}</p>
+</section>
 
+<section>
 <h3>Attendees</h3>
-<ul>
+<ul class="users">
 % for event_user in event.iter_users():
     <% state = event.users[event_user.name] %>
     <li class="${event_classes[state] | h}">
-        [${event.get_sign(state) | h}] ${partials.display_user(event_user)}
+        <span class="state">[${event.get_sign(state) | h}]</span> ${partials.display_user(event_user)}
     </li>
 % endfor
 </ul>
+</section>
 
 % if user_state is not None:
+<section>
 <h3>Confirmation</h3>
     <p>
     Your current status is:
@@ -56,8 +66,12 @@ event_classes = {
         % endif
     </form>
 % endif
+</section>
 
+<section>
 <a href="${url.setvar(action='download', view='raw').href}">Download as text</a>
+</section>
+</article>
 
 <%def name="title()">Event ${path | h}</%def>
 

@@ -273,6 +273,7 @@ class EventAction(Action):
         self.ctx.template_vars['user_state'] = user_state
         self.ctx.template_vars['error_message'] = error_message
         self.ctx.template_vars['confirm_message'] = confirm_message
+        self.ctx.template_vars['stylesheets'].append('event.css')
         self.ctx.res.body = self.ctx.render('event.html')
 
 class EventsPlugin(Plugin):

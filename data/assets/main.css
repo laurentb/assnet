@@ -39,6 +39,8 @@ article {
     border-bottom: 1px solid gray;
     padding-top: 10px;
     padding-bottom: 14px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 section {
@@ -107,4 +109,43 @@ table.list td.size {
 
 img {
     border: 0;
+}
+
+p.message {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+p.message span {
+    border: 1px solid black;
+    background-color: #F5F5F5;
+    padding: 6px;
+}
+
+p.confirm span {
+    color: green;
+}
+
+p.error span {
+    color: red;
+}
+
+article.info section h3 {
+    margin-top: 4px;
+    margin-bottom: 2px;
+}
+
+article.info section p {
+    margin-top: 2px;
+    margin-bottom: 4px;
+}
+
+article.info section {
+    margin-bottom: 7px;
+}
+
+article.info ul.users {
+    list-style-type: none;
+    margin: 5px;
 }

@@ -1,0 +1,7 @@
+article.event ul.users li span.state {
+    font-family: monospace;
+}
+
+article.event ul.users li.waiting span.state {
+    color: gray;
+}
