@@ -77,6 +77,11 @@ footer address {
     font-style: normal;
 }
 
+table.list td,
+table.list th {
+    font-family: monospace;
+}
+
 table.list tr.dir th.filename {
     font-weight: bold;
 }
@@ -93,6 +98,11 @@ table.list td {
 
 table.list th {
     padding-bottom: 3px;
+}
+
+table.list th.size,
+table.list td.size {
+    text-align: right;
 }
 
 img {

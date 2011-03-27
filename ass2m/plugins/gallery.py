@@ -31,13 +31,13 @@ class ListGalleryAction(Action):
         photos = []
         description = None
         for f in self.ctx.iter_files():
-            filename = f.get_name()
             if f.isdir():
-                dirs.append(filename)
+                dirs.append(f)
             elif self.ctx.user.has_perms(f, f.PERM_READ):
+                filename = f.get_name()
                 mimetype = mimetypes.guess_type(filename)[0]
                 if mimetype is not None and mimetype.startswith('image'):
-                    photos.append(filename)
+                    photos.append(f)
                 elif filename == 'DESCRIPTION':
                     with open(f.get_realpath(), 'r') as f:
                         description = f.read()

@@ -165,9 +165,9 @@ class ListAction(Action):
         files = []
         for f in self.ctx.iter_files():
             if f.isdir():
-                dirs.append(f.get_name())
+                dirs.append(f)
             else:
-                files.append(f.get_name())
+                files.append(f)
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files

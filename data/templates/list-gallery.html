@@ -10,14 +10,26 @@
 
 <section>
 % for photo in photos:
-    <a href="${photo}"><img src="${photo}?view=thumbnail&thumb_size=200" /></a>
+    <a href="${photo.get_name()}"><img src="${photo.get_name()}?view=thumbnail&thumb_size=200" /></a>
 % endfor
 
-<ul class="list">
+<table summary="Directory listing" class="list">
+<thead>
+    <tr><th>Name</th></tr>
+</thead>
+<tbody>
+    % if path != '/':
+    <tr class="parent">
+        <td class="filename"><a href="../">Parent directory</a></td>
+    </tr>
+    % endif
     % for dir in dirs:
-        <li class="dir"><a href="${dir}/">${dir | h}/</a></li>
+    <tr class="dir">
+        <td class="filename"><a href="${dir.get_name()}/">${dir.get_name() | h}</a>/</td>
+    </tr>
     % endfor
-</ul>
+</tbody>
+</table>
 </section>
 </article>
 
