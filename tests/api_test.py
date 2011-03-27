@@ -59,11 +59,11 @@ class ApiTest(TestCase):
         data = json.loads(res.body)
         assert data['type'] == 'directory'
         assert data['size'] == None
-        assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S.%f').year > 0
+        assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S').year > 0
 
         # info on a file
         res = self.app.get('/penguins/gentoo?action=info&view=json', status=200)
         data = json.loads(res.body)
         assert data['type'] == 'file'
         assert data['size'] == 17
-        assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S.%f').year > 0
+        assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S').year > 0
