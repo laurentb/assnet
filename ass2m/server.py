@@ -138,6 +138,28 @@ class Context(object):
                 if self.user.has_perms(f, f.PERM_LIST):
                     yield f
 
+    def login(self, user):
+        """
+        Log in an user.
+        user: User
+        Do note that if you replace the "res" attribute after,
+        that the cookie will not be sent.
+        """
+        assert user.exists
+        signer = AuthCookieSigner(secret=self.cookie_secret)
+        cookie = signer.sign(user.name)
+        self.res.set_cookie('ass2m_auth', cookie, httponly=True)
+        self.user = user
+
+    def logout(self):
+        """
+        Log out the current user.
+        Do note that if you replace the "res" attribute after,
+        that the cookie will not be removed.
+        """
+        self.res.delete_cookie('ass2m_auth')
+        self.user = Anonymous()
+
 
 class Action(object):
     def __init__(self, ctx):

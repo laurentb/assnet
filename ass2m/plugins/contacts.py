@@ -25,7 +25,6 @@ from ass2m.users import User
 
 from ass2m.routes import Route
 from ass2m.server import Action
-from paste.auth.cookie import AuthCookieSigner
 from webob.exc import HTTPFound
 
 
@@ -216,16 +215,14 @@ class ContactsRemoveCmd(Command):
 
 class LoginAction(Action):
     def answer(self):
-        signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
         form_username = self.ctx.req.str_POST.get('username')
         form_password = self.ctx.req.str_POST.get('password')
         if form_username and form_password:
             user = self.ctx.ass2m.storage.get_user(form_username)
             if user and user.is_valid_password(form_password):
-                # set cookie
-                cookie = signer.sign(form_username)
                 self.ctx.res = HTTPFound(location=self.ctx.url.href)
-                self.ctx.res.set_cookie('ass2m_auth', cookie, httponly=True)
+                # set cookie
+                self.ctx.login(user)
                 return
 
         self.ctx.res.body = self.ctx.render('login.html')
@@ -235,7 +232,7 @@ class LogoutAction(Action):
     def answer(self):
         referer = self.ctx.req.referer or self.ctx.root_url.href
         self.ctx.res = HTTPFound(location=referer)
-        self.ctx.res.delete_cookie('ass2m_auth')
+        self.ctx.logout()
 
 
 class ContactsPlugin(Plugin):
