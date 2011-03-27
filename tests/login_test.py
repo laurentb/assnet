@@ -26,7 +26,7 @@ class LoginTest(TestCase):
         if self.root:
             shutil.rmtree(self.root)
 
-    def test_defaultDirs(self):
+    def test_formLogin(self):
         res = self.app.get('/?action=login', status=200)
         assert 'Not logged in.' in res.body
 
