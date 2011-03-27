@@ -205,5 +205,5 @@ class CorePlugin(Plugin):
             AssetAction)
 
         self.register_web_action(
-            Route(object_type = "directory", action="list", view="html"),
+            Route(object_type = "directory", action="list", view="html", verbose_name="Detailed list"),
             ListAction)

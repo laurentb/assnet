@@ -156,6 +156,13 @@ class RoutesTest(TestCase):
         self.router.connect(Route(object_type="file", action="list", view="yaml"), None)
         self.router.connect(Route(object_type="directory", action="list", view=None), None)
 
-        assert sorted(self.router.available_views("directory", "list")) == ["html", "json"]
-        assert sorted(self.router.available_views("directory", "tar")) == []
-        assert sorted(self.router.available_views("file", "list")) == ["yaml"]
+        assert sorted([r.view for r in self.router.available_views("directory", "list") if r.public]) == ["html", "json"]
+        assert sorted([r.view for r in self.router.available_views("directory", "tar") if r.public]) == []
+        assert sorted([r.view for r in self.router.available_views("file", "list") if r.public]) == ["yaml"]
+
+
+    def test_verboseName(self):
+        assert Route(object_type="directory", action="list", view="html").verbose_name == 'Html'
+        assert Route(object_type="directory", action="list", view="this_is_a_list").verbose_name == "This Is A List"
+        assert Route(object_type="directory", action="list", view=None).verbose_name is None
+        assert Route(object_type="directory", action="list", view="html", verbose_name="Detailed list").verbose_name is "Detailed list"

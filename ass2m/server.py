@@ -198,7 +198,7 @@ class Dispatcher(Action):
         ctx.template_vars["action"], ctx.template_vars["view"] = \
             router.resolve(ctx.object_type, ctx.req, f.view)
         ctx.template_vars["available_views"] = \
-            sorted(router.available_views(ctx.object_type, ctx.template_vars["action"]))
+            sorted(router.available_views(ctx.object_type, ctx.template_vars["action"]), key=lambda x: x.view)
         # find the action to forward the request to
         action = router.match(ctx.object_type, ctx.req, f.view)
         if action is not None:

@@ -20,18 +20,22 @@ __all__ = ['Route', 'Router']
 
 
 class Route(object):
-    def __init__(self, object_type, action, view = None, method = 'GET', public = True):
+    def __init__(self, object_type, action, view = None, method = 'GET',
+            public = True, verbose_name = None):
         """
         object_type: "file" or "directory", or None for global actions
         action: Arbitrary name
         view: Arbitrary name. If none, will accept anything
         method: HTTP method, GET by default
+        public: Show in in the available views list
+        verbose_name: Name to show in the available views list
         """
         self.object_type = object_type
         self.action = action
         self.view = view
         self.method = method
         self.public = public
+        self.verbose_name = verbose_name or (view.replace('_', ' ').title() if view else None)
         if self.view:
             self.precision = 1
         else:
@@ -90,8 +94,8 @@ class Router(object):
         """
         for routes in self.routes.itervalues():
             for route, call in routes:
-                if route.amatch(object_type, action, 'GET') and route.view and route.public:
-                    yield route.view
+                if route.amatch(object_type, action, 'GET') and route.view:
+                    yield route
 
     def match(self, object_type, req, file_view = None):
         action, view = self.resolve(object_type, req, file_view)

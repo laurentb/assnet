@@ -75,11 +75,11 @@ class ApiPlugin(Plugin):
             InfoAction)
 
         self.register_web_action(
-            Route(object_type = "directory", action="info", view="json", public=False),
+            Route(object_type = "directory", action="info", view="json", public=False, verbose_name="JSON"),
             InfoAction)
 
         self.register_web_action(
-            Route(object_type = "directory", action="list", view="json", public=False),
+            Route(object_type = "directory", action="list", view="json", public=False, verbose_name="JSON"),
             JsonListAction)
 
         self.register_web_action(

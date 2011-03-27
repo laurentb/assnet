@@ -1,7 +1,7 @@
 <%def name="viewslist()">
 <%
-view_links = [(available_view, url.setvar(view=available_view).href) \
-                for available_view in available_views]
+view_links = [(available_view.verbose_name, url.setvar(view=available_view.view).href) \
+                for available_view in available_views if available_view.public is True]
 %>
     <menu>
         % for available_view, view_url in view_links:

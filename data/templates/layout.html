@@ -23,7 +23,7 @@
 
 <%def name="altrels()">
     <%
-    view_links = [(available_view, url.setvar(view=available_view).href) \
+    view_links = [(available_view.verbose_name, url.setvar(view=available_view.view).href) \
                     for available_view in available_views]
     %>
     % for available_view, view_url in view_links:
