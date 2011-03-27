@@ -67,17 +67,17 @@ class TextListAction(Action):
 class ApiPlugin(Plugin):
     def init(self):
         self.register_web_action(
-            Route(object_type = "file", action="info", view="json"),
+            Route(object_type = "file", action="info", view="json", public=False),
             InfoAction)
 
         self.register_web_action(
-            Route(object_type = "directory", action="info", view="json"),
+            Route(object_type = "directory", action="info", view="json", public=False),
             InfoAction)
 
         self.register_web_action(
-            Route(object_type = "directory", action="list", view="json"),
+            Route(object_type = "directory", action="list", view="json", public=False),
             JsonListAction)
 
         self.register_web_action(
-            Route(object_type = "directory", action="list", view="text"),
+            Route(object_type = "directory", action="list", view="text", public=False),
             TextListAction)
