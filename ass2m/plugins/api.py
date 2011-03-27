@@ -38,7 +38,7 @@ class InfoAction(Action):
         else:
             fileinfo['type'] = 'file'
             fileinfo['size'] = f.get_size()
-        fileinfo['mtime'] = f.get_mtime().isoformat().split('.')[0]
+        fileinfo['mtime'] = f.get_mtime().strftime(r'%Y-%m-%dT%H:%M:%S')
         return fileinfo
 
 
