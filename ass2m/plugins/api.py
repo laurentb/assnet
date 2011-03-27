@@ -27,6 +27,7 @@ __all__ = ['ApiPlugin']
 
 class InfoAction(Action):
     def answer(self):
+        self.ctx.res.content_type = 'application/json'
         self.ctx.res.body = json.dumps(self.get_fileinfo(self.ctx.file))
 
     def get_fileinfo(self, f):
@@ -49,6 +50,7 @@ class JsonListAction(InfoAction):
 
         info = dict(files=files)
 
+        self.ctx.res.content_type = 'application/json'
         self.ctx.res.body = json.dumps(info)
 
 
@@ -61,6 +63,8 @@ class TextListAction(Action):
             else:
                 filenames.append(f.get_name())
 
+        self.ctx.res.content_type = 'text/plain'
+        self.ctx.res.charset = 'UTF-8'
         self.ctx.res.body = '\n'.join(filenames)
 
 
