@@ -72,6 +72,16 @@ class ContactsManagement(ConsolePart):
         except (EOFError, KeyboardInterrupt):
             return None
 
+    def generate_contact_key(self, username):
+        if not self.storage.user_exists(username):
+            print >>sys.stderr, 'Error: user %s does not exists.' % username
+            return None
+        user = self.storage.get_user(username)
+        user.gen_key()
+        user.save()
+        print 'Key of user %s set to %s.' % (user.name, user.key)
+        return user
+
     def edit_contact(self, user):
         user.realname = self.ask('Enter the realname', default=user.realname)
         user.email = self.ask('Enter the email address', default=user.email, regexp='^[^ ]+@[^ ]+$')
@@ -163,6 +173,18 @@ class ContactsPasswordCmd(Command):
         if not cm.edit_contact_password(args.username):
             return 1
 
+class ContactsGenKeyCmd(Command):
+    DESCRIPTION = 'Create or reset the key on a contact'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('username')
+
+    def cmd(self, args):
+        cm = ContactsManagement(self.storage)
+        if not cm.generate_contact_key(args.username):
+            return 1
+
 class ContactsMenuCmd(Command):
     DESCRIPTION = 'Display the contacts menu'
 
@@ -240,6 +262,7 @@ class ContactsPlugin(Plugin):
         self.register_cli_command('contacts', 'Contacts Management')
         self.register_cli_command('contacts', 'add', ContactsAddCmd)
         self.register_cli_command('contacts', 'password', ContactsPasswordCmd)
+        self.register_cli_command('contacts', 'genkey', ContactsGenKeyCmd)
         self.register_cli_command('contacts', 'merge', ContactsMergeCmd)
         self.register_cli_command('contacts', 'menu', ContactsMenuCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)

@@ -1,5 +1,7 @@
 from unittest import TestCase
 from ass2m.cli import CLI
+from ass2m.storage import Storage
+from ass2m.users import User
 from tempfile import mkdtemp
 import os
 import re
@@ -49,3 +51,19 @@ class BaseCLITest(TestCase):
         os.mkdir(subdir)
         subapp = CLI(subdir)
         assert subapp.main(['ass2m_test', 'tree']) in (0, None)
+
+    def test_genKey(self):
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'init']) in (0, None)
+        self.endCapture()
+
+        storage = Storage.lookup(self.root)
+        user = User(storage, 'penguin')
+        user.realname = 'Penguin'
+        user.password = 'monkey1'
+        user.save()
+
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'contacts', 'genkey', 'penguin']) in (0, None)
+        output = self.endCapture()
+        assert 'Key of user penguin set' in output
