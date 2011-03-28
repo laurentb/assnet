@@ -3,7 +3,6 @@ from ass2m.users import User
 from unittest import TestCase
 from tempfile import mkdtemp
 import shutil
-import os
 
 class UsersTest(TestCase):
     def setUp(self):

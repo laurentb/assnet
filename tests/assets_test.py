@@ -13,7 +13,7 @@ import shutil
 class AssetsTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        storage = Storage.create(self.root)
+        Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)
         datapath = os.path.join(self.root, 'test_data')
