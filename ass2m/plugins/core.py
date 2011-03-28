@@ -78,7 +78,7 @@ class ChViewCmd(Command):
     @staticmethod
     def configure_parser(parser):
         parser.add_argument('view')
-        parser.add_argument('path', nargs='*')
+        parser.add_argument('path', nargs='+')
 
     def cmd(self, args):
         for path in args.path:
@@ -101,7 +101,7 @@ class ChModCmd(Command):
     def configure_parser(parser):
         parser.add_argument('who')
         parser.add_argument('perms')
-        parser.add_argument('path', nargs='*')
+        parser.add_argument('path', nargs='+')
 
     def cmd(self, args):
         if '.' in args.who:
