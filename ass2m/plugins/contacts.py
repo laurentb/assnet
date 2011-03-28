@@ -18,9 +18,9 @@
 import sys
 from copy import copy
 
-from ass2m import Ass2m
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command, ConsolePart
+from ass2m.storage import Storage
 from ass2m.users import User
 
 from ass2m.routes import Route
@@ -32,19 +32,19 @@ __all__ = ['ContactsManagement', 'ContactsSelection', 'ContactsPlugin']
 
 
 class ContactsManagement(ConsolePart):
-    def __init__(self, ass2m):
-        self.ass2m = ass2m
-        self.users = list(self.ass2m.storage.iter_users())
+    def __init__(self, storage):
+        self.storage = storage
+        self.users = list(self.storage.iter_users())
 
     def add_contact(self, username=None):
         try:
             if username is None:
                 username = self.ask('Enter the username', regexp='^\w+$')
 
-            if self.ass2m.storage.user_exists(username):
+            if self.storage.user_exists(username):
                 print >>sys.stderr, 'Error: user %s already exists.' % username
                 return None
-            user = User(self.ass2m.storage, username)
+            user = User(self.storage, username)
             self.edit_contact(user)
             self.users.append(user)
             print 'User %s correctly added.' % user.name
@@ -54,10 +54,10 @@ class ContactsManagement(ConsolePart):
 
     def edit_contact_password(self, username):
         try:
-            if not self.ass2m.storage.user_exists(username):
+            if not self.storage.user_exists(username):
                 print >>sys.stderr, 'Error: user %s does not exists.' % username
                 return None
-            user = self.ass2m.storage.get_user(username)
+            user = self.storage.get_user(username)
             password1 = self.ask('Enter the new password', masked=True)
             password2 = self.ask('Confirm the new password', masked=True)
             if len(password1) == 0:
@@ -118,8 +118,8 @@ class ContactsManagement(ConsolePart):
                                                  user.realname, user.email)
 
 class ContactsSelection(ContactsManagement):
-    def __init__(self, ass2m, sel_users=[], sel_groups=[]):
-        ContactsManagement.__init__(self, ass2m)
+    def __init__(self, storage, sel_users=[], sel_groups=[]):
+        ContactsManagement.__init__(self, storage)
         self.sel_users = copy(sel_users)
         self.sel_groups = copy(sel_groups)
 
@@ -147,7 +147,7 @@ class ContactsAddCmd(Command):
         parser.add_argument('username')
 
     def cmd(self, args):
-        cm = ContactsManagement(self.ass2m)
+        cm = ContactsManagement(self.storage)
         if not cm.add_contact(args.username):
             return 1
 
@@ -159,7 +159,7 @@ class ContactsPasswordCmd(Command):
         parser.add_argument('username')
 
     def cmd(self, args):
-        cm = ContactsManagement(self.ass2m)
+        cm = ContactsManagement(self.storage)
         if not cm.edit_contact_password(args.username):
             return 1
 
@@ -167,7 +167,7 @@ class ContactsMenuCmd(Command):
     DESCRIPTION = 'Display the contacts menu'
 
     def cmd(self, args):
-        cm = ContactsManagement(self.ass2m)
+        cm = ContactsManagement(self.storage)
         cm.main()
 
 class ContactsMergeCmd(Command):
@@ -178,13 +178,13 @@ class ContactsMergeCmd(Command):
         parser.add_argument('workdir')
 
     def cmd(self, args):
-        ass2m = Ass2m(args.workdir)
-        if not ass2m.storage:
+        storage = Storage.lookup(args.workdir)
+        if not storage:
             print >>sys.stderr, 'Error: Path "%s" is not a working directory' % args.workdir
             return 1
 
-        for user in ass2m.storage.iter_users():
-            user.storage = self.ass2m.storage
+        for user in storage.iter_users():
+            user.storage = self.storage
             user.save()
             print 'Imported %s (%s <%s>)' % (user.name, user.realname, user.email)
 
@@ -193,7 +193,7 @@ class ContactsListCmd(Command):
     WORKDIR = True
 
     def cmd(self, args):
-        cm = ContactsManagement(self.ass2m)
+        cm = ContactsManagement(self.storage)
         cm.print_users()
 
 class ContactsRemoveCmd(Command):
@@ -205,11 +205,11 @@ class ContactsRemoveCmd(Command):
         parser.add_argument('username')
 
     def cmd(self, args):
-        if not self.ass2m.storage.user_exists(args.username):
+        if not self.storage.user_exists(args.username):
             print >>sys.stderr, 'Error: user %s does not exist.' % args.username
             return 1
 
-        self.ass2m.storage.get_user(args.username).remove()
+        self.storage.get_user(args.username).remove()
         print 'User %s has been removed.' % args.username
 
 
@@ -218,7 +218,7 @@ class LoginAction(Action):
         form_username = self.ctx.req.str_POST.get('username')
         form_password = self.ctx.req.str_POST.get('password')
         if form_username and form_password:
-            user = self.ctx.ass2m.storage.get_user(form_username)
+            user = self.ctx.storage.get_user(form_username)
             if user and user.is_valid_password(form_password):
                 self.ctx.res = HTTPFound(location=self.ctx.url.href)
                 # set cookie

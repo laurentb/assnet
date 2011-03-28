@@ -28,7 +28,9 @@ from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
 from paste.url import URL
 import urlparse
 
-from ass2m import Ass2m
+from .butt import Butt
+from .storage import Storage
+from .version import VERSION
 from .users import Anonymous
 from .routes import Router
 
@@ -38,10 +40,9 @@ class Context(object):
              '/usr/share/ass2m',
              '/usr/local/share/ass2m']
 
-    def __init__(self, environ, start_response):
-        self._init_routing()
-
-        self.ass2m = Ass2m(environ.get("ASS2M_ROOT"), router=self.router)
+    def __init__(self, router, environ, start_response):
+        self.router = router
+        self.storage = Storage.lookup(environ.get("ASS2M_ROOT"))
         self._environ = environ
         self._start_response = start_response
         self.req = Request(environ)
@@ -62,8 +63,8 @@ class Context(object):
         if path in ('.', '/'):
             path = ''
 
-        if self.ass2m.root:
-            f = self.ass2m.storage.get_file(path)
+        if self.storage:
+            f = self.storage.get_file(path)
         else:
             f = None
 
@@ -86,19 +87,11 @@ class Context(object):
         # Root application URL (for links to special actions)
         self.root_url = URL(urlparse.urlparse(self.req.application_url).path)
 
-    def _init_routing(self):
-        router = Router()
-        router.set_default_view(None, "html")
-        router.set_default_view("download", "raw")
-        router.set_default_action("file", "download")
-        router.set_default_action("directory", "list")
-        self.router = router
-
     def _init_cookie_secret(self):
-        if not self.ass2m.storage:
+        if not self.storage:
             return
 
-        config = self.ass2m.storage.get_config()
+        config = self.storage.get_config()
         self.cookie_secret = config.data["web"].get("cookie_secret")
         if self.cookie_secret is None:
             self.cookie_secret = hexlify(new_secret())
@@ -118,7 +111,7 @@ class Context(object):
 
     def _init_template_vars(self):
         self.template_vars = {
-            'ass2m_version': Ass2m.VERSION,
+            'ass2m_version': VERSION,
             'path': self.path or "/",
             'url': self.url,
             'root_url': self.root_url,
@@ -175,13 +168,13 @@ class Dispatcher(Action):
         cookie = self.ctx.req.str_cookies.get('ass2m_auth')
         user = cookie and signer.auth(cookie)
         if user:
-            self.ctx.user = self.ctx.ass2m.storage.get_user(user)
+            self.ctx.user = self.ctx.storage.get_user(user)
 
     def answer(self):
         ctx = self.ctx
         router = ctx.router
 
-        if not ctx.ass2m.storage:
+        if not ctx.storage:
             return self.error_notworkingdir()
 
         self._authenticate()
@@ -246,6 +239,15 @@ class Server(object):
         will be used.
         """
         self.root = root
+        self.butt = Butt(router=self._create_router())
+
+    def _create_router(self):
+        router = Router()
+        router.set_default_view(None, "html")
+        router.set_default_view("download", "raw")
+        router.set_default_action("file", "download")
+        router.set_default_action("directory", "list")
+        return router
 
     def bind(self, hostname, port):
         httpserver.serve(self.process, host=hostname, port=str(port))
@@ -256,8 +258,7 @@ class Server(object):
         """
         if self.root:
             environ.setdefault("ASS2M_ROOT", self.root)
-        ctx = Context(environ, start_response)
+        ctx = Context(self.butt.router, environ, start_response)
         dispatcher = Dispatcher(ctx)
         dispatcher.answer()
         return ctx.respond()
-

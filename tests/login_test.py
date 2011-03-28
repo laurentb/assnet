@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-from ass2m.ass2m import Ass2m
+from ass2m.storage import Storage
 from ass2m.server import Server
 from ass2m.users import User
 
@@ -13,9 +13,8 @@ import shutil
 class LoginTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        ass2m = Ass2m(self.root)
-        ass2m.create(self.root)
-        user = User(ass2m.storage, 'penguin')
+        storage = Storage.create(self.root)
+        user = User(storage, 'penguin')
         user.realname = 'Penguin'
         user.password = 'monkey1'
         user.save()

@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-from ass2m.ass2m import Ass2m
+from ass2m.storage import Storage
 from ass2m.server import Server
 from ass2m.users import User
 
@@ -14,12 +14,11 @@ import shutil
 class EventTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        ass2m = Ass2m(self.root)
-        ass2m.create(self.root)
+        storage = Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)
 
-        user = User(ass2m.storage, 'penguin')
+        user = User(storage, 'penguin')
         user.realname = 'Penguin'
         user.save()
 
@@ -42,7 +41,7 @@ Attendees:
         with open(os.path.join(self.root, 'event1.txt'), 'w') as f:
             f.write(event_text)
 
-        f = ass2m.storage.get_file('/event1.txt')
+        f = storage.get_file('/event1.txt')
         f.view = 'event'
         f.save()
 

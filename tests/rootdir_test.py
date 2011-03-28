@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-from ass2m.ass2m import Ass2m
+from ass2m.storage import Storage
 from ass2m.server import Server
 
 from unittest import TestCase
@@ -19,8 +19,7 @@ class RootDirTest(TestCase):
         self.not_a_wd = os.path.join(self.root, 'not_a_wd')
         os.mkdir(self.a_wd)
         os.mkdir(self.not_a_wd)
-        ass2m = Ass2m(self.a_wd)
-        ass2m.create(self.a_wd)
+        Storage.create(self.a_wd)
 
     def tearDown(self):
         if self.root:
@@ -51,8 +50,7 @@ class RootDirTest(TestCase):
         app = TestApp(server.process)
         res = app.get("/", status=500, extra_environ={'ASS2M_ROOT': self.root})
         assert "not an ass2m working directory" in res.body
-        ass2m = Ass2m(self.root)
-        ass2m.create(self.root)
+        Storage.create(self.root)
         res = app.get("/", status=200, extra_environ={'ASS2M_ROOT': self.not_a_wd})
         assert "penguin" in res.body
         res = app.get("/penguin", status=200, extra_environ={'ASS2M_ROOT': self.not_a_wd})

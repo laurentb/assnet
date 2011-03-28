@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-from ass2m.ass2m import Ass2m
+from ass2m.storage import Storage
 from ass2m.server import Server
 
 from unittest import TestCase
@@ -15,8 +15,7 @@ import shutil
 class GalleryTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        self.ass2m = Ass2m(self.root)
-        self.ass2m.create(self.root)
+        self.storage = Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)
         os.mkdir(os.path.join(self.root, 'images'))
@@ -47,7 +46,7 @@ class GalleryTest(TestCase):
         assert 'nothing' in res.body
 
         res1 = self.app.get('/images/?view=gallery')
-        f = self.ass2m.storage.get_file('/images')
+        f = self.storage.get_file('/images')
         f.view = 'gallery'
         f.save()
 

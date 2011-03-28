@@ -144,6 +144,12 @@ class Event(object):
         for username in sorted(self.users.keys(), key=unicode.lower):
             yield self.f.storage.get_user(username)
 
+    def remove_user(self, username):
+        self.users.pop(username)
+
+    def add_user(self, username):
+        self.users[username] = self.USER_WAITING
+
 class EventCmd(Command):
     DESCRIPTION = 'Create or edit an event'
     WORKDIR = True
@@ -153,7 +159,7 @@ class EventCmd(Command):
         parser.add_argument('filename')
 
     def cmd(self, args):
-        f = self.ass2m.storage.get_file_from_realpath(args.filename)
+        f = self.storage.get_file_from_realpath(args.filename)
         if not f:
             print >>sys.stderr, 'Error: file "%s" is not in the working tree.' % args.filename
             return 1
@@ -231,12 +237,12 @@ class EventCmd(Command):
         event.place = self.ask('Enter a place', default=event.place)
 
     def edit_attendees(self, event):
-        cs = ContactsSelection(self.ass2m, event.users.keys())
+        cs = ContactsSelection(self.storage, event.users.keys())
         cs.main()
         for deleted in (set(event.users.keys()) - set(cs.sel_users)):
-            event.users.pop(deleted)
+            event.remove_user(deleted)
         for added in set(cs.sel_users) - set(event.users.keys()):
-            event.users[added] = event.USER_WAITING
+            event.add_user(added)
 
 class EventAction(Action):
     def answer(self):

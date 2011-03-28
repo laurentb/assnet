@@ -17,7 +17,9 @@
 
 import argparse
 
-from ass2m import Ass2m
+from .storage import Storage
+from .butt import Butt
+from .version import VERSION, COPYRIGHT
 
 
 __all__ = ['CLI']
@@ -27,16 +29,17 @@ class CLI(object):
     def __init__(self, working_dir):
         self.working_dir = working_dir
         self.parser = argparse.ArgumentParser(prog='ass2m')
-        self.ass2m = Ass2m(self.working_dir, parser=self.parser)
+        self.butt = Butt(parser=self.parser)
+
         self.parser.add_argument('-V', '--version', action='version',
-                                 version='%(prog)s ' + self.ass2m.VERSION +
-                                                 ' ' + self.ass2m.COPYRIGHT)
+                                 version='%(prog)s ' + VERSION + ' ' + COPYRIGHT)
 
     def main(self, argv):
         # TODO use cmd.Cmd to have a REPL application when no command
         # is supplied.
+        storage = Storage.lookup(self.working_dir)
         args = self.parser.parse_args(argv[1:])
-        cmd = args.cmd(self.ass2m, self.working_dir)
+        cmd = args.cmd(storage, self.working_dir)
         try:
             return cmd.run(args)
         except KeyboardInterrupt:

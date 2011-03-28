@@ -34,12 +34,34 @@ class GlobalConfig(IObject):
 
 
 class Storage(object):
+    DIRNAME = '.ass2m'
+
     def __init__(self, path):
         self.path = path
 
+    @property
+    def root(self):
+        return os.path.realpath(os.path.join(self.path, os.path.pardir))
+
     @classmethod
-    def init(cls, path):
-        storage = cls(path)
+    def lookup(cls, path):
+        if not path:
+            return None
+
+        try:
+            while not os.path.isdir(os.path.join(path, cls.DIRNAME)) and path != os.path.dirname(path):
+                path = os.path.dirname(path)
+        except OSError:
+            path = None
+
+        if path and path != os.path.dirname(path):
+            return cls(os.path.join(path, cls.DIRNAME))
+        else:
+            return None
+
+    @classmethod
+    def create(cls, path):
+        storage = cls(os.path.join(path, cls.DIRNAME))
 
         # Default perms on /.ass2m
         f = File(storage, '/.ass2m')

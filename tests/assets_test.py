@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-from ass2m.ass2m import Ass2m
+from ass2m.storage import Storage
 from ass2m.server import Server, Context
 
 from unittest import TestCase
@@ -13,8 +13,7 @@ import shutil
 class AssetsTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        ass2m = Ass2m(self.root)
-        ass2m.create(self.root)
+        storage = Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)
         datapath = os.path.join(self.root, 'test_data')

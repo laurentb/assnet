@@ -23,8 +23,8 @@ __all__ = ['Plugin']
 
 
 class Plugin(object):
-    def __init__(self, ass2m):
-        self.ass2m = ass2m
+    def __init__(self, butt):
+        self.butt = butt
 
     def init(self):
         pass
@@ -33,7 +33,7 @@ class Plugin(object):
         pass
 
     def register_cli_command(self, *args):
-        parser = self.ass2m.parser
+        parser = self.butt.parser
         if not parser:
             # not a cli application, does not need to register a command.
             return
@@ -67,7 +67,7 @@ class Plugin(object):
             parser.set_defaults(cmd=cmd)
 
     def register_web_action(self, route, action):
-        router = self.ass2m.router
+        router = self.butt.router
         if not router:
             # not a web application, does not need to register an action.
             return

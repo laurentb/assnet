@@ -10,14 +10,14 @@ import os
 class StorageTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        self.storage = Storage(os.path.join(self.root, 'store'))
+        self.storage = Storage(os.path.join(self.root, Storage.DIRNAME))
 
     def tearDown(self):
         if self.root:
             shutil.rmtree(self.root)
 
     def test_create(self):
-        storage = Storage.init(os.path.join(self.root, 'store'))
+        storage = Storage.create(self.root)
         assert len(storage.get_file('').perms) == 1
         assert len(storage.get_file('/.ass2m').perms) == 1
 

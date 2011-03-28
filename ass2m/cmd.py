@@ -98,12 +98,12 @@ class Command(ConsolePart):
     def configure_parser(parser):
         return
 
-    def __init__(self, ass2m, working_dir):
-        self.ass2m = ass2m
+    def __init__(self, storage, working_dir):
+        self.storage = storage
         self.working_dir = working_dir
 
     def run(self, args):
-        if self.WORKDIR and not self.ass2m.storage:
+        if self.WORKDIR and not self.storage:
             print >>sys.stderr, 'Error: Not a ass2m working directory.'
             print >>sys.stderr, 'Please use "%s init"' % sys.argv[0]
             return 1

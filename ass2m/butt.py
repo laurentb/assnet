@@ -19,42 +19,16 @@
 import os
 import re
 
-from .storage import Storage
 from .plugin import Plugin
 
 
-__all__ = ['Ass2m']
+__all__ = ['Butt']
 
 
-class Ass2m(object):
-    DIRNAME = '.ass2m'
-    VERSION = '0.1-dev'
-    COPYRIGHT = 'Copyright(C) 2011 Romain Bignon, Laurent Bachelier'
-
-    def __init__(self, path, parser=None, router=None):
-        if isinstance(path, Storage):
-            storage = path
-        elif path:
-            try:
-                while not os.path.isdir(os.path.join(path, self.DIRNAME)) and path != os.path.dirname(path):
-                    path = os.path.dirname(path)
-            except OSError:
-                path = None
-            if path and path != os.path.dirname(path):
-                storage = Storage(os.path.join(path, self.DIRNAME))
-            else:
-                storage = None
-        else:
-            storage = None
-
+class Butt(object):
+    def __init__(self, parser=None, router=None):
         self.parser = parser
         self.router = router
-        self.storage = storage
-        if self.storage:
-            self.root = os.path.realpath(os.path.join(storage.path, os.path.pardir))
-        else:
-            self.root = None
-
         self.load_plugins()
 
     def iter_existing_plugin_names(self):
@@ -91,7 +65,3 @@ class Ass2m(object):
         plugin = klass(self)
         plugin.init()
         self.plugins[plugin_name] = plugin
-
-    def create(self, path):
-        self.storage = Storage.init(os.path.join(path, self.DIRNAME))
-        self.root = os.path.realpath(os.path.join(self.storage.path, os.path.pardir))

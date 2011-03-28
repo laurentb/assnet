@@ -21,6 +21,7 @@ import re
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
+from ass2m.storage import Storage
 
 from ass2m.routes import Route
 from ass2m.server import Action
@@ -36,11 +37,11 @@ class InitCmd(Command):
     WORKDIR = False
 
     def cmd(self, args):
-        if self.ass2m.storage:
+        if self.storage:
             print >>sys.stderr, 'Error: %s is already a working directory' % self.working_dir
             return 1
 
-        self.ass2m.create(self.working_dir)
+        self.storage = Storage.create(self.working_dir)
         print 'Ass2m working directory created.'
 
 class TreeCmd(Command):
@@ -48,7 +49,7 @@ class TreeCmd(Command):
     WORKDIR = True
 
     def print_perms(self, path, depth):
-        f = self.ass2m.storage.get_file(path)
+        f = self.storage.get_file(path)
         parent = f.parent()
 
         perms_s = ''
@@ -63,7 +64,7 @@ class TreeCmd(Command):
 
     def cmd(self, args):
         for root, directories, files in os.walk(self.working_dir):
-            path = root[len(self.ass2m.root):]
+            path = root[len(self.storage.root):]
             depth = path.count('/')
 
             self.print_perms(path + '/', depth)
@@ -85,7 +86,7 @@ class PermsCmd(Command):
             print >>sys.stderr, 'Error: Path "%s" does not exist.' % args.path
             return 1
 
-        f = self.ass2m.storage.get_file_from_realpath(os.path.realpath(args.path))
+        f = self.storage.get_file_from_realpath(os.path.realpath(args.path))
         if not f:
             print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % args.path
             return 1
@@ -93,7 +94,7 @@ class PermsCmd(Command):
         if '.' in args.who:
             t, who = args.who.split('.', 1)
             if t == 'u':
-                if not self.ass2m.storage.user_exists(who):
+                if not self.storage.user_exists(who):
                     print >>sys.stderr, 'Error: User "%s" does not exist.' % who
                     return 1
             elif t == 'g':

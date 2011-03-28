@@ -8,7 +8,7 @@ import os
 class UsersTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
-        self.storage = Storage.init(os.path.join(self.root, 'store'))
+        self.storage = Storage.create(self.root)
 
     def tearDown(self):
         if self.root:
