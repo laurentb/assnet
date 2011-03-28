@@ -31,6 +31,8 @@ class File(IObject):
     PERM_LIST =  0x002
     PERM_WRITE = 0x004
 
+    PERM_ALL =   0xfff
+
     PERMS = (('r', PERM_READ),
              ('l', PERM_LIST),
              ('w', PERM_WRITE)

@@ -22,6 +22,7 @@ import re
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 from ass2m.storage import Storage
+from ass2m.files import File
 
 from ass2m.routes import Route
 from ass2m.server import Action
@@ -71,26 +72,38 @@ class TreeCmd(Command):
             for filename in files:
                 self.print_perms(os.path.join(path, filename), depth+1)
 
-class PermsCmd(Command):
+class ChViewCmd(Command):
+    DESCRIPTION = 'Change default view of a path'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('view')
+        parser.add_argument('path', nargs='*')
+
+    def cmd(self, args):
+        for path in args.path:
+            if not os.path.exists(path):
+                print >>sys.stderr, 'Error: Path "%s" does not exist.' % path
+                continue
+
+            f = self.storage.get_file_from_realpath(os.path.realpath(path))
+            if not f:
+                print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
+                continue
+
+            f.view = args.view
+            f.save()
+
+class ChModCmd(Command):
     DESCRIPTION = 'Change permissions of a path'
 
     @staticmethod
     def configure_parser(parser):
-        parser.add_argument('path')
         parser.add_argument('who')
-        parser.add_argument('perms', nargs='?')
-        parser.add_argument('-D', action='store_true')
+        parser.add_argument('perms')
+        parser.add_argument('path', nargs='*')
 
     def cmd(self, args):
-        if not os.path.exists(args.path):
-            print >>sys.stderr, 'Error: Path "%s" does not exist.' % args.path
-            return 1
-
-        f = self.storage.get_file_from_realpath(os.path.realpath(args.path))
-        if not f:
-            print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % args.path
-            return 1
-
         if '.' in args.who:
             t, who = args.who.split('.', 1)
             if t == 'u':
@@ -108,41 +121,44 @@ class PermsCmd(Command):
             print >>sys.stderr, 'Only available ones: "u.<username>", "g.<group>", "all"'
             return 1
 
-        if args.D:
-            if args.who in f.perms:
-                f.perms.pop(args.who)
-                f.save()
-                print 'Removed permissions for %s on %s.' % (args.who, f.path)
-                return 0
-            else:
-                print >>sys.stderr, 'Error: %s does not have permissions on %s.' % (args.who, f.path)
-                return 1
-
-        if args.perms is None:
-            print 'Permissions for %s on %s: %s' % (args.who, f.path, f.p2str(f.perms[args.who]))
-            return 0
-
-        perms = f.perms.get(args.who, 0)
-        state = -1
-        for l in args.perms:
-            if l == '+': state = 1
-            elif l == '-': state = 0
-            else:
-                try:
-                    perm = f.str2p(l)
-                except KeyError:
-                    print >>sys.stderr, 'Error: Perm "%s" does not exist.' % l
-                    return 1
-                if state == 1:   perms |= perm
-                elif state == 0: perms &= ~perm
+        if args.perms != '-':
+            state = -1
+            to_add = 0
+            to_remove = 0
+            for l in args.perms:
+                if l == '+': state = 1
+                elif l == '-': state = 0
                 else:
-                    perms = perm
-                    state = 1
+                    try:
+                        perm = File.str2p(l)
+                    except KeyError:
+                        print >>sys.stderr, 'Error: Perm "%s" does not exist.' % l
+                        return 1
+                    if state == 1:   to_add |= perm
+                    elif state == 0: to_remove |= perm
+                    else:
+                        to_remove = File.PERM_ALL
+                        to_add = perm
+                        state = 1
 
-        f.perms[args.who] = perms
-        f.save()
-        print 'Permissions for %s on %s are now: %s' % (args.who, f.path, f.p2str(f.perms[args.who]))
+        for path in args.path:
+            if not os.path.exists(path):
+                print >>sys.stderr, 'Error: Path "%s" does not exist.' % path
+                continue
 
+            f = self.storage.get_file_from_realpath(os.path.realpath(path))
+            if not f:
+                print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
+                continue
+
+            if args.perms == '-':
+                if args.who in f.perms:
+                    f.perms.pop(args.who)
+                    f.save()
+            else:
+                perms = f.perms.get(args.who, 0)
+                f.perms[args.who] = (perms & ~to_remove) | to_add
+                f.save()
 
 class Ass2mFileApp(FileApp):
     def guess_type(self):
@@ -195,7 +211,8 @@ class CorePlugin(Plugin):
     def init(self):
         self.register_cli_command('init', InitCmd)
         self.register_cli_command('tree', TreeCmd)
-        self.register_cli_command('perms', PermsCmd)
+        self.register_cli_command('chmod', ChModCmd)
+        self.register_cli_command('chview', ChViewCmd)
 
         self.register_web_action(
             Route(object_type = "file", action="download", view="raw"),
