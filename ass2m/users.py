@@ -30,11 +30,6 @@ class Group(object):
         self.users = []
 
 class IUser(object):
-    name = None
-    email = None
-    realname = None
-    groups = []
-
     def has_perms(self, f, perm):
         raise NotImplementedError()
 
@@ -48,6 +43,7 @@ class User(IUser, IObject):
         self.email = None
         self.realname = None
         self.password = None
+        self.key = None
         self.groups = []
         IObject.__init__(self, storage)
 
@@ -68,6 +64,9 @@ class User(IUser, IObject):
         f_parent = f.parent()
         return f_parent and self.has_perms(f_parent, perm)
 
+    def gen_key(self):
+        self.key = hexlify(os.urandom(16))
+
     def _get_confname(self):
         return os.path.join('users', self.name)
 
@@ -76,10 +75,12 @@ class User(IUser, IObject):
         self.realname = self.data['info'].get('realname')
         self.password = len(self.data['auth'].get('password', '') \
                             + self.data['auth'].get('salt', '')) > 0
+        self.key = self.data['auth'].get('key')
 
     def _prewrite(self):
         self.data['info']['email'] = self.email if self.email else None
         self.data['info']['realname'] = self.realname if self.realname else None
+        self.data['auth']['key'] = self.key if self.key else None
         # only update password when set
         if isinstance(self.password, basestring):
             salt = hexlify(os.urandom(42))

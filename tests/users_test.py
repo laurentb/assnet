@@ -51,3 +51,16 @@ class UsersTest(TestCase):
         salt2 = u.data['auth']['salt']
         assert password1 != password2
         assert salt1 != salt2
+
+    def test_key(self):
+        u1 = User(self.storage, 'penguin')
+        u1.read()
+        assert u1.key is None
+        u1.gen_key()
+        u1.save()
+
+        u2 = User(self.storage, 'penguin')
+        u2.read()
+        assert len(u2.key)
+        u2.gen_key()
+        assert u2.key != u1.key
