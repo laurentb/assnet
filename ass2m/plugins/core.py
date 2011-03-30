@@ -218,6 +218,6 @@ class CorePlugin(Plugin):
                 View(object_type='file', name='raw'),
                 DownloadAction, 10)
         self.register_web_view(
-                View(object_type='directory', name='html', verbose_name='Detailed list'),
+                View(object_type='directory', name='list', verbose_name='Detailed list'),
                 ListAction, 10)
         self.register_web_action('asset', AssetAction)
