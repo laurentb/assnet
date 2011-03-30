@@ -99,6 +99,7 @@ class ChModCmd(Command):
 
     @staticmethod
     def configure_parser(parser):
+        parser.prefix_chars = ''
         parser.add_argument('who')
         parser.add_argument('perms')
         parser.add_argument('path', nargs='+')
