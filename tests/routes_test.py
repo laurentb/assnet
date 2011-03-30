@@ -32,6 +32,7 @@ class RoutesTest(TestCase):
         router.register_view(View(object_type='file', name='json'), fn1)
         router.register_view(View(object_type='directory', name='json'), fn2)
         router.register_view(View(object_type=None, name='archive'), fn1)
+        router.register_view(View(object_type='directory', name='gallery'), fn1)
 
         # same view, different action for a different object type
         assert router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'json')[1] is fn1
@@ -41,6 +42,9 @@ class RoutesTest(TestCase):
         assert router.find_view(FakeFile(name='penguin', object_type='directory'), 'archive')[1] is fn1
         # no such view
         assert router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'raw')[1] is None
+        # no such view for this type
+        assert router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'gallery')[1] is None
+        assert router.find_view(FakeFile(name='penguin', object_type='directory'), 'gallery')[1] is fn1
 
     def test_priorityForDefaults(self):
         router = Router()
