@@ -46,8 +46,8 @@ class BaseWebTest(TestCase):
         assert res.location == "http://localhost/penguins/"
         res.follow(status=200)
 
-        res = self.app.get("/penguins?action=list", status=302)
-        assert res.location == "http://localhost/penguins/?action=list"
+        res = self.app.get("/penguins?view=list", status=302)
+        assert res.location == "http://localhost/penguins/?view=list"
         res.follow(status=200)
 
         # no trailing slash for files
@@ -57,8 +57,8 @@ class BaseWebTest(TestCase):
         assert res.location == "http://localhost/penguins/gentoo"
         res.follow(status=200)
 
-        res = self.app.get("/penguins/gentoo/?action=download", status=302)
-        assert res.location == "http://localhost/penguins/gentoo?action=download"
+        res = self.app.get("/penguins/gentoo/?view=raw", status=302)
+        assert res.location == "http://localhost/penguins/gentoo?view=raw"
         res.follow(status=200)
 
         # limit cases

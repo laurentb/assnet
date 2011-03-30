@@ -54,14 +54,14 @@ class ApiTest(TestCase):
 
     def test_jsonInfo(self):
         # info on a directory
-        res = self.app.get('/?action=info&view=json_info', status=200)
+        res = self.app.get('/?view=json_info', status=200)
         data = json.loads(res.body)
         assert data['type'] == 'directory'
         assert data['size'] == None
         assert datetime.strptime(data['mtime'], '%Y-%m-%dT%H:%M:%S').year > 0
 
         # info on a file
-        res = self.app.get('/penguins/gentoo?action=info&view=json_info', status=200)
+        res = self.app.get('/penguins/gentoo?view=json_info', status=200)
         data = json.loads(res.body)
         assert data['type'] == 'file'
         assert data['size'] == 17
