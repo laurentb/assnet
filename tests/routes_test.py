@@ -115,3 +115,10 @@ class RoutesTest(TestCase):
         assert not View(name='test', mimetype='image').match_mimetype(None)
         assert View(name='test', mimetype='image').match_mimetype('image/jpeg')
         assert View(name='test', mimetype='image').match_mimetype('image/png')
+
+    def test_guessPriority(self):
+        assert View(name='test', object_type=None, mimetype=None).guess_priority() == 0
+        assert View(name='test', object_type='file', mimetype=None).guess_priority() == 1
+        assert View(name='test', object_type=None, mimetype='image').guess_priority() == 1
+        assert View(name='test', object_type=None, mimetype='image/png').guess_priority() == 2
+        assert View(name='test', object_type='file', mimetype='image/png').guess_priority() == 3

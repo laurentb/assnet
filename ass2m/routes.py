@@ -57,6 +57,21 @@ class View(object):
         return self.match_mimetype(mimetype) and \
             (self.object_type == object_type or self.object_type is None)
 
+    def guess_priority(self):
+        """
+        Guess the priority of a view.
+        The more precise it is, the more priority it will get.
+        """
+        priority = 0
+        if self.object_type:
+            priority += 1
+        if self.mimetype:
+            priority += 1
+            if '/' in self.mimetype:
+                priority += 1
+        return priority
+
+
     def __str__(self):
         return self.name
 
@@ -74,7 +89,7 @@ class Router(object):
         """
         self.actions[name] = action
 
-    def register_view(self, view, action, priority = 1):
+    def register_view(self, view, action, priority = None):
         """
         Register a view. A view is related to a file.
         See the View class for more details.
@@ -82,6 +97,8 @@ class Router(object):
         action: Action class to use if the route is matched
         priority: int
         """
+        if priority is None:
+            priority = view.guess_priority()
         self.views.setdefault(priority, []).append((view, action))
 
     def find_action(self, name):
