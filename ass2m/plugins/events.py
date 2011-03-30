@@ -24,7 +24,7 @@ from textwrap import wrap
 from datetime import datetime
 
 from ass2m.plugin import Plugin
-from ass2m.routes import Route
+from ass2m.routes import View
 from ass2m.server import Action
 from ass2m.cmd import Command
 
@@ -285,9 +285,6 @@ class EventAction(Action):
 class EventsPlugin(Plugin):
     def init(self):
         self.register_cli_command('event', EventCmd)
-        self.register_web_action(
-            Route(object_type = "file", action="download", view="event"),
-            EventAction)
-        self.register_web_action(
-            Route(object_type = "file", action="download", view="event", method="POST"),
+        self.register_web_view(
+            View(object_type='file', name='event'),
             EventAction)

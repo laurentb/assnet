@@ -24,7 +24,7 @@ from ass2m.cmd import Command
 from ass2m.storage import Storage
 from ass2m.files import File
 
-from ass2m.routes import Route
+from ass2m.routes import View
 from ass2m.server import Action
 from paste.fileapp import FileApp
 from webob.exc import HTTPNotFound, HTTPPreconditionFailed
@@ -214,14 +214,10 @@ class CorePlugin(Plugin):
         self.register_cli_command('chmod', ChModCmd)
         self.register_cli_command('chview', ChViewCmd)
 
-        self.register_web_action(
-            Route(object_type = "file", action="download", view="raw"),
-            DownloadAction)
-
-        self.register_web_action(
-            Route(object_type = None, action="asset"),
-            AssetAction)
-
-        self.register_web_action(
-            Route(object_type = "directory", action="list", view="html", verbose_name="Detailed list"),
-            ListAction)
+        self.register_web_view(
+                View(object_type='file', name='raw'),
+                DownloadAction, 10)
+        self.register_web_view(
+                View(object_type='directory', name='html', verbose_name='Detailed list'),
+                ListAction, 10)
+        self.register_web_action('asset', AssetAction)

@@ -19,17 +19,13 @@ import json
 
 from ass2m.plugin import Plugin
 
-from ass2m.routes import Route
+from ass2m.routes import View
 from ass2m.server import Action
 
 __all__ = ['ApiPlugin']
 
 
 class InfoAction(Action):
-    def answer(self):
-        self.ctx.res.content_type = 'application/json'
-        self.ctx.res.body = json.dumps(self.get_fileinfo(self.ctx.file))
-
     def get_fileinfo(self, f):
         fileinfo = dict()
         if f.isdir():
@@ -40,6 +36,12 @@ class InfoAction(Action):
             fileinfo['size'] = f.get_size()
         fileinfo['mtime'] = f.get_mtime().strftime(r'%Y-%m-%dT%H:%M:%S')
         return fileinfo
+
+
+class JsonInfoAction(InfoAction):
+    def answer(self):
+        self.ctx.res.content_type = 'application/json'
+        self.ctx.res.body = json.dumps(self.get_fileinfo(self.ctx.file))
 
 
 class JsonListAction(InfoAction):
@@ -70,18 +72,14 @@ class TextListAction(Action):
 
 class ApiPlugin(Plugin):
     def init(self):
-        self.register_web_action(
-            Route(object_type = "file", action="info", view="json", public=False),
-            InfoAction)
+        self.register_web_view(
+            View(object_type=None, name='json_info', public=False, verbose_name='JSON info'),
+            JsonInfoAction)
 
-        self.register_web_action(
-            Route(object_type = "directory", action="info", view="json", public=False, verbose_name="JSON"),
-            InfoAction)
-
-        self.register_web_action(
-            Route(object_type = "directory", action="list", view="json", public=False, verbose_name="JSON"),
+        self.register_web_view(
+            View(object_type='directory', name='json_list', public=False, verbose_name='JSON list'),
             JsonListAction)
 
-        self.register_web_action(
-            Route(object_type = "directory", action="list", view="text", public=False),
+        self.register_web_view(
+            View(object_type='directory', name='text_list', public=False, verbose_name='Text-only list'),
             TextListAction)

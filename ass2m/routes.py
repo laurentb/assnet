@@ -16,94 +16,94 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 
-__all__ = ['Route', 'Router']
+__all__ = ['View', 'Router']
 
 
-class Route(object):
-    def __init__(self, object_type, action, view = None, method = 'GET',
+class View(object):
+    def __init__(self, name, object_type = None,
             public = True, verbose_name = None):
         """
-        object_type: "file" or "directory", or None for global actions
-        action: Arbitrary name
-        view: Arbitrary name. If none, will accept anything
-        method: HTTP method, GET by default
+        name: Arbitrary name
+        object_type: "file" or "directory", or None for both
         public: Show in in the available views list
         verbose_name: Name to show in the available views list
         """
+        self.name = name
         self.object_type = object_type
-        self.action = action
-        self.view = view
-        self.method = method
         self.public = public
-        self.verbose_name = verbose_name or (view.replace('_', ' ').title() if view else None)
-        if self.view:
-            self.precision = 1
-        else:
-            self.precision = 0
+        self.verbose_name = verbose_name or name.replace('_', ' ').title()
 
-    def amatch(self, object_type, action, method):
+    def match(self, object_type):
+        """
+        Returns a boolean.
+        """
         return \
-            self.object_type == object_type and \
-            self.action == action and \
-            self.method == method
+            (self.object_type == object_type or self.object_type is None)
 
-    def match(self, object_type, action, view, method):
-        return \
-            self.amatch(object_type, action, method) and \
-            (self.view == view or self.view is None)
+    def __str__(self):
+        return self.name
+
 
 class Router(object):
     def __init__(self):
-        self.routes = {}
-        self.default_actions = {}
-        self.default_views = {}
-        self.default_view = None
+        self.actions = {}
+        self.views = {}
 
-    def connect(self, route, call):
+    def register_action(self, name, action):
         """
-        Register an action. Last added actions are prioritized.
-        route: Route object
-        call: method to call if the route is matched
+        Register an action. An action is global, not related to a file.
+        name: Arbitrary name
+        action: Action class to use if the route is matched
         """
-        self.routes.setdefault(route.precision, []).append((route, call))
+        self.actions[name] = action
 
-    def set_default_action(self, object_type, action):
-        self.default_actions[object_type] = action
-
-    def set_default_view(self, action, view):
-        if action is None:
-            self.default_view = view
-        else:
-            self.default_views[action] = view
-
-    def resolve(self, object_type, req, file_view = None):
+    def register_view(self, view, action, priority = 1):
         """
-        Get the final parameters of a request, by processing all the defaults.
+        Register a view. A view is related to a file.
+        See the View class for more details.
+        view: View
+        action: Action class to use if the route is matched
+        priority: int
         """
-        action = req.str_GET.get("action", self.default_actions.get(object_type))
-        default_view = file_view or self.default_views.get(action, self.default_view)
-        view = req.str_GET.get("view", default_view)
+        self.views.setdefault(priority, []).append((view, action))
 
-        return (action, view)
-
-    def available_views(self, object_type, action):
+    def find_action(self, name):
         """
-        Get all the available views for an object type / action.
-        Do note that it won't return views that are handled with a catch-all route
-        (view = None).
+        name: str
+        Returns the Action class for an action name.
         """
-        for routes in self.routes.itervalues():
-            for route, call in routes:
-                if route.amatch(object_type, action, 'GET') and route.view:
-                    yield route
+        return self.actions.get(name)
 
-    def match(self, object_type, req, file_view = None):
-        action, view = self.resolve(object_type, req, file_view)
-        method = req.method
+    def find_view(self, f, name = None):
+        """
+        Find a view suitable for a file
+        f: File
+        name: Provide the view name if we already know it
+        Returns the view and the related Action class.
 
-        for precision in sorted(self.routes.keys(), reverse=True):
-            for route, call in self.routes[precision]:
-                if route.match(object_type, action, view, method):
-                    return call
+        Even if we know the view name, this function is useful to validate we can
+        actually use the view on it.
+        """
+        # use the default file view if no view was requested
+        if name is None:
+            name = f.view
+        object_type = f.get_object_type()
 
-        return None
+        for priority in sorted(self.views.keys(), reverse=True):
+            for view, action in self.views[priority]:
+                if view.match(object_type):
+                    # if no view was requested, or if we found the requested view
+                    if name is None or view.name == name:
+                        return (view, action)
+        return (None, None)
+
+    def get_available_views(self, f):
+        """
+        f: File
+        Get all the available views for a file.
+        """
+        object_type = f.get_object_type()
+        for views in self.views.itervalues():
+            for view, action in views:
+                if view.match(object_type):
+                    yield view

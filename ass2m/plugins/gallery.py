@@ -22,7 +22,7 @@ from cStringIO import StringIO
 from paste.fileapp import DataApp
 
 from ass2m.plugin import Plugin
-from ass2m.routes import Route
+from ass2m.routes import View
 from ass2m.server import Action
 
 class ListGalleryAction(Action):
@@ -69,9 +69,9 @@ class DownloadThumbnailAction(Action):
 
 class GalleryPlugin(Plugin):
     def init(self):
-        self.register_web_action(
-            Route(object_type = "directory", action="list", view="gallery"),
+        self.register_web_view(
+            View(object_type='directory', name='gallery'),
             ListGalleryAction)
-        self.register_web_action(
-            Route(object_type = "file", action="download", view="thumbnail"),
+        self.register_web_view(
+            View(object_type='file', name='thumbnail'),
             DownloadThumbnailAction)

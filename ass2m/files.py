@@ -128,6 +128,12 @@ class File(IObject):
     def isfile(self):
         return os.path.isfile(self.get_realpath())
 
+    def get_object_type(self):
+        if self.isdir():
+            return "directory"
+        elif self.isfile():
+            return "file"
+
     def iter_children(self):
         if self.isdir():
             filenames = sorted(os.listdir(self.get_realpath()))

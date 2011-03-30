@@ -1,168 +1,94 @@
-from ass2m.routes import Route, Router
-from webtest import TestApp
-from webob import Request, Response
+from ass2m.routes import View, Router
 from unittest import TestCase
 
+def fn1():
+    pass
+
+def fn2():
+    pass
+
+class FakeFile(object):
+    def __init__(self, name, object_type, view = None):
+        self.name = name
+        self.object_type = object_type
+        self.view = view
+
+    def get_object_type(self):
+        return self.object_type
+
 class RoutesTest(TestCase):
-    def setUp(self):
+    def test_actions(self):
         router = Router()
-        def app(environ, start_response):
-            req = Request(environ)
-            res = Response(content_type='text/plain')
-            res.body = repr(router.match(environ["ASS2M_OBJECT_TYPE"], req))
-            return res(environ, start_response)
+        router.register_action('login', fn1)
+        router.register_action('logout', fn2)
 
-        self.app = TestApp(app)
-        self.router = router
+        assert router.find_action(None) is None
+        assert router.find_action('login') is fn1
+        assert router.find_action('logout') is fn2
+        assert router.find_action('fly') is None
 
+    def test_objectTypeValidation(self):
+        router = Router()
+        router.register_view(View(object_type='file', name='json'), fn1)
+        router.register_view(View(object_type='directory', name='json'), fn2)
+        router.register_view(View(object_type=None, name='archive'), fn1)
 
-    def test_addAndMatch(self):
-        def fn1():
-            pass
+        # same view, different action for a different object type
+        assert router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'json')[1] is fn1
+        assert router.find_view(FakeFile(name='penguin', object_type='directory'), 'json')[1] is fn2
+        # accepts any object type
+        assert router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'archive')[1] is fn1
+        assert router.find_view(FakeFile(name='penguin', object_type='directory'), 'archive')[1] is fn1
+        # no such view
+        assert router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'raw')[1] is None
 
-        self.router.connect(Route(object_type="file", action="list", view="html"), fn1)
+    def test_priorityForDefaults(self):
+        router = Router()
+        router.register_view(View(object_type='file', name='raw'), fn1, 10)
+        router.register_view(View(object_type='file', name='json'), fn2, 1)
+        router.register_view(View(object_type='directory', name='json'), fn2, 1)
+        router.register_view(View(object_type='directory', name='list'), fn1, 10)
 
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
-        res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn1) == res.body
-        res = self.app.get("/?action=plop&view=html", extra_environ=extra_environ)
-        assert "None" == res.body
-
-
-    def test_getOrPost(self):
-        def fn1():
-            pass
-
-        def fn2():
-            pass
-
-        self.router.connect(Route(object_type="file", action="list", view="html", method="GET"), fn1)
-        self.router.connect(Route(object_type="file", action="list", view="html", method="POST"), fn2)
-
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
-        res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn1) == res.body
-        res = self.app.post("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
-
-
-    def test_catchAllView(self):
-        def fn1():
-            pass
-
-        def fn2():
-            pass
-
-        self.router.connect(Route(object_type="file", action="list", view=None), fn1)
-        self.router.connect(Route(object_type="file", action="list", view="html"), fn2)
-
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
-        res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
-        assert repr(fn1) == res.body
-        res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
-
-
-    def test_catchAllViewAndPrecision(self):
-        def fn1():
-            pass
-
-        def fn2():
-            pass
-
-        self.router.connect(Route(object_type="file", action="list", view="html"), fn1)
-        self.router.connect(Route(object_type="file", action="list", view=None), fn2)
-
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
-        res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
-        res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn1) == res.body
-
-
-    def test_setDefaultAction(self):
-        def fn1():
-            pass
-
-        def fn2():
-            pass
-
-        self.router.connect(Route(object_type="directory", action="list", view="html"), fn1)
-        self.router.set_default_action("directory", "list")
-
-        extra_environ = {"ASS2M_OBJECT_TYPE": "directory"}
-        res = self.app.get("/", extra_environ=extra_environ)
-        assert "None" == res.body
-        res = self.app.get("/?view=html", extra_environ=extra_environ)
-        assert repr(fn1) == res.body
-        res = self.app.get("/?action=tar&view=html", extra_environ=extra_environ)
-        assert "None" == res.body
-
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
-        res = self.app.get("/?view=html", extra_environ=extra_environ)
-        assert "None" == res.body
-
-
-    def test_setDefaultActionAndView(self):
-        def fn1():
-            pass
-
-        def fn2():
-            pass
-
-        def fn3():
-            pass
-
-        self.router.connect(Route(object_type="directory", action="list", view="html"), fn1)
-        self.router.connect(Route(object_type="directory", action="list", view="json"), fn2)
-        self.router.connect(Route(object_type="directory", action="tree", view="json"), fn3)
-        self.router.set_default_action("directory", "list")
-        self.router.set_default_view("list", "html")
-        self.router.set_default_view("tree", "json")
-        extra_environ = {"ASS2M_OBJECT_TYPE": "directory"}
-
-        res = self.app.get("/", extra_environ=extra_environ)
-        assert repr(fn1) == res.body
-        res = self.app.get("/?view=json", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
-        res = self.app.get("/?action=tree", extra_environ=extra_environ)
-        assert repr(fn3) == res.body
-
-
-    def test_manualPrecision(self):
-        def fn1():
-            pass
-
-        def fn2():
-            pass
-
-        self.router.connect(Route(object_type="file", action="list", view="html"), fn1)
-        route = Route(object_type="file", action="list", view=None)
-        route.precision = 42
-        self.router.connect(route, fn2)
-
-        extra_environ = {"ASS2M_OBJECT_TYPE": "file"}
-        res = self.app.get("/?action=list&view=json", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
-        res = self.app.get("/?action=list&view=html", extra_environ=extra_environ)
-        assert repr(fn2) == res.body
-
+        view, call = router.find_view(FakeFile(name='penguin.txt', object_type='file'))
+        assert view.name == 'raw'
+        assert call == fn1
+        view, call = router.find_view(FakeFile(name='penguin.txt', object_type='file'), 'json')
+        assert view.name == 'json'
+        assert call == fn2
+        view, call = router.find_view(FakeFile(name='penguin', object_type='directory'))
+        assert view.name == 'list'
+        assert call == fn1
+        view, call = router.find_view(FakeFile(name='penguin', object_type='directory'), 'json')
+        assert view.name == 'json'
+        assert call == fn2
 
     def test_viewsList(self):
-        self.router.connect(Route(object_type="directory", action="list", view="html"), None)
-        self.router.connect(Route(object_type="directory", action="list", view="json"), None)
-        self.router.connect(Route(object_type="directory", action="list", view="yaml", public = False), None)
-        self.router.connect(Route(object_type="directory", action="tree", view="xml"), None)
-        self.router.connect(Route(object_type="file", action="list", view="yaml"), None)
-        self.router.connect(Route(object_type="directory", action="list", view=None), None)
+        router = Router()
+        router.register_view(View(object_type='file', name='raw'), None)
+        router.register_view(View(object_type='file', name='yaml', public=False), None)
+        router.register_view(View(object_type=None, name='json'), None)
+        router.register_view(View(object_type='directory', name='list'), None)
 
-        assert sorted([r.view for r in self.router.available_views("directory", "list") if r.public]) == ["html", "json"]
-        assert sorted([r.view for r in self.router.available_views("directory", "tar") if r.public]) == []
-        assert sorted([r.view for r in self.router.available_views("file", "list") if r.public]) == ["yaml"]
+        assert sorted([r.name for r in router.get_available_views(FakeFile(name='penguin.txt', object_type='file')) if r.public]) == ['json', 'raw']
+        assert sorted([r.name for r in router.get_available_views(FakeFile(name='penguin.txt', object_type='file'))]) == ['json', 'raw', 'yaml']
+        assert sorted([r.name for r in router.get_available_views(FakeFile(name='penguin', object_type='directory'))]) == ['json', 'list']
 
+    def test_fileView(self):
+        router = Router()
+        router.register_view(View(object_type='file', name='raw'), fn1, 10)
+        router.register_view(View(object_type='file', name='json'), fn2, 1)
+
+        view, call = router.find_view(FakeFile(name='penguin.txt', object_type='file', view='json'))
+        assert view.name == 'json'
+        assert call == fn2
+        view, call = router.find_view(FakeFile(name='penguin.txt', object_type='file', view='json'), 'raw')
+        assert view.name == 'raw'
+        assert call == fn1
+        view, call = router.find_view(FakeFile(name='penguin.txt', object_type='file', view='doesnotexist'))
+        assert view is None
+        assert call is None
 
     def test_verboseName(self):
-        assert Route(object_type="directory", action="list", view="html").verbose_name == 'Html'
-        assert Route(object_type="directory", action="list", view="this_is_a_list").verbose_name == "This Is A List"
-        assert Route(object_type="directory", action="list", view=None).verbose_name is None
-        assert Route(object_type="directory", action="list", view="html", verbose_name="Detailed list").verbose_name is "Detailed list"
+        assert View(object_type='directory', name='list').verbose_name == 'List'
+        assert View(object_type='directory', name='this_is_a_list').verbose_name == 'This Is A List'
+        assert View(object_type='directory', name='list', verbose_name='Detailed list').verbose_name == 'Detailed list'

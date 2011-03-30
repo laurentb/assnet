@@ -23,7 +23,6 @@ from ass2m.cmd import Command, ConsolePart
 from ass2m.storage import Storage
 from ass2m.users import User
 
-from ass2m.routes import Route
 from ass2m.server import Action
 from webob.exc import HTTPFound
 
@@ -268,12 +267,5 @@ class ContactsPlugin(Plugin):
         self.register_cli_command('contacts', 'list', ContactsListCmd)
         self.register_cli_command('contacts', 'remove', ContactsRemoveCmd)
 
-        self.register_web_action(
-            Route(object_type = None, action="login"),
-            LoginAction)
-        self.register_web_action(
-            Route(object_type = None, action="login", method="POST"),
-            LoginAction)
-        self.register_web_action(
-            Route(object_type = None, action="logout"),
-            LogoutAction)
+        self.register_web_action('login', LoginAction)
+        self.register_web_action('logout', LogoutAction)

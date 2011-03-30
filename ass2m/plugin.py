@@ -66,11 +66,19 @@ class Plugin(object):
             cmd.configure_parser(parser)
             parser.set_defaults(cmd=cmd)
 
-    def register_web_action(self, route, action):
+    def register_web_action(self, *args, **kwargs):
         router = self.butt.router
         if not router:
             # not a web application, does not need to register an action.
             return
 
-        router.connect(route, action)
+        router.register_action(*args, **kwargs)
+
+    def register_web_view(self, *args, **kwargs):
+        router = self.butt.router
+        if not router:
+            # not a web application, does not need to register an action.
+            return
+
+        router.register_view(*args, **kwargs)
 

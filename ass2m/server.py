@@ -68,12 +68,7 @@ class Context(object):
         else:
             f = None
 
-        if f and f.isfile():
-            self.object_type = "file"
-        elif f and f.isdir():
-            self.object_type = "directory"
-        else:
-            self.object_type = None
+        self.object_type = f.get_object_type() if f else None
 
         query_vars = self.req.str_GET.items()
         # Path of the file relative to the Ass2m root
@@ -180,9 +175,8 @@ class Dispatcher(Action):
         self._authenticate()
         ctx.template_vars["user"] = ctx.user if ctx.user.exists else None
 
-
         # actions not related to a file or directory
-        action = router.match(None, ctx.req)
+        action = router.find_action(ctx.req.str_GET.get('action'))
         if action is not None:
             return action(ctx).answer()
 
@@ -209,14 +203,13 @@ class Dispatcher(Action):
             ctx.res = HTTPNotFound('File not found')
             return
 
-        # find out current action/view and available views
-        ctx.template_vars["action"], ctx.template_vars["view"] = \
-            router.resolve(ctx.object_type, ctx.req, f.view)
-        ctx.template_vars["available_views"] = \
-            sorted(router.available_views(ctx.object_type, ctx.template_vars["action"]), key=lambda x: x.view)
         # find the action to forward the request to
-        action = router.match(ctx.object_type, ctx.req, f.view)
-        if action is not None:
+        view, action = router.find_view(f, ctx.req.str_GET.get('view'))
+        if view and action:
+            # find out current action/view and available views
+            ctx.template_vars['view'] = view.name
+            ctx.template_vars['available_views'] = \
+                sorted(router.get_available_views(f), key=str)
             return action(ctx).answer()
 
         # action/view not found
@@ -239,15 +232,7 @@ class Server(object):
         will be used.
         """
         self.root = root
-        self.butt = Butt(router=self._create_router())
-
-    def _create_router(self):
-        router = Router()
-        router.set_default_view(None, "html")
-        router.set_default_view("download", "raw")
-        router.set_default_action("file", "download")
-        router.set_default_action("directory", "list")
-        return router
+        self.butt = Butt(router=Router())
 
     def bind(self, hostname, port):
         httpserver.serve(self.process, host=hostname, port=str(port))
