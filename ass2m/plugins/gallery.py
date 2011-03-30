@@ -62,7 +62,7 @@ class DownloadThumbnailAction(Action):
 
         img.thumbnail((size,size))
         s = StringIO()
-        img.save(s, 'jpeg')
+        img.save(s, 'jpeg', quality=95)
         self.ctx.res = DataApp(None, content_type='image/jpeg')
         self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.file.get_realpath()))
 
