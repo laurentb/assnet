@@ -175,10 +175,12 @@ class Dispatcher(Action):
         self._authenticate()
         ctx.template_vars["user"] = ctx.user if ctx.user.exists else None
 
-        # actions not related to a file or directory
-        action = router.find_action(ctx.req.str_GET.get('action'))
-        if action is not None:
-            return action(ctx).answer()
+        # actions: not related to a file or directory
+        # if we are in the root app URL
+        if ctx.url.setvars().href == ctx.root_url.setvars().href:
+            action = router.find_action(ctx.req.str_GET.get('action'))
+            if action is not None:
+                return action(ctx).answer()
 
         # check perms
         f = ctx.file

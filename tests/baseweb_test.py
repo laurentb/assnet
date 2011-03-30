@@ -99,3 +99,19 @@ class BaseWebTest(TestCase):
         assert "Parent directory" in res.body
         res = res.click("Parent directory")
         assert "<h1>Index of /</h1>" in res.body
+
+
+    def test_actionsInRoot(self):
+        os.mkdir(os.path.join(self.root, 'penguins'))
+        with open(os.path.join(self.root, 'penguins', 'gentoo'), 'w') as f:
+            f.write('HELLO')
+        res = self.app.get('/?action=login', status=200)
+        assert 'penguins' not in res.body
+        res = self.app.get('/?foo=bar&action=login', status=200)
+        assert 'penguins' not in res.body
+        self.app.get('/doesnotexist?action=login', status=404)
+        self.app.get('/doesnotexist/?action=login', status=404)
+        res = self.app.get('/penguins/?action=login', status=200)
+        assert 'gentoo' in res.body
+        res = self.app.get('/penguins/gentoo?action=login', status=200)
+        assert 'HELLO' == res.body
