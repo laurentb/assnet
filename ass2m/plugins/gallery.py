@@ -72,5 +72,5 @@ class GalleryPlugin(Plugin):
             View(object_type='directory', name='gallery'),
             ListGalleryAction)
         self.register_web_view(
-            View(object_type='file', name='thumbnail'),
+            View(object_type='file', mimetype='image', name='thumbnail'),
             DownloadThumbnailAction)

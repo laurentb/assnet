@@ -286,5 +286,5 @@ class EventsPlugin(Plugin):
     def init(self):
         self.register_cli_command('event', EventCmd)
         self.register_web_view(
-            View(object_type='file', name='event'),
+            View(object_type='file', mimetype='text/plain', name='event'),
             EventAction)

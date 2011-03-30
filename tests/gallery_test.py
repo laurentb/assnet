@@ -70,3 +70,4 @@ class GalleryTest(TestCase):
         assert img.size[0] == 42
         assert img.size[1] == 42
 
+        res = self.app.get('/images/notanimage.txt?view=thumbnail', status=404)
