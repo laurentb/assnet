@@ -17,7 +17,6 @@
 
 import os
 import Image
-import mimetypes
 from cStringIO import StringIO
 from paste.fileapp import DataApp
 
@@ -35,7 +34,7 @@ class ListGalleryAction(Action):
                 dirs.append(f)
             elif self.ctx.user.has_perms(f, f.PERM_READ):
                 filename = f.get_name()
-                mimetype = mimetypes.guess_type(filename)[0]
+                mimetype = f.get_mimetype()
                 if mimetype is not None and mimetype.startswith('image'):
                     photos.append(f)
                 elif filename == 'DESCRIPTION':

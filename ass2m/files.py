@@ -18,6 +18,7 @@
 import os
 import posixpath
 import hashlib
+import mimetypes
 from math import log
 from datetime import datetime
 
@@ -142,6 +143,9 @@ class File(IObject):
 
     def get_name(self):
         return posixpath.basename(self.path)
+
+    def get_mimetype(self):
+        return mimetypes.guess_type(self.get_name())[0]
 
     def _get_confname(self):
         return os.path.join('files', hashlib.sha1(self.path).hexdigest())
