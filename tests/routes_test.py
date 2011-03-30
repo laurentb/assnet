@@ -8,13 +8,17 @@ def fn2():
     pass
 
 class FakeFile(object):
-    def __init__(self, name, object_type, view = None):
+    def __init__(self, name, object_type, view = None, mimetype = None):
         self.name = name
         self.object_type = object_type
         self.view = view
+        self.mimetype = mimetype
 
     def get_object_type(self):
         return self.object_type
+
+    def get_mimetype(self):
+        return self.mimetype
 
 class RoutesTest(TestCase):
     def test_actions(self):
@@ -96,3 +100,18 @@ class RoutesTest(TestCase):
         assert View(object_type='directory', name='list').verbose_name == 'List'
         assert View(object_type='directory', name='this_is_a_list').verbose_name == 'This Is A List'
         assert View(object_type='directory', name='list', verbose_name='Detailed list').verbose_name == 'Detailed list'
+
+    def test_mimetypes(self):
+        assert View(name='test', mimetype=None).match_mimetype('anything')
+        assert View(name='test', mimetype=None).match_mimetype('every/thing')
+        assert View(name='test', mimetype=None).match_mimetype(None)
+
+        assert not View(name='test', mimetype='image/png').match_mimetype(None)
+        assert View(name='test', mimetype='image/png').match_mimetype('image/png')
+        assert not View(name='test', mimetype='image/png').match_mimetype('image')
+        assert not View(name='test', mimetype='image/png').match_mimetype('image/jpeg')
+
+        assert not View(name='test', mimetype='image').match_mimetype('text/plain')
+        assert not View(name='test', mimetype='image').match_mimetype(None)
+        assert View(name='test', mimetype='image').match_mimetype('image/jpeg')
+        assert View(name='test', mimetype='image').match_mimetype('image/png')

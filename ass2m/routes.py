@@ -20,24 +20,41 @@ __all__ = ['View', 'Router']
 
 
 class View(object):
-    def __init__(self, name, object_type = None,
-            public = True, verbose_name = None):
+    def __init__(self, name, object_type = None, mimetype = None,
+            verbose_name = None, public = True):
         """
-        name: Arbitrary name
-        object_type: "file" or "directory", or None for both
-        public: Show in in the available views list
-        verbose_name: Name to show in the available views list
+        name: Arbitrary name.
+        object_type: "file" or "directory", or None for both.
+        mimetype = mimetypes for which the view is available. Can be \
+            a partial mimetype (for instance "image")
+        verbose_name: Name to show in the available views list.
+        public: Show in in the available views list.
         """
         self.name = name
         self.object_type = object_type
-        self.public = public
+        self.mimetype = mimetype
         self.verbose_name = verbose_name or name.replace('_', ' ').title()
+        self.public = public
 
-    def match(self, object_type):
+    def match_mimetype(self, mimetype):
         """
+        Checks if the mimetype can be handled by the View.
+        If the View mimetype is None, it will accept anything.
+        If the View mimetype exactly the provided mimetype, it will be accepted.
+        If the View mimetype is partial, it will accept any mimetype starting by it,
+        i.e. "image" will accept "image/png" and "image/jpeg".
         Returns a boolean.
         """
-        return \
+        return self.mimetype is None or \
+            self.mimetype == mimetype or \
+            (mimetype and self.mimetype == mimetype.split('/')[0])
+
+    def match(self, object_type, mimetype):
+        """
+        Checks if the View is suitable for given the parameters.
+        Returns a boolean.
+        """
+        return self.match_mimetype(mimetype) and \
             (self.object_type == object_type or self.object_type is None)
 
     def __str__(self):
@@ -88,10 +105,11 @@ class Router(object):
         if name is None:
             name = f.view
         object_type = f.get_object_type()
+        mimetype = f.get_mimetype()
 
         for priority in sorted(self.views.keys(), reverse=True):
             for view, action in self.views[priority]:
-                if view.match(object_type):
+                if view.match(object_type, mimetype):
                     # if no view was requested, or if we found the requested view
                     if name is None or view.name == name:
                         return (view, action)
@@ -103,7 +121,9 @@ class Router(object):
         Get all the available views for a file.
         """
         object_type = f.get_object_type()
+        mimetype = f.get_mimetype()
+
         for views in self.views.itervalues():
             for view, action in views:
-                if view.match(object_type):
+                if view.match(object_type, mimetype):
                     yield view
