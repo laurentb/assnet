@@ -206,7 +206,10 @@ class ViewAction(Action):
     pass
 
 
-class Dispatcher(Action):
+class Dispatcher(object):
+    def __init__(self, ctx):
+        self.ctx = ctx
+
     def _authenticate(self):
         signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
         cookie = self.ctx.req.str_cookies.get('ass2m_auth')
@@ -214,7 +217,7 @@ class Dispatcher(Action):
         if user:
             self.ctx.user = self.ctx.storage.get_user(user)
 
-    def answer(self):
+    def dispatch(self):
         ctx = self.ctx
         router = ctx.router
 
@@ -295,6 +298,5 @@ class Server(object):
         if self.root:
             environ.setdefault("ASS2M_ROOT", self.root)
         ctx = Context(self.butt.router, environ, start_response)
-        dispatcher = Dispatcher(ctx)
-        dispatcher.answer()
+        Dispatcher(ctx).dispatch()
         return ctx.respond()
