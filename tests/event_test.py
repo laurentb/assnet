@@ -20,6 +20,11 @@ class EventTest(TestCase):
 
         user = User(storage, 'penguin')
         user.realname = 'Penguin'
+        user.password = 'monkey1'
+        user.save()
+        user = User(storage, 'platypus')
+        user.realname = 'Platypus'
+        user.password = 'passw0rd'
         user.save()
 
         event_text = """Reunion
@@ -34,8 +39,9 @@ Place:
 Somewhere
 
 Attendees:
-[x] penguin (Penguin)
--- 1 confirmed, 0 waiting, 0 declined
+[ ] penguin (Penguin)
+[x] platypus (Platypus)
+-- 0 confirmed, 0 waiting, 0 declined
 
         """
         with open(os.path.join(self.root, 'event1.txt'), 'w') as f:
@@ -43,6 +49,7 @@ Attendees:
 
         f = storage.get_file('/event1.txt')
         f.view = 'event'
+        f.perms['u.penguin'] = f.PERM_WRITE
         f.save()
 
     def tearDown(self):
@@ -52,3 +59,16 @@ Attendees:
     def test_viewEvent(self):
         res = self.app.get('/event1.txt', status=200)
         assert '<h3>Place</h3>' in res.body
+        assert 'Decline' not in res.body
+
+        res = self.app.get('/?action=login', status=200)
+        form = res.form
+        form['username'] = 'penguin'
+        form['password'] = 'monkey1'
+        res = form.submit(status=302)
+        res = res.follow(status=200)
+
+        res = self.app.get('/event1.txt', status=200)
+        assert '<h3>Place</h3>' in res.body
+        assert '<strong>waiting</strong>' in res.body
+        assert 'Decline' in res.body
