@@ -114,6 +114,7 @@ class BaseWebTest(TestCase):
         assert 'HELLO' == res.body
 
     def test_methods(self):
+        self.app.head('/?view=text_list', status=200)
         self.app.get('/?view=text_list', status=200)
         self.app.post('/?view=text_list', status=405)
         self.app.put('/?view=text_list', status=405)
@@ -124,3 +125,12 @@ class BaseWebTest(TestCase):
 
         self.app.get('/?action=login', status=200)
         self.app.post('/?action=login', status=200)
+        self.app.post('/?action=login&_method=DELETE', status=405)
+        self.app.post('/?action=login', {'_method': 'DELETE'}, status=405)
+
+        self.app.post('/?_method=GET', status=405)
+        self.app.post('/?action=login&_method=HEAD', status=405)
+        self.app.post('/?action=login&_method=HEAD', status=405)
+        self.app.get('/?action=login&_method=GET', status=405)
+        self.app.get('/?action=login&_method=PUT', status=405)
+        self.app.get('/?action=login&_method=PENGUIN', status=405)

@@ -163,9 +163,25 @@ class Action(object):
         self.ctx = ctx
 
     def answer(self):
-        method = self.ctx.req.method
+        """
+        Find out the HTTP request method is and call the right
+        method.
+        For user agents that do not support PUT or DELETE, the _method parameter
+        can be provided in either the POST data or the query string.
+        """
+        req = self.ctx.req
+        method = req.method
+        if method in ('POST', 'GET'):
+            param_method = req.str_params.get('_method')
+            if param_method:
+                # it's silly to simulate these requests with a _method param
+                if param_method not in ('HEAD', 'GET', 'POST'):
+                    method = param_method
+                else:
+                    method = None
         if method in self.METHODS:
             return getattr(self, method.lower(), self._unhandled_method)()
+        return self._unhandled_method()
 
     def head(self):
         return self.get()
