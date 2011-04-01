@@ -235,7 +235,10 @@ class ContactsRemoveCmd(Command):
 
 
 class LoginAction(Action):
-    def answer(self):
+    def get(self):
+        self.ctx.res.body = self.ctx.render('login.html')
+
+    def post(self):
         form_username = self.ctx.req.str_POST.get('username')
         form_password = self.ctx.req.str_POST.get('password')
         if form_username and form_password:
@@ -245,12 +248,11 @@ class LoginAction(Action):
                 # set cookie
                 self.ctx.login(user)
                 return
-
-        self.ctx.res.body = self.ctx.render('login.html')
+        self.get()
 
 
 class LogoutAction(Action):
-    def answer(self):
+    def get(self):
         referer = self.ctx.req.referer or self.ctx.root_url.href
         self.ctx.res = HTTPFound(location=referer)
         self.ctx.logout()

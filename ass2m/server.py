@@ -24,7 +24,7 @@ from mako.lookup import TemplateLookup
 from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from webob import Request, Response
-from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden
+from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
 from paste.url import URL
 import urlparse
 
@@ -33,6 +33,8 @@ from .storage import Storage
 from .version import VERSION
 from .users import Anonymous
 from .routes import Router
+
+__all__ = ['ViewAction', 'Action', 'Server']
 
 class Context(object):
     SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+' % re.escape(r'/.'))
@@ -150,11 +152,42 @@ class Context(object):
 
 
 class Action(object):
+    """
+    REST action.
+    Overload any HTTP method you wish. By default, head()
+    will call get().
+    """
+    METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'DELETE']
+
     def __init__(self, ctx):
         self.ctx = ctx
 
     def answer(self):
-        raise NotImplementedError()
+        method = self.ctx.req.method
+        if method in self.METHODS:
+            return getattr(self, method.lower(), self._unhandled_method)()
+
+    def head(self):
+        return self.get()
+
+    def get(self):
+        return self._unhandled_method()
+
+    def post(self):
+        return self._unhandled_method()
+
+    def put(self):
+        return self._unhandled_method()
+
+    def delete(self):
+        return self._unhandled_method()
+
+    def _unhandled_method(self):
+        self.ctx.res = HTTPMethodNotAllowed()
+
+
+class ViewAction(Action):
+    pass
 
 
 class Dispatcher(Action):

@@ -25,7 +25,7 @@ from datetime import datetime
 
 from ass2m.plugin import Plugin
 from ass2m.routes import View
-from ass2m.server import Action
+from ass2m.server import ViewAction
 from ass2m.cmd import Command
 
 from .contacts import ContactsSelection
@@ -244,8 +244,8 @@ class EventCmd(Command):
         for added in set(cs.sel_users) - set(event.users.keys()):
             event.add_user(added)
 
-class EventAction(Action):
-    def answer(self):
+class EventAction(ViewAction):
+    def get(self):
         user_state = None
         error_message = None
         confirm_message = None
@@ -281,6 +281,9 @@ class EventAction(Action):
         self.ctx.template_vars['confirm_message'] = confirm_message
         self.ctx.template_vars['stylesheets'].append('event.css')
         self.ctx.res.body = self.ctx.render('event.html')
+
+    def post(self):
+        self.get()
 
 class EventsPlugin(Plugin):
     def init(self):

@@ -22,10 +22,10 @@ from paste.fileapp import DataApp
 
 from ass2m.plugin import Plugin
 from ass2m.routes import View
-from ass2m.server import Action
+from ass2m.server import ViewAction
 
-class ListGalleryAction(Action):
-    def answer(self):
+class ListGalleryAction(ViewAction):
+    def get(self):
         dirs = []
         photos = []
         description = None
@@ -46,10 +46,10 @@ class ListGalleryAction(Action):
         self.ctx.template_vars['description'] = description
         self.ctx.res.body = self.ctx.render('list-gallery.html')
 
-class DownloadThumbnailAction(Action):
+class DownloadThumbnailAction(ViewAction):
     DEFAULT_SIZE = 300
 
-    def answer(self):
+    def get(self):
         img = Image.open(self.ctx.file.get_realpath())
 
         try:

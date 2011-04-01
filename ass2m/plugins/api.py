@@ -20,12 +20,12 @@ import json
 from ass2m.plugin import Plugin
 
 from ass2m.routes import View
-from ass2m.server import Action
+from ass2m.server import ViewAction
 
 __all__ = ['ApiPlugin']
 
 
-class InfoAction(Action):
+class InfoAction(ViewAction):
     def get_fileinfo(self, f):
         fileinfo = dict()
         if f.isdir():
@@ -39,13 +39,13 @@ class InfoAction(Action):
 
 
 class JsonInfoAction(InfoAction):
-    def answer(self):
+    def get(self):
         self.ctx.res.content_type = 'application/json'
         self.ctx.res.body = json.dumps(self.get_fileinfo(self.ctx.file))
 
 
 class JsonListAction(InfoAction):
-    def answer(self):
+    def get(self):
         files = dict()
         for f in self.ctx.iter_files():
             files[f.get_name()] = self.get_fileinfo(f)
@@ -56,8 +56,8 @@ class JsonListAction(InfoAction):
         self.ctx.res.body = json.dumps(info)
 
 
-class TextListAction(Action):
-    def answer(self):
+class TextListAction(ViewAction):
+    def get(self):
         filenames = []
         for f in self.ctx.iter_files():
             if f.isdir():

@@ -85,11 +85,9 @@ class BaseWebTest(TestCase):
         assert res.location == "http://localhost/penguins/gentoo"
         res.follow(status=200)
 
-
     def test_notFound(self):
         self.app.get("/penguins/", status=404)
         self.app.get("/penguins", status=404)
-
 
     def test_listWithParent(self):
         os.mkdir(os.path.join(self.root, "penguins"))
@@ -99,7 +97,6 @@ class BaseWebTest(TestCase):
         assert "Parent directory" in res.body
         res = res.click("Parent directory")
         assert "<h1>Index of /</h1>" in res.body
-
 
     def test_actionsInRoot(self):
         os.mkdir(os.path.join(self.root, 'penguins'))
@@ -115,3 +112,15 @@ class BaseWebTest(TestCase):
         assert 'gentoo' in res.body
         res = self.app.get('/penguins/gentoo?action=login', status=200)
         assert 'HELLO' == res.body
+
+    def test_methods(self):
+        self.app.get('/?view=text_list', status=200)
+        self.app.post('/?view=text_list', status=405)
+        self.app.put('/?view=text_list', status=405)
+        self.app.delete('/?view=text_list', status=405)
+
+        self.app.get('/?action=logout', status=302)
+        self.app.post('/?action=logout', status=405)
+
+        self.app.get('/?action=login', status=200)
+        self.app.post('/?action=login', status=200)

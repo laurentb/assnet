@@ -25,7 +25,7 @@ from ass2m.storage import Storage
 from ass2m.files import File
 
 from ass2m.routes import View
-from ass2m.server import Action
+from ass2m.server import Action, ViewAction
 from paste.fileapp import FileApp
 from webob.exc import HTTPNotFound, HTTPPreconditionFailed
 
@@ -171,14 +171,14 @@ class Ass2mFileApp(FileApp):
         return (content_type, guess[1])
 
 
-class DownloadAction(Action):
-    def answer(self):
+class DownloadAction(ViewAction):
+    def get(self):
         # serve the file, delegate everything to to FileApp
         self.ctx.res = Ass2mFileApp(self.ctx.file.get_realpath())
 
 
-class ListAction(Action):
-    def answer(self):
+class ListAction(ViewAction):
+    def get(self):
         dirs = []
         files = []
         for f in self.ctx.iter_files():
@@ -194,7 +194,8 @@ class ListAction(Action):
 
 class AssetAction(Action):
     SANITIZE_REGEXP = re.compile(r'\w+\.\w+')
-    def answer(self):
+
+    def get(self):
         filename = self.ctx.req.str_GET.get('file')
         if self.SANITIZE_REGEXP.match(filename):
             paths = [os.path.join(path, 'assets') for path in self.ctx.DATA_PATHS]
