@@ -114,7 +114,7 @@ class BaseWebTest(TestCase):
         assert 'HELLO' == res.body
 
     def test_methods(self):
-        self.app.head('/?view=text_list', status=200)
+        self.app._gen_request('HEAD', '/?view=text_list', status=200)
         self.app.get('/?view=text_list', status=200)
         self.app.post('/?view=text_list', status=405)
         self.app.put('/?view=text_list', status=405)
