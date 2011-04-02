@@ -211,11 +211,18 @@ class Dispatcher(object):
         self.ctx = ctx
 
     def _authenticate(self):
-        signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
+        authkey = self.ctx.req.str_params.get('authkey')
         cookie = self.ctx.req.str_cookies.get('ass2m_auth')
-        user = cookie and signer.auth(cookie)
-        if user:
-            self.ctx.user = self.ctx.storage.get_user(user)
+        if authkey:
+            for user in self.ctx.storage.iter_users():
+                if authkey == user.key:
+                    # set the cookie for the following requests
+                    return self.ctx.login(user)
+        elif cookie:
+            signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
+            username = signer.auth(cookie)
+            if username:
+                self.ctx.user = self.ctx.storage.get_user(username)
 
     def dispatch(self):
         ctx = self.ctx

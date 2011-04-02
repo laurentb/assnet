@@ -17,6 +17,10 @@ class LoginTest(TestCase):
         user = User(storage, 'penguin')
         user.realname = 'Penguin'
         user.password = 'monkey1'
+        user.key = 'fabf37d746da8a45df63489f642b3813'
+        user.save()
+        user = User(storage, 'platypus')
+        user.realname = 'Platypus'
         user.save()
         server = Server(self.root)
         self.app = TestApp(server.process)
@@ -49,6 +53,24 @@ class LoginTest(TestCase):
         assert 'Current user: <abbr title="Penguin">penguin</abbr>' in res.body
 
         res = self.app.get('/')
+        assert 'Login' not in res.body
+        assert 'Logged as <abbr title="Penguin">penguin</abbr>' in res.body
+        res = self.app.get('/?action=logout', status=302)
+        res = res.follow(status=200)
+        assert 'Login' in res.body
+        assert 'Logged as' not in res.body
+
+    def test_authKeyLogin(self):
+        res = self.app.get('/?action=login', status=200)
+        assert 'Not logged in.' in res.body
+
+        # we are authentified by the key
+        res = self.app.get('/?authkey=fabf37d746da8a45df63489f642b3813', status=200)
+        assert 'Login' not in res.body
+        assert 'Logged as <abbr title="Penguin">penguin</abbr>' in res.body
+
+        # the authentification is kept
+        res = self.app.get('/', status=200)
         assert 'Login' not in res.body
         assert 'Logged as <abbr title="Penguin">penguin</abbr>' in res.body
         res = self.app.get('/?action=logout', status=302)
