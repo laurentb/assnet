@@ -125,12 +125,7 @@ class BaseWebTest(TestCase):
 
         self.app.get('/?action=login', status=200)
         self.app.post('/?action=login', status=200)
-        self.app.post('/?action=login&_method=DELETE', status=405)
         self.app.post('/?action=login', {'_method': 'DELETE'}, status=405)
 
         self.app.post('/?_method=GET', status=405)
-        self.app.post('/?action=login&_method=HEAD', status=405)
-        self.app.post('/?action=login&_method=HEAD', status=405)
-        self.app.get('/?action=login&_method=GET', status=405)
-        self.app.get('/?action=login&_method=PUT', status=405)
-        self.app.get('/?action=login&_method=PENGUIN', status=405)
+        self.app.post('/?action=login', {'_method': 'HEAD'}, status=405)

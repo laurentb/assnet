@@ -171,14 +171,14 @@ class Action(object):
         """
         req = self.ctx.req
         method = req.method
-        if method in ('POST', 'GET'):
-            param_method = req.str_params.get('_method')
+        if method == 'POST':
+            param_method = req.str_POST.get('_method')
             if param_method:
                 # it's silly to simulate these requests with a _method param
-                if param_method not in ('HEAD', 'GET', 'POST'):
-                    method = param_method
-                else:
+                if param_method in ('HEAD', 'GET', 'POST'):
                     method = None
+                else:
+                    method = param_method
         if method in self.METHODS:
             return getattr(self, method.lower(), self._unhandled_method)()
         return self._unhandled_method()
