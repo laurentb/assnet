@@ -26,6 +26,7 @@ from paste.auth.cookie import AuthCookieSigner, new_secret
 from webob import Request, Response
 from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
 from paste.url import URL
+from datetime import timedelta
 import urlparse
 
 from .butt import Butt
@@ -138,7 +139,8 @@ class Context(object):
         assert user.exists
         signer = AuthCookieSigner(secret=self.cookie_secret)
         cookie = signer.sign(user.name)
-        self.res.set_cookie('ass2m_auth', cookie, httponly=True)
+        self.res.set_cookie('ass2m_auth', cookie,
+                max_age=timedelta(days=120), httponly=True, path=self.root_url.url)
         self.user = user
 
     def logout(self):
