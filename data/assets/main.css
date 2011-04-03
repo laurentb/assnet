@@ -59,7 +59,7 @@ header nav menu {
 header nav menu li {
     display: inline;
     background-color: white;
-    padding: 0.5em;
+    padding: 2px;
     border: 1px solid gray;
 }
 
@@ -160,5 +160,19 @@ article.info section {
 
 article.info ul.users {
     list-style-type: none;
+    margin: 5px;
+}
+
+nav#toolbox {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+}
+
+menu#available_views {
+    position: absolute;
+    right: 0px;
+    top: 0px;
     margin: 5px;
 }
