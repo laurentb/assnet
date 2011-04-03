@@ -68,6 +68,19 @@ header nav menu li.selected a {
     color: black;
 }
 
+header nav.breadcrumbs {
+    display: inline;
+}
+
+header nav.breadcrumbs a.last {
+    color: black;
+}
+
+
+header h1 {
+    font-weight: normal;
+}
+
 footer {
     font-size: medium;
     font-family: monospace;

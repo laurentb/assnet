@@ -11,7 +11,7 @@
     </tr>
 </thead>
 <tbody>
-    % if path != '/':
+    % if path:
     <tr class="parent">
         <td class="filename"><a href="../">Parent directory</a></td>
     </tr>
@@ -37,7 +37,13 @@
 </table>
 </article>
 
-<%def name="title()">Index of ${path | h}</%def>
+<%def name="title(html=False)">
+% if html:
+    Index of ${partials.breadcrumbs(path)}
+% else:
+    Index of ${path}/
+% endif
+</%def>
 
 <%def name="header()">
     ${parent.header()}

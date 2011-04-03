@@ -18,7 +18,7 @@
     <tr><th>Name</th></tr>
 </thead>
 <tbody>
-    % if path != '/':
+    % if path:
     <tr class="parent">
         <td class="filename"><a href="../">Parent directory</a></td>
     </tr>
@@ -33,7 +33,13 @@
 </section>
 </article>
 
-<%def name="title()">Gallery of ${path | h}</%def>
+<%def name="title(html=False)">
+% if html:
+    Gallery of ${partials.breadcrumbs(path)}
+% else:
+    Gallery of ${path}/
+% endif
+</%def>
 
 <%def name="header()">
     ${parent.header()}

@@ -113,7 +113,7 @@ class Context(object):
     def _init_template_vars(self):
         self.template_vars = {
             'ass2m_version': VERSION,
-            'path': self.path or "/",
+            'path': self.path,
             'url': self.url,
             'root_url': self.root_url,
             'global': dict(),

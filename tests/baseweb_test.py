@@ -23,7 +23,7 @@ class BaseWebTest(TestCase):
 
     def test_listAndDownload(self):
         res = self.app.get("/")
-        assert "<h1>Index of /</h1>" in res.body
+        assert "<title>Index of /</title>" in res.body
 
         with open(os.path.join(self.root, "penguins_are_cute"), 'w') as f:
             f.write("HELLO")
@@ -96,7 +96,7 @@ class BaseWebTest(TestCase):
         res = self.app.get("/penguins/", status=200)
         assert "Parent directory" in res.body
         res = res.click("Parent directory")
-        assert "<h1>Index of /</h1>" in res.body
+        assert "<title>Index of /</title>" in res.body
 
     def test_actionsInRoot(self):
         os.mkdir(os.path.join(self.root, 'penguins'))

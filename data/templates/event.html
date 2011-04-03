@@ -73,7 +73,13 @@ event_classes = {
 </section>
 </article>
 
-<%def name="title()">Event ${path | h}</%def>
+<%def name="title(html=False)">
+% if html:
+    Event ${partials.breadcrumbs(path, isdir=False)}
+% else:
+    Event ${path}
+% endif
+</%def>
 
 <%def name="header()">
     ${parent.header()}

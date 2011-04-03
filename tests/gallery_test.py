@@ -41,7 +41,7 @@ class GalleryTest(TestCase):
 
     def test_listAndDefaultView(self):
         res = self.app.get('/images/')
-        assert '<h1>Index of /images</h1>' in res.body
+        assert '<title>Index of /images/</title>' in res.body
         assert '<img' not in res.body
         assert 'nothing' in res.body
 
@@ -53,7 +53,7 @@ class GalleryTest(TestCase):
         res2 = self.app.get('/images/')
 
         for res in (res1, res2):
-            assert '<h1>Gallery of /images</h1>' in res.body
+            assert '<title>Gallery of /images/</title>' in res.body
             assert '<img' in res.body
             assert 'nothing' in res.body
 

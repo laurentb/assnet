@@ -31,3 +31,38 @@ view_links = [(available_view.verbose_name, url.setvar(view=available_view.name)
 </%def>
 
 <%def name="display_user(u)"><abbr title="${u.realname | h}">${u.name | h}</abbr></%def>
+
+<%def name="breadcrumbs(path, isdir=True)">
+<%
+if path == '/':
+    paths = ['[root]']
+else:
+    paths = path.split('/')
+    paths[0] = '[root]'
+%>
+<nav class="breadcrumbs">
+% for index, pathpart in enumerate(paths, 1):
+<%
+classes = []
+parturl = '../' * (len(paths)-index)
+chr = '/'
+%>\
+% if index == len(paths):
+<%
+classes.append('last')
+parturl = url.href
+if not isdir:
+    chr = ''
+%>\
+% endif
+% if index == 1:
+<%
+classes.append('root')
+parturl = root_url.href
+chr = ':/'
+%>\
+% endif
+<a class="${' '.join(classes)}" href="${parturl}">${pathpart | h}</a>${chr}\
+% endfor
+</nav>
+</%def>
