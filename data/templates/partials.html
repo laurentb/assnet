@@ -1,14 +1,14 @@
 <%def name="viewslist()">
 <%
-view_links = [(available_view.verbose_name, url.setvar(view=available_view.name).href) \
+view_links = [(available_view, url.setvar(view=available_view.name).href) \
                 for available_view in available_views if available_view.public is True]
 %>
     <menu>
         % for available_view, view_url in view_links:
-            % if available_view == view:
-            <li class="selected"><a href="${view_url}">${available_view | h}</a></li>
+            % if available_view.name == view:
+            <li class="selected"><a href="${view_url}">${available_view.verbose_name | h}</a></li>
             % else:
-            <li><a href="${view_url}">${available_view | h}</a></li>
+            <li><a href="${view_url}">${available_view.verbose_name | h}</a></li>
             % endif
         % endfor
     </menu>
