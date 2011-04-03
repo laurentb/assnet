@@ -68,6 +68,15 @@ class BaseWebTest(TestCase):
         assert res.location == "http://localhost/"
         res.follow(status=200)
 
+        # it fails without the http://localhost
+        res = self.app.get("http://localhost///", status=302)
+        assert res.location == "http://localhost/"
+        res.follow(status=200)
+
+        res = self.app.get("http://localhost////", status=302)
+        assert res.location == "http://localhost/"
+        res.follow(status=200)
+
         # more sanitization
         res = self.app.get("/penguins///", status=302)
         assert res.location == "http://localhost/penguins/"

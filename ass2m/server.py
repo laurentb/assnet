@@ -37,7 +37,7 @@ from .routes import Router
 __all__ = ['ViewAction', 'Action', 'Server']
 
 class Context(object):
-    SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+' % re.escape(r'/.'))
+    SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+|/+' % re.escape(r'/.'))
     DATA_PATHS = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
              '/usr/share/ass2m',
              '/usr/local/share/ass2m']
@@ -70,23 +70,19 @@ class Context(object):
         else:
             f = None
 
+        # File object, related to the real one on the file system
+        self.file = f
         self.object_type = f.get_object_type() if f else None
 
         query_vars = self.req.str_GET.items()
         # Path of the file relative to the Ass2m root
         self.path = path
-        # File object, related to the real one on the file system
-        self.file = f
+        # Root application URL (useful for links to Actions)
+        self.root_url = URL(urlparse.urlparse(self.req.application_url).path)
         # URL after Ass2m web application base URL
-        self.relurl = URL(path, query_vars)
-        # Complete URL
-        appurl = urlparse.urlparse(self.req.application_url).path
-        if self.object_type == 'directory':
-            self.url = URL(appurl + path + '/', query_vars)
-        else:
-            self.url = URL(appurl + path, query_vars)
-        # Root application URL (for links to special actions)
-        self.root_url = URL(appurl)
+        self.relurl = URL(urlparse.urlparse(self.req.path_info).path, query_vars)
+        # Complete URL (without host)
+        self.url = URL(urlparse.urljoin(self.root_url.url, self.relurl.url[1:]), query_vars)
 
     def _init_cookie_secret(self):
         if not self.storage:
@@ -252,14 +248,14 @@ class Dispatcher(object):
             return
 
         # normalize paths
-        if f.file_exists():
-            goodpath = ctx.path if len(ctx.path) else "/"
-            if f.isdir() and goodpath[-1] != "/":
+        if ctx.object_type:
+            goodpath = ctx.path
+            if ctx.object_type == 'directory' and not goodpath.endswith('/'):
                 # there should be a trailing slash in the client URL
                 # for directories but not for files
-                goodpath += "/"
+                goodpath += '/'
             if ctx.req.path_info != goodpath:
-                goodlocation = URL(ctx.req.application_url + goodpath, vars=ctx.url.vars)
+                goodlocation = URL(urlparse.urljoin(ctx.root_url.url, goodpath), vars=ctx.url.vars)
                 ctx.res = HTTPFound(location=goodlocation.href)
                 return
 
