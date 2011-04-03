@@ -49,6 +49,11 @@ class Context(object):
         self._environ = environ
         self._start_response = start_response
         self.req = Request(environ)
+        # fix script_name for weird configurations
+        if 'SCRIPT_URL' in environ:
+            script_path = urlparse.urlparse(environ['SCRIPT_URL']).path
+            level = len(self.req.path_info.split('/')) - 1
+            environ['SCRIPT_NAME'] = '/'.join(script_path.split('/')[:-level])+'/'
         self.res = Response()
         self.user = Anonymous()
 
