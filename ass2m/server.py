@@ -80,9 +80,13 @@ class Context(object):
         # URL after Ass2m web application base URL
         self.relurl = URL(path, query_vars)
         # Complete URL
-        self.url = URL(urlparse.urlparse(self.req.application_url).path + path, query_vars)
+        appurl = urlparse.urlparse(self.req.application_url).path
+        if self.object_type == 'directory':
+            self.url = URL(appurl + path + '/', query_vars)
+        else:
+            self.url = URL(appurl + path, query_vars)
         # Root application URL (for links to special actions)
-        self.root_url = URL(urlparse.urlparse(self.req.application_url).path)
+        self.root_url = URL(appurl)
 
     def _init_cookie_secret(self):
         if not self.storage:
