@@ -161,6 +161,25 @@ class ChModCmd(Command):
                 f.perms[args.who] = (perms & ~to_remove) | to_add
                 f.save()
 
+class ResolveCmd(Command):
+    DESCRIPTION = 'Get the storage name of a path'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('path', nargs='+')
+
+    def cmd(self, args):
+        for path in args.path:
+            if not os.path.exists(path):
+                print >>sys.stderr, 'Error: Path "%s" does not exist.' % path
+                continue
+
+            f = self.storage.get_file_from_realpath(os.path.realpath(path))
+            if not f:
+                print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
+                continue
+            print '%s => %s' % (f.path, os.path.join(self.storage.path, f._get_confname()))
+
 class Ass2mFileApp(FileApp):
     def guess_type(self):
         # add UTF-8 by default to text content-types
@@ -215,6 +234,7 @@ class CorePlugin(Plugin):
         self.register_cli_command('tree', TreeCmd)
         self.register_cli_command('chmod', ChModCmd)
         self.register_cli_command('chview', ChViewCmd)
+        self.register_cli_command('resolve', ResolveCmd)
 
         self.register_web_view(
                 View(object_type='file', name='raw'),
