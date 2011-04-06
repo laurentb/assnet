@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-from urlparse import urlparse, urlunparse
+from urlparse import urlsplit, urlunsplit
 from urllib import quote
 from paste.url import URL
 
@@ -26,6 +26,15 @@ def quote_url(url):
     """
     Quote the path part of an URL object and return the full URL as a string.
     """
-    purl = urlparse(url.url)
-    purl = urlunparse((purl.scheme, purl.netloc, quote(purl.path), purl.params, purl.query, purl.fragment))
+    purl = urlsplit(url.url)
+    qpath = quote(purl.path)
+    # queries should not be in the URL, it means it's a '?' in a file
+    if purl.query:
+        qpath += quote('?'+purl.query)
+    purl = urlunsplit((
+        purl.scheme,
+        purl.netloc,
+        qpath,
+        '',
+        purl.fragment))
     return URL(purl, vars=url.vars).href
