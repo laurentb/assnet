@@ -18,7 +18,7 @@
     % endif
     % for dir in dirs:
     <tr class="dir">
-        <td class="filename"><a href="${dir.get_name()}/">${dir.get_name() | h}</a>/</td>
+        <td class="filename"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
         <td class="lastmod" colspan="2">
             <time datetime="${dir.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${dir.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>
@@ -26,7 +26,7 @@
     % endfor
     % for file in files:
     <tr class="file">
-        <td class="filename"><a href="${file.get_name()}">${file.get_name() | h}</a></td>
+        <td class="filename"><a href="${URL(file.get_name()) | n,U}">${file.get_name() | h}</a></td>
         <td class="lastmod">
             <time datetime="${file.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${file.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>

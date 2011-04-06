@@ -103,9 +103,12 @@ class Context(object):
 
     def _init_templates(self):
         paths = [os.path.join(path, 'templates') for path in self.DATA_PATHS]
+        imports = ['from ass2m.filters import compact as cpt, quote_url as U',
+                'from paste.url import URL']
         self.lookup = TemplateLookup(directories=paths, collection_size=20,
                          output_encoding='utf-8', input_encoding='utf-8',
-                         default_filters=['decode.utf8'])
+                         default_filters=['decode.utf8'],
+                         imports=imports)
 
     def _init_default_response(self):
         # defaults, may be changed later on

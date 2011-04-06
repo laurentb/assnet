@@ -7,14 +7,14 @@
     % if available_views:
         ${altrels()}
     % endif
-    <title>${capture(self.title, html=False).replace('\n', ' ') | trim}</title>
+    <title>${capture(self.title, html=False) | cpt}</title>
     % for stylesheet in stylesheets:
-        <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet).href}" />
+        <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet) | n,U}" />
     % endfor
     % if path:
         <link rel="up" href="../" />
     % endif
-    <link rel="top" href="${root_url.href}" />
+    <link rel="top" href="${root_url | n,U}" />
 </head>
 <body>
     <header>${self.header()}</header>
@@ -25,20 +25,20 @@
 
 <%def name="altrels()">
     <%
-    view_links = [(available_view.verbose_name, url.setvar(view=available_view.name).href) \
+    view_links = [(available_view.verbose_name, url.setvar(view=available_view.name)) \
                     for available_view in available_views]
     %>
     % for available_view, view_url in view_links:
         % if available_view == view:
-            <link rel="canonical" href="${view_url}" />
+            <link rel="canonical" href="${view_url | n,U}" />
         % else:
-            <link rel="alternate" title="Alternate view ${available_view | h}" href="${view_url}" />
+            <link rel="alternate" title="Alternate view ${available_view | h}" href="${view_url | n,U}" />
         % endif
     % endfor
 </%def>
 
 <%def name="header()">
-    <h1>${self.title(html=True) | trim}</h1>
+    <h1>${capture(self.title, html=True) | cpt}</h1>
 </%def>
 
 <%def name="footer()">

@@ -1,14 +1,14 @@
 <%def name="viewslist()">
 <%
-view_links = [(available_view, url.setvar(view=available_view.name).href) \
+view_links = [(available_view, url.setvar(view=available_view.name)) \
                 for available_view in available_views if available_view.public is True]
 %>
     <menu id="available_views">
         % for available_view, view_url in view_links:
             % if available_view.name == view:
-            <li class="selected"><a href="${view_url}">${available_view.verbose_name | h}</a></li>
+            <li class="selected"><a href="${view_url | n,U}">${available_view.verbose_name | h}</a></li>
             % else:
-            <li><a href="${view_url}">${available_view.verbose_name | h}</a></li>
+            <li><a href="${view_url | n,U}">${available_view.verbose_name | h}</a></li>
             % endif
         % endfor
     </menu>
@@ -17,9 +17,9 @@ view_links = [(available_view, url.setvar(view=available_view.name).href) \
 <%def name="loginbox()">
     % if user:
         Logged as ${display_user(user)}
-        <a href="${root_url.setvar(action='logout').href}">Logout</a>
+        <a href="${root_url.setvar(action='logout') | n,U}">Logout</a>
     % else:
-        <a href="${root_url.setvar(action='login').href}">Login</a>
+        <a href="${root_url.setvar(action='login') | n,U}">Login</a>
     % endif
 </%def>
 
@@ -44,13 +44,13 @@ else:
 % for index, pathpart in enumerate(paths, 1):
 <%
 classes = []
-parturl = '../' * (len(paths)-index)
+parturl = URL('../' * (len(paths)-index))
 chr = '/'
 %>\
 % if index == len(paths):
 <%
 classes.append('last')
-parturl = url.href
+parturl = url
 if not isdir:
     chr = ''
 %>\
@@ -58,11 +58,11 @@ if not isdir:
 % if index == 1:
 <%
 classes.append('root')
-parturl = root_url.href
+parturl = root_url
 chr = ':/'
 %>\
 % endif
-<a class="${' '.join(classes)}" href="${parturl}">${pathpart | h}</a>${chr}\
+<a class="${' '.join(classes)}" href="${parturl | n,U}">${pathpart | h}</a>${chr}\
 % endfor
 </nav>
 </%def>
