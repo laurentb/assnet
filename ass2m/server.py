@@ -84,7 +84,7 @@ class Context(object):
         # Path of the file relative to the Ass2m root
         self.path = path
         # Root application URL (useful for links to Actions)
-        self.root_url = URL(urlparse.urlparse(self.req.application_url).path)
+        self.root_url = URL(urlparse.urlparse(self.req.script_name).path)
         # URL after Ass2m web application base URL
         self.relurl = URL(urlparse.urlparse(self.req.path_info).path, query_vars)
         # Complete URL (without host)
