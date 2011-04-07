@@ -18,7 +18,7 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-from urlparse import urlsplit, urlunsplit
+from urlparse import urlsplit
 from urllib import quote
 from paste.url import URL
 
@@ -28,16 +28,10 @@ def compact(text):
 def quote_url(url):
     """
     Quote the path part of an URL object and return the full URL as a string.
+    Any special characters in the URL are not considered as the query string or any other
+    parameters, they should be in their dedicated variables of the URL class.
     """
     purl = urlsplit(url.url)
-    qpath = quote(purl.path)
-    # queries should not be in the URL, it means it's a '?' in a file
-    if purl.query:
-        qpath += quote('?'+purl.query)
-    purl = urlunsplit((
-        purl.scheme,
-        purl.netloc,
-        qpath,
-        '',
-        purl.fragment))
-    return URL(purl, vars=url.vars).href
+    # we do not support escaping an URL with a scheme and netloc yet
+    assert not purl.scheme and not purl.netloc
+    return URL(quote(url.url), vars=url.vars).href
