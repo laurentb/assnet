@@ -28,8 +28,7 @@ from ass2m.storage import Storage
 from ass2m.files import File
 
 from ass2m.routes import View
-from ass2m.server import Action, ViewAction
-from paste.fileapp import FileApp
+from ass2m.server import Action, ViewAction, FileApp
 from webob.exc import HTTPNotFound, HTTPPreconditionFailed
 
 
@@ -183,20 +182,11 @@ class ResolveCmd(Command):
                 continue
             print '%s => %s' % (f.path, os.path.join(self.storage.path, f._get_confname()))
 
-class Ass2mFileApp(FileApp):
-    def guess_type(self):
-        # add UTF-8 by default to text content-types
-        guess = FileApp.guess_type(self)
-        content_type = guess[0]
-        if content_type and "text/" in content_type and "charset=" not in content_type:
-            content_type += "; charset=UTF-8"
-        return (content_type, guess[1])
-
 
 class DownloadAction(ViewAction):
     def get(self):
         # serve the file, delegate everything to to FileApp
-        self.ctx.res = Ass2mFileApp(self.ctx.file.get_realpath())
+        self.ctx.res = FileApp(self.ctx.file.get_realpath())
 
 
 class ListAction(ViewAction):
@@ -224,7 +214,7 @@ class AssetAction(Action):
             for path in paths:
                 realpath = os.path.join(path, filename)
                 if os.path.isfile(realpath):
-                    self.ctx.res = Ass2mFileApp(realpath)
+                    self.ctx.res = FileApp(realpath)
                     return
             self.ctx.res = HTTPNotFound()
         else:

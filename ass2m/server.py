@@ -25,6 +25,7 @@ from binascii import hexlify
 from mako.lookup import TemplateLookup
 from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
+from paste.fileapp import FileApp as PasteFileApp
 from webob import Request, Response
 from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
 from paste.url import URL
@@ -37,7 +38,7 @@ from .version import VERSION
 from .users import Anonymous
 from .routes import Router
 
-__all__ = ['ViewAction', 'Action', 'Server']
+__all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
 
 class Context(object):
     SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+|/+' % re.escape(r'/.'))
@@ -295,6 +296,16 @@ class Dispatcher(object):
             self.ctx.res.body = self.ctx.render('error_notworkingdir.html')
         else:
             self.ctx.res.body = self.ctx.render('error_norootpath.html')
+
+
+class FileApp(PasteFileApp):
+    def guess_type(self):
+        # add UTF-8 by default to text content-types
+        guess = PasteFileApp.guess_type(self)
+        content_type = guess[0]
+        if content_type and "text/" in content_type and "charset=" not in content_type:
+            content_type += "; charset=UTF-8"
+        return (content_type, guess[1])
 
 
 class Server(object):
