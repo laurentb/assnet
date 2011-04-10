@@ -18,8 +18,11 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
+from __future__ import with_statement
+from contextlib import closing
 import os
 import re
+from gzip import GzipFile
 
 from ass2m.plugin import Plugin
 
@@ -36,15 +39,39 @@ class AssetAction(Action):
     def get(self):
         filename = self.ctx.req.str_GET.get('file')
         if self.SANITIZE_REGEXP.match(filename):
+            realpath = self.find_file(filename)
+            if realpath:
+                if self.accepts_gzip():
+                    realpath = self.gzip_file(realpath)
+                self.ctx.res = FileApp(realpath)
+                return
+            self.ctx.res = HTTPNotFound()
+        else:
+            self.ctx.res = HTTPPreconditionFailed()
+
+    def find_file(self, filename):
             paths = [os.path.join(path, 'assets') for path in self.ctx.DATA_PATHS]
             for path in paths:
                 realpath = os.path.join(path, filename)
                 if os.path.isfile(realpath):
-                    self.ctx.res = FileApp(realpath)
-                    return
-            self.ctx.res = HTTPNotFound()
-        else:
-            self.ctx.res = HTTPPreconditionFailed()
+                    return realpath
+
+    def accepts_gzip(self):
+        return 'gzip' in self.ctx.req.accept_encoding
+
+    def gzip_file(self, realpath):
+        cachedir = os.path.join(self.ctx.storage.path, 'assets_cache')
+        if not os.path.isdir(cachedir):
+            os.makedirs(cachedir)
+        filename = os.path.basename(realpath)
+        dest = os.path.join(cachedir, filename+'.gz')
+        mtime = os.path.getmtime(realpath)
+        if not os.path.exists(dest) or mtime > os.path.getmtime(dest):
+            with open(realpath, 'rb') as f_in:
+                with closing(GzipFile(dest, 'wb')) as f_out:
+                    f_out.writelines(f_in)
+            os.utime(dest, (mtime, mtime))
+        return dest
 
 
 class AssetsPlugin(Plugin):
