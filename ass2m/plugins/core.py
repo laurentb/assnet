@@ -20,7 +20,6 @@
 
 import sys
 import os
-import re
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
@@ -28,8 +27,7 @@ from ass2m.storage import Storage
 from ass2m.files import File
 
 from ass2m.routes import View
-from ass2m.server import Action, ViewAction, FileApp
-from webob.exc import HTTPNotFound, HTTPPreconditionFailed
+from ass2m.server import ViewAction, FileApp
 
 
 __all__ = ['CorePlugin']
@@ -204,23 +202,6 @@ class ListAction(ViewAction):
         self.ctx.res.body = self.ctx.render('list.html')
 
 
-class AssetAction(Action):
-    SANITIZE_REGEXP = re.compile(r'\w+\.\w+')
-
-    def get(self):
-        filename = self.ctx.req.str_GET.get('file')
-        if self.SANITIZE_REGEXP.match(filename):
-            paths = [os.path.join(path, 'assets') for path in self.ctx.DATA_PATHS]
-            for path in paths:
-                realpath = os.path.join(path, filename)
-                if os.path.isfile(realpath):
-                    self.ctx.res = FileApp(realpath)
-                    return
-            self.ctx.res = HTTPNotFound()
-        else:
-            self.ctx.res = HTTPPreconditionFailed()
-
-
 class CorePlugin(Plugin):
     def init(self):
         self.register_cli_command('init', InitCmd)
@@ -235,4 +216,3 @@ class CorePlugin(Plugin):
         self.register_web_view(
                 View(object_type='directory', name='list', verbose_name='Detailed list'),
                 ListAction, 10)
-        self.register_web_action('asset', AssetAction)
