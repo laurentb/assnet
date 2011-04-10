@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/sh -xe
 
 if [ "$1" != "" ]; then
     nosetests -sv $(dirname $0)/../tests/$1_test.py
