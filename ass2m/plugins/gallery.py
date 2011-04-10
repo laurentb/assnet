@@ -22,6 +22,7 @@ import os
 import Image
 from cStringIO import StringIO
 from paste.fileapp import DataApp
+from paste.httpheaders import CACHE_CONTROL
 
 from ass2m.plugin import Plugin
 from ass2m.routes import View
@@ -68,6 +69,7 @@ class DownloadThumbnailAction(ViewAction):
         img.save(s, 'jpeg', quality=95)
         self.ctx.res = DataApp(None, content_type='image/jpeg')
         self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.file.get_realpath()))
+        self.ctx.res.cache_control(public=True, max_age=CACHE_CONTROL.ONE_HOUR)
 
 class GalleryPlugin(Plugin):
     def init(self):

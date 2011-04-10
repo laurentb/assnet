@@ -27,6 +27,7 @@ from gzip import GzipFile
 from ass2m.plugin import Plugin
 
 from ass2m.server import Action, FileApp
+from paste.httpheaders import CACHE_CONTROL, CONTENT_DISPOSITION
 from webob.exc import HTTPNotFound, HTTPPreconditionFailed
 
 
@@ -44,6 +45,8 @@ class AssetAction(Action):
                 if self.accepts_gzip():
                     realpath = self.gzip_file(realpath)
                 self.ctx.res = FileApp(realpath)
+                self.ctx.res.cache_control(public=True, max_age=CACHE_CONTROL.ONE_DAY)
+                CONTENT_DISPOSITION.apply(self.ctx.res.headers, inline=True, filename=filename)
                 return
             self.ctx.res = HTTPNotFound()
         else:
