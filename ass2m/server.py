@@ -55,8 +55,11 @@ class Context(object):
         # fix script_name for weird configurations
         if 'SCRIPT_URL' in environ:
             script_path = urlparse.urlparse(environ['SCRIPT_URL']).path
-            level = len(self.req.path_info.split('/')) - 1
-            environ['SCRIPT_NAME'] = '/'.join(script_path.split('/')[:-level])+'/'
+            if self.req.path_info:
+                level = len(self.req.path_info.split('/')) - 1
+                environ['SCRIPT_NAME'] = '/'.join(script_path.split('/')[:-level])+'/'
+            else:
+                environ['SCRIPT_NAME'] = script_path
         self.res = Response()
         self.user = Anonymous()
 
@@ -268,7 +271,12 @@ class Dispatcher(object):
                 # for directories but not for files
                 goodpath += '/'
             if ctx.req.path_info != goodpath:
-                goodlocation = URL(urlparse.urljoin(ctx.root_url.url, goodpath), vars=ctx.url.vars)
+                root_url = ctx.root_url.url
+                if goodpath.startswith('/'):
+                    goodpath = goodpath[1:]
+                if not root_url.endswith('/'):
+                    root_url += '/'
+                goodlocation = URL(urlparse.urljoin(root_url, goodpath), vars=ctx.url.vars)
                 ctx.res = HTTPFound(location=goodlocation.href)
                 return
 
