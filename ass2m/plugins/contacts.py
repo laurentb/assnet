@@ -209,6 +209,7 @@ class ContactsMergeCmd(Command):
 
         for user in storage.iter_users():
             user.storage = self.storage
+            user._old_data = None
             user.save()
             print 'Imported %s (%s <%s>)' % (user.name, user.realname, user.email)
 

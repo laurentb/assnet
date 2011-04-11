@@ -40,7 +40,6 @@ class IUser(object):
 
 class User(IUser, IObject):
     def __init__(self, storage, name):
-        self.storage = storage
         self.name = name
         self.email = None
         self.realname = None

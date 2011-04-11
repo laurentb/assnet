@@ -23,7 +23,7 @@ from copy import deepcopy
 
 class IObject(object):
     def __init__(self, storage):
-        self._storage = storage
+        self.storage = storage
         self._confname = self._get_confname()
         self._mtime = None
         self._old_data = None
@@ -40,9 +40,9 @@ class IObject(object):
         pass
 
     def read(self):
-        mtime = self._storage._get_mtime(self._confname)
+        mtime = self.storage._get_mtime(self._confname)
         if self._mtime is None or self._mtime < mtime or self._old_data != self.data:
-            data = self._storage._read(self._confname)
+            data = self.storage._read(self._confname)
             self._mtime = mtime
             self.exists = data is not None
             self.data = data or ConfigDict()
@@ -54,13 +54,13 @@ class IObject(object):
         self.data.cleanup()
         # only write as needed
         if self._old_data is None or self._old_data != self.data or self.exists is not True:
-            self._storage._write(self._confname, self.data)
+            self.storage._write(self._confname, self.data)
             self._old_data = deepcopy(self.data)
-            self._mtime = self._storage._get_mtime(self._confname)
+            self._mtime = self.storage._get_mtime(self._confname)
             self.exists = True
 
     def remove(self):
-        self._storage._remove(self._confname)
+        self.storage._remove(self._confname)
         self._mtime = None
         self.exists = False
         self.data.clear()

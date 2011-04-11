@@ -61,7 +61,6 @@ class File(IObject):
         if len(path) > 0 and path[-1] == '/':
             path = path[:-1]
 
-        self.storage = storage
         self.path = path
         self.view = None
         self.perms = {}
