@@ -25,6 +25,7 @@ from ass2m.plugin import Plugin
 from ass2m.cmd import Command, ConsolePart
 from ass2m.storage import Storage
 from ass2m.users import User
+from ass2m.filters import quote_url
 
 from ass2m.server import Action
 from webob.exc import HTTPFound
@@ -248,7 +249,7 @@ class LoginAction(Action):
         if form_username and form_password:
             user = self.ctx.storage.get_user(form_username)
             if user and user.is_valid_password(form_password):
-                self.ctx.res = HTTPFound(location=self.ctx.url.href)
+                self.ctx.res = HTTPFound(location=quote_url(self.ctx.url))
                 # set cookie
                 self.ctx.login(user)
                 return
@@ -257,7 +258,7 @@ class LoginAction(Action):
 
 class LogoutAction(Action):
     def get(self):
-        referer = self.ctx.req.referer or self.ctx.root_url.href
+        referer = self.ctx.req.referer or quote_url(self.ctx.root_url)
         self.ctx.res = HTTPFound(location=referer)
         self.ctx.logout()
 

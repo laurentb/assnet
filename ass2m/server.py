@@ -37,6 +37,7 @@ from .storage import Storage
 from .version import VERSION
 from .users import Anonymous
 from .routes import Router
+from .filters import quote_url
 
 __all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
 
@@ -154,7 +155,7 @@ class Context(object):
         signer = AuthCookieSigner(secret=self.cookie_secret)
         cookie = signer.sign(user.name)
         self.res.set_cookie('ass2m_auth', cookie,
-                max_age=timedelta(days=120), httponly=True, path=self.root_url.url)
+                max_age=timedelta(days=120), httponly=True, path=quote_url(self.root_url))
         self.user = user
 
     def logout(self):
@@ -163,7 +164,7 @@ class Context(object):
         Do note that if you replace the "res" attribute after,
         that the cookie will not be removed.
         """
-        self.res.delete_cookie('ass2m_auth')
+        self.res.delete_cookie('ass2m_auth', path=quote_url(self.root_url))
         self.user = Anonymous()
 
 
@@ -250,9 +251,16 @@ class Dispatcher(object):
         self._authenticate()
         ctx.template_vars["user"] = ctx.user if ctx.user.exists else None
 
+        # force the URL to be fully escaped
+        # this is required for cookies to work properly
+        if 'REQUEST_URI' in ctx._environ \
+        and ctx._environ['REQUEST_URI'] != quote_url(ctx.url):
+            ctx.res = HTTPFound(location=quote_url(ctx.url))
+            return
+
         # actions: not related to a file or directory
         # if we are in the root app URL
-        if ctx.url.setvars().href == ctx.root_url.setvars().href:
+        if ctx.url.setvars().href == ctx.root_url.href:
             action = router.find_action(ctx.req.str_GET.get('action'))
             if action is not None:
                 return action(ctx).answer()
@@ -277,7 +285,7 @@ class Dispatcher(object):
                 if not root_url.endswith('/'):
                     root_url += '/'
                 goodlocation = URL(urlparse.urljoin(root_url, goodpath), vars=ctx.url.vars)
-                ctx.res = HTTPFound(location=goodlocation.href)
+                ctx.res = HTTPFound(location=quote_url(goodlocation))
                 return
 
         # no object type means no real file exists
@@ -299,7 +307,7 @@ class Dispatcher(object):
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500
-        if self.ctx._environ.has_key('ASS2M_ROOT'):
+        if 'ASS2M_ROOT' in self.ctx._environ:
             self.ctx.template_vars['root'] = self.ctx._environ['ASS2M_ROOT']
             self.ctx.res.body = self.ctx.render('error_notworkingdir.html')
         else:
