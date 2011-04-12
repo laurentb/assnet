@@ -22,16 +22,42 @@ from urlparse import urlsplit
 from urllib import quote
 from paste.url import URL
 
+__all__ = ['compact', 'quote_url', 'quote_path', 'quote_and_decode_url']
+
+UNSAFE_CHARS = {
+    '?': quote('?'),
+    '&': quote('&'),
+    ';': quote(';'),
+    ',': quote(','),
+    '=': quote('='),
+    ' ': quote(' '),
+    '+': quote('+'),
+    ':': quote(':'),
+    '$': quote('$'),
+}
+
 def compact(text):
     return text.replace('\n', ' ').strip()
+
+def quote_path(path):
+    """
+    Quote a path (see quote_url)
+    """
+    return ''.join([UNSAFE_CHARS.get(c, c) for c in path])
 
 def quote_url(url):
     """
     Quote the path part of an URL object and return the full URL as a string.
-    Any special characters in the URL are not considered as the query string or any other
+    Special characters in the URL are not considered as the query string or any other
     parameters, they should be in their dedicated variables of the URL class.
     """
     purl = urlsplit(url.url)
     # we do not support escaping an URL with a scheme and netloc yet
     assert not purl.scheme and not purl.netloc
-    return URL(quote(url.url), vars=url.vars).href
+    return URL(quote_path(url.url), vars=url.vars).href
+
+def quote_and_decode_url(url):
+    """
+    Like quote_url but for usage in Mako templates
+    """
+    return quote_url(url).decode('utf-8')

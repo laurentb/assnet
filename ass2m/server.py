@@ -37,7 +37,7 @@ from .storage import Storage
 from .version import VERSION
 from .users import Anonymous
 from .routes import Router
-from .filters import quote_url
+from .filters import quote_url, quote_path
 
 __all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
 
@@ -55,7 +55,7 @@ class Context(object):
         self.req = Request(environ)
         # fix script_name for weird configurations
         if 'SCRIPT_URL' in environ:
-            script_path = urlparse.urlparse(environ['SCRIPT_URL']).path
+            script_path = quote_path(environ['SCRIPT_URL'])
             if self.req.path_info:
                 level = len(self.req.path_info.split('/')) - 1
                 environ['SCRIPT_NAME'] = '/'.join(script_path.split('/')[:-level])+'/'
@@ -91,9 +91,9 @@ class Context(object):
         # Path of the file relative to the Ass2m root
         self.path = path
         # Root application URL (useful for links to Actions)
-        self.root_url = URL(urlparse.urlparse(self.req.script_name).path)
+        self.root_url = URL(self.req.script_name)
         # URL after Ass2m web application base URL
-        self.relurl = URL(urlparse.urlparse(self.req.path_info).path, query_vars)
+        self.relurl = URL(self.req.path_info, query_vars)
         # Complete URL (without host)
         self.url = URL(urlparse.urljoin(self.root_url.url, self.relurl.url[1:]), query_vars)
 
@@ -110,7 +110,7 @@ class Context(object):
 
     def _init_templates(self):
         paths = [os.path.join(path, 'templates') for path in self.DATA_PATHS]
-        imports = ['from ass2m.filters import compact as cpt, quote_url as U',
+        imports = ['from ass2m.filters import compact as cpt, quote_and_decode_url as U',
                 'from paste.url import URL']
         self.lookup = TemplateLookup(directories=paths, collection_size=20,
                          output_encoding='utf-8', input_encoding='utf-8',
@@ -250,13 +250,6 @@ class Dispatcher(object):
 
         self._authenticate()
         ctx.template_vars["user"] = ctx.user if ctx.user.exists else None
-
-        # force the URL to be fully escaped
-        # this is required for cookies to work properly
-        if 'REQUEST_URI' in ctx._environ \
-        and ctx._environ['REQUEST_URI'] != quote_url(ctx.url):
-            ctx.res = HTTPFound(location=quote_url(ctx.url))
-            return
 
         # actions: not related to a file or directory
         # if we are in the root app URL
