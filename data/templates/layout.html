@@ -7,7 +7,7 @@
     % if available_views:
         ${altrels()}
     % endif
-    <title>${capture(self.title, html=False) | cpt}</title>
+    <title>${self.title(html=False)}</title>
     % for stylesheet in stylesheets:
         <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet) | n,U}" />
     % endfor
@@ -38,7 +38,7 @@
 </%def>
 
 <%def name="header()">
-    <h1>${capture(self.title, html=True) | cpt}</h1>
+    <h1>${self.title(html=True)}</h1>
 </%def>
 
 <%def name="footer()">

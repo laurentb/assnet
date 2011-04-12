@@ -33,7 +33,7 @@
 </section>
 </article>
 
-<%def name="title(html=False)">
+<%def name="title(html=False)" filter="cpt">
 % if html:
     Gallery of ${partials.breadcrumbs(path)}
 % else:
