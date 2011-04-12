@@ -77,6 +77,9 @@ class User(IUser, IObject):
         self.password = len(self.data['auth'].get('password', '') \
                             + self.data['auth'].get('salt', '')) > 0
         self.key = self.data['auth'].get('key')
+        for group in self.storage.get_groups().itervalues():
+            if self.name in group.users:
+                self.groups.append(group.name)
 
     def _prewrite(self):
         self.data['info']['email'] = self.email if self.email else None

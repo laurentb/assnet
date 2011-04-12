@@ -112,8 +112,9 @@ class ChModCmd(Command):
                     print >>sys.stderr, 'Error: User "%s" does not exist.' % who
                     return 1
             elif t == 'g':
-                print >>sys.stderr, 'Not implemented yet'
-                return 1
+                if not who in self.storage.get_groups():
+                    print >>sys.stderr, 'Error: Group "%s" does not exist.' % who
+                    return 1
             else:
                 print >>sys.stderr, 'Error: "%s" is not a right kind of target.' % t
                 return 1

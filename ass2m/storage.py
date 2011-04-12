@@ -22,7 +22,7 @@ from __future__ import with_statement
 
 import os
 from ConfigParser import RawConfigParser
-from .users import User, Anonymous
+from .users import Group, User, Anonymous
 from .files import File
 from .obj import IObject, ConfigDict
 
@@ -34,6 +34,26 @@ class GlobalConfig(IObject):
     def _get_confname(self):
         return 'config'
 
+class Groups(IObject, dict):
+    def __init__(self, storage):
+        IObject.__init__(self, storage)
+        dict.__init__(self)
+
+    def _get_confname(self):
+        return 'groups'
+
+    def _postread(self):
+        for name, values in self.data.iteritems():
+            group = Group(name)
+            if 'users' in values:
+                group.users = values['users'].split()
+            self[name] = group
+
+    def _prewrite(self):
+        self.data = {}
+        for name, group in self.iteritems():
+            self.data[name] = {}
+            self.data[name]['users'] = ' '.join([g.name for g in group.users])
 
 class Storage(object):
     DIRNAME = '.ass2m'
@@ -114,6 +134,11 @@ class Storage(object):
         f = File(self, path)
         f.read()
         return f
+
+    def get_groups(self):
+        groups = Groups(self)
+        groups.read()
+        return groups
 
     def get_config(self):
         cfg = GlobalConfig(self)
