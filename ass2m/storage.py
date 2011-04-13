@@ -34,7 +34,7 @@ class GlobalConfig(IObject):
     def _get_confname(self):
         return 'config'
 
-class Groups(IObject, dict):
+class GroupsConfig(IObject, dict):
     def __init__(self, storage):
         IObject.__init__(self, storage)
         dict.__init__(self)
@@ -47,13 +47,15 @@ class Groups(IObject, dict):
             group = Group(name)
             if 'users' in values:
                 group.users = values['users'].split()
+            group.description = values.get('description', '')
             self[name] = group
 
     def _prewrite(self):
-        self.data = {}
+        self.data = ConfigDict()
         for name, group in self.iteritems():
             self.data[name] = {}
-            self.data[name]['users'] = ' '.join([g.name for g in group.users])
+            self.data[name]['users'] = ' '.join([uname for uname in group.users])
+            self.data[name]['description'] = group.description
 
 class Storage(object):
     DIRNAME = '.ass2m'
@@ -135,8 +137,8 @@ class Storage(object):
         f.read()
         return f
 
-    def get_groups(self):
-        groups = Groups(self)
+    def get_groupscfg(self):
+        groups = GroupsConfig(self)
         groups.read()
         return groups
 

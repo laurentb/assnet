@@ -24,7 +24,7 @@ from copy import copy
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command, ConsolePart
 from ass2m.storage import Storage
-from ass2m.users import User
+from ass2m.users import User, Group
 from ass2m.filters import quote_url
 
 from ass2m.server import Action
@@ -35,9 +35,11 @@ __all__ = ['ContactsManagement', 'ContactsSelection', 'ContactsPlugin']
 
 
 class ContactsManagement(ConsolePart):
-    def __init__(self, storage):
+    def __init__(self, storage, show_groups=True):
         self.storage = storage
         self.users = list(self.storage.iter_users())
+        self.groupscfg = self.storage.get_groupscfg()
+        self.groups = sorted(self.groupscfg.itervalues())
 
     def add_contact(self, username=None):
         try:
@@ -90,14 +92,43 @@ class ContactsManagement(ConsolePart):
         user.email = self.ask('Enter the email address', default=user.email, regexp='^[^ ]+@[^ ]+$')
         user.save()
 
+    def add_group(self, name=None):
+        try:
+            if name is None:
+                name = self.ask('Enter the group name', regexp='^\w+$')
+
+            if name in self.groupscfg:
+                print >>sys.stderr, 'Error: group %s already exists.' % name
+                return None
+
+            group = Group(name)
+            self.groups.append(group)
+            self.groupscfg[name] = group
+
+            self.edit_group(group)
+            print 'Group %s correctly added.' % group.name
+            return group
+        except (EOFError, KeyboardInterrupt):
+            return None
+
+    def edit_group(self, group):
+        cs = ContactsSelection(self.storage, group.users)
+        cs.main()
+        group.users = cs.sel_users
+        self.groupscfg.save()
+
     def main(self):
         r = ''
         while r != 'q':
             print ''
             print 'Contacts:'
-            self.print_users()
+            self.print_users(1)
+            print '%s a)%s --add contact--' % (self.BOLD, self.NC)
+            print 'Groups:'
+            self.print_groups(len(self.users) + 1)
+            print '%s g)%s --add group--' % (self.BOLD, self.NC)
             try:
-                print '%s a)%s --add--' % (self.BOLD, self.NC)
+                self.print_extra_commands()
                 print '%s q)%s --stop--' % (self.BOLD, self.NC)
                 print ''
                 r = self.print_menu()
@@ -106,51 +137,123 @@ class ContactsManagement(ConsolePart):
 
             if r.isdigit():
                 i = int(r) - 1
-                if i < 0 or i >= len(self.users):
-                    print >>sys.stderr, 'Error: %s is not a valid choice' % r
-                    continue
-                user = self.users[i]
-                self.select_user(user)
+                if i >= 0 and i < len(self.users):
+                    user = self.users[i]
+                    self.select_user(user)
+                else:
+                    i -= len(self.users)
+                    if i >= 0 and i < len(self.groups):
+                        group = self.groups[i]
+                        self.select_group(group)
+                    else:
+                        print >>sys.stderr, 'Error: %s is not a valid choice' % r
+                        continue
             elif r == 'a':
                 self.add_contact()
+            elif r == 'g':
+                self.add_group()
+            else:
+                self.handle_extra_command(r)
 
     def select_user(self, user):
         self.edit_contact(user)
 
-    def print_menu(self):
-        return self.ask('Select a contacts to edit (a to add one, or q to stop)',
-                        regexp='^(\d+|q|a)$')
+    def select_group(self, group):
+        self.edit_group(group)
 
-    def print_users(self):
+    def print_extra_commands(self):
+        pass
+
+    def handle_extra_command(self, r):
+        pass
+
+    def print_menu(self):
+        return self.ask('Select a contacts to edit (or q to stop)',
+                        regexp='^(\d+|q|a|g)$')
+
+    def print_groups(self, start=1):
+        for i, group in enumerate(self.storage.get_groupscfg().itervalues()):
+            self.print_group(i + start, group)
+
+    def print_group(self, i, group):
+        desc = group.description
+        if len(desc) > 30:
+            desc = desc[:28] + '..'
+        print '%s%2d)%s %s%-20s%s %-4s %s' % (self.BOLD, i, self.NC,
+                                              self.BOLD, group.name, self.NC,
+                                              ('(%d)' % len(group.users)), desc)
+
+    def print_users(self, start=1):
         for i, user in enumerate(self.users):
-            self.print_user(i, user)
+            self.print_user(i + start, user)
 
     def print_user(self, i, user):
-        print '%s%2d)%s %s%-15s%s  "%s <%s>"' % (self.BOLD, i+1, self.NC,
-                                                 self.BOLD, user.name, self.NC,
-                                                 user.realname, user.email)
+        print '%s%2d)%s %s%-20s%s "%s <%s>"' % (self.BOLD, i, self.NC,
+                                                self.BOLD, user.name, self.NC,
+                                                user.realname, user.email)
 
 class ContactsSelection(ContactsManagement):
-    def __init__(self, storage, sel_users=[], sel_groups=[]):
+    def __init__(self, storage, sel_users=[], sel_groups=None):
         ContactsManagement.__init__(self, storage)
-        self.sel_users = copy(sel_users)
-        self.sel_groups = copy(sel_groups)
+        self.sel_users = set(sel_users)
+        self.sel_groups = set(sel_groups) if sel_groups is not None else None
 
     def print_menu(self):
-        return self.ask('Select a contacts to check/uncheck (a to add one, or q to stop)',
-                        regexp='^(\d+|q|a)$')
+        return self.ask('Select a contacts to check/uncheck (or q to stop)',
+                        regexp='^(\d+|q|a|g|c|q)$')
+
+    def print_extra_commands(self):
+        print '%s c)%s --clear--' % (self.BOLD, self.NC)
+
+    def handle_extra_command(self, r):
+        if r == 'c':
+            self.sel_users = []
+            if self.sel_groups is not None:
+                self.sel_groups = []
 
     def print_user(self, i, user):
         checked = 'x' if user.name in self.sel_users else ' '
-        print '%s%2d)%s [%s] %s%-15s%s  "%s <%s>"' % (self.BOLD, i+1, self.NC, checked,
-                                                      self.BOLD, user.name, self.NC,
-                                                      user.realname, user.email)
+        print '%s%2d)%s [%s] %s%-20s%s "%s <%s>"' % (self.BOLD, i, self.NC, checked,
+                                                     self.BOLD, user.name, self.NC,
+                                                     user.realname, user.email)
+
+    def print_group(self, i, group):
+        if self.sel_groups is None:
+            status = '---'
+            for user in group.users:
+                if not user in self.sel_users:
+                    status = '+++'
+                    break
+        else:
+            status = '[x]' if group.name in self.sel_groups else '[ ]'
+        desc = group.description
+        if len(desc) > 30:
+            desc = desc[:28] + '..'
+        print '%s%2d)%s %s %s%-20s%s %-4s %s' % (self.BOLD, i, self.NC, status,
+                                                 self.BOLD, group.name, self.NC,
+                                                 ('(%d)' % len(group.users)), desc)
 
     def select_user(self, user):
         if user.name in self.sel_users:
             self.sel_users.remove(user.name)
         else:
-            self.sel_users.append(user.name)
+            self.sel_users.add(user.name)
+
+    def select_group(self, group):
+        if self.sel_groups is None:
+            cmd = self.sel_users.remove
+            for user in group.users:
+                if not user in self.sel_users:
+                    cmd = self.sel_users.add
+
+            for user in group.users:
+                cmd(user)
+            return
+
+        if group.name in self.sel_groups:
+            self.sel_groups.remove(group.name)
+        else:
+            self.sel_groups.add(group.name)
 
 class ContactsAddCmd(Command):
     DESCRIPTION = 'Add a contact'

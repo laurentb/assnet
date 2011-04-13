@@ -112,7 +112,7 @@ class ChModCmd(Command):
                     print >>sys.stderr, 'Error: User "%s" does not exist.' % who
                     return 1
             elif t == 'g':
-                if not who in self.storage.get_groups():
+                if not who in self.storage.get_groupscfg():
                     print >>sys.stderr, 'Error: Group "%s" does not exist.' % who
                     return 1
             else:

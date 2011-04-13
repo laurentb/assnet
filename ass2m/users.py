@@ -29,6 +29,7 @@ from binascii import hexlify
 class Group(object):
     def __init__(self, name):
         self.name = name
+        self.description = u''
         self.users = []
 
 class IUser(object):
@@ -77,7 +78,7 @@ class User(IUser, IObject):
         self.password = len(self.data['auth'].get('password', '') \
                             + self.data['auth'].get('salt', '')) > 0
         self.key = self.data['auth'].get('key')
-        for group in self.storage.get_groups().itervalues():
+        for group in self.storage.get_groupscfg().itervalues():
             if self.name in group.users:
                 self.groups.append(group.name)
 

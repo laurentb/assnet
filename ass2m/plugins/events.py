@@ -242,9 +242,9 @@ class EventCmd(Command):
     def edit_attendees(self, event):
         cs = ContactsSelection(self.storage, event.users.keys())
         cs.main()
-        for deleted in (set(event.users.keys()) - set(cs.sel_users)):
+        for deleted in (set(event.users.keys()) - cs.sel_users):
             event.remove_user(deleted)
-        for added in set(cs.sel_users) - set(event.users.keys()):
+        for added in cs.sel_users - set(event.users.keys()):
             event.add_user(added)
 
 class EventAction(ViewAction):
