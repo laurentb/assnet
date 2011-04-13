@@ -51,13 +51,13 @@ class User(IUser, IObject):
 
     def has_perms(self, f, perm):
         f_perms = f.get_user_perms(self.name)
-        if f_perms is not None and f_perms & perm:
-            return True
+        if f_perms is not None:
+            return f_perms & perm
 
         for group in self.groups:
             f_perms = f.get_group_perms(group)
-            if f_perms is not None and f.get_group_perms(group) & perm:
-                return True
+            if f_perms is not None:
+                return f.get_group_perms(group) & perm
 
         f_perms = f.get_all_perms()
         if f_perms is not None:
