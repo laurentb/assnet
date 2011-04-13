@@ -19,7 +19,6 @@
 
 
 import sys
-from copy import copy
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command, ConsolePart
