@@ -118,9 +118,9 @@ class ChModCmd(Command):
             else:
                 print >>sys.stderr, 'Error: "%s" is not a right kind of target.' % t
                 return 1
-        elif args.who != 'all':
+        elif args.who not in ('all', 'auth'):
             print >>sys.stderr, 'Error: "%s" is not a right target.' % args.who
-            print >>sys.stderr, 'Only available ones: "u.<username>", "g.<group>", "all"'
+            print >>sys.stderr, 'Only available ones: "u.<username>", "g.<group>", "auth", "all"'
             return 1
 
         if args.perms != '-':

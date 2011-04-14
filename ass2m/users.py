@@ -59,6 +59,10 @@ class User(IUser, IObject):
             if f_perms is not None:
                 return f.get_group_perms(group) & perm
 
+        f_perms = f.get_auth_perms()
+        if f_perms is not None:
+            return f_perms & perm
+
         f_perms = f.get_all_perms()
         if f_perms is not None:
             return f_perms & perm

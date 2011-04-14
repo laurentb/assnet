@@ -69,6 +69,9 @@ class File(IObject):
     def set_all_perms(self, perms):
         self.perms['all'] = perms
 
+    def set_auth_perms(self, perms):
+        self.perms['auth'] = perms
+
     def set_group_perms(self, name, perms):
         self.perms['g.%s' % name] = perms
 
@@ -78,6 +81,9 @@ class File(IObject):
     def get_all_perms(self, default=None):
         return self.perms.get('all', default)
 
+    def get_auth_perms(self, default=None):
+        return self.perms.get('auth', default)
+
     def get_group_perms(self, name, default=None):
         return self.perms.get('g.%s' % name, default)
 
@@ -86,6 +92,9 @@ class File(IObject):
 
     def clear_all_perms(self):
         self.perms.pop('all', None)
+
+    def clear_auth_perms(self):
+        self.perms.pop('auth', None)
 
     def clear_group_perms(self):
         for name in self.perms.keys():
