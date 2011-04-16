@@ -13,24 +13,27 @@
 <tbody>
     % if path:
     <tr class="parent">
-        <td class="filename"><a href="../">Parent directory</a></td>
+        <td class="filename"  data-sortname="/"><a href="../">Parent directory</a></td>
+        <td class="lastmod"><span class="not-applicable">-</span></td>
+        <td class="size"><span class="not-applicable">-</span></td>
     </tr>
     % endif
     % for dir in dirs:
     <tr class="dir">
-        <td class="filename"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
-        <td class="lastmod" colspan="2">
+        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
+        <td class="lastmod">
             <time datetime="${dir.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${dir.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>
+        <td class="size"><span class="not-applicable">-</span></td>
     </tr>
     % endfor
     % for file in files:
     <tr class="file">
-        <td class="filename"><a href="${URL(file.get_name()) | n,U}">${file.get_name() | h}</a></td>
+        <td class="filename" data-sortname="${file.get_name() | h}"><a href="${URL(file.get_name()) | n,U}">${file.get_name() | h}</a></td>
         <td class="lastmod">
             <time datetime="${file.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${file.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>
-        <td class="size">${file.get_human_size() | h}</td>
+        <td class="size"><span title="${file.get_size() | h}">${file.get_human_size() | h}</span></td>
     </tr>
     % endfor
 </tbody>

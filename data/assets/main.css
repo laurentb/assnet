@@ -120,6 +120,30 @@ table.list td.size {
     text-align: right;
 }
 
+table.list td .not-applicable {
+    color: #aaa;
+}
+
+table.table-sortable th span.table-th-sort-span {
+    font-size: 1px;
+}
+
+table.table-sortable th span.table-th-sort-span:after {
+    content: '\25C6';
+    color: #aaa;
+    padding-right: 2px;
+    font-size: small;
+}
+
+table.table-sortable th.table-th-sort span.table-th-sort-span:after {
+    content: '\25B2';
+}
+
+table.table-sortable th.table-th-sort-rev span.table-th-sort-span:after {
+    content: '\25BC';
+}
+
+
 img {
     border: 0;
 }

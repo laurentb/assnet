@@ -200,6 +200,7 @@ class ListAction(ViewAction):
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files
+        self.ctx.template_vars['scripts'].append('list.js')
         self.ctx.res.body = self.ctx.render('list.html')
 
 
