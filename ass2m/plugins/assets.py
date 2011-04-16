@@ -35,7 +35,7 @@ __all__ = ['AssetsPlugin']
 
 
 class AssetAction(Action):
-    SANITIZE_REGEXP = re.compile(r'\w+\.\w+')
+    SANITIZE_REGEXP = re.compile(r'^[\w\-]+(?:\.[\w\-]+)+$')
 
     def get(self):
         filename = self.ctx.req.str_GET.get('file')
