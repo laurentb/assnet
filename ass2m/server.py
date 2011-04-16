@@ -130,6 +130,7 @@ class Context(object):
             'root_url': self.root_url,
             'global': dict(),
             'stylesheets': ['main.css'],
+            'scripts': ['mootools-core-1.3.1.js', 'mootools-more-1.3.1.1.js'],
         }
 
     def render(self, template):

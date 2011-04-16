@@ -11,6 +11,9 @@
     % for stylesheet in stylesheets:
         <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet) | n,U}" />
     % endfor
+    % for script in scripts:
+        <script src="${root_url.setvar(action='asset', file=script) | n,U}"></script>
+    % endfor
     % if path:
         <link rel="up" href="../" />
     % endif
