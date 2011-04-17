@@ -15,17 +15,19 @@
 
 <table summary="Directory listing" class="list">
 <thead>
-    <tr><th>Name</th></tr>
+    <tr>
+        <th class="filename">Name</th>
+    </tr>
 </thead>
 <tbody>
     % if path:
     <tr class="parent">
-        <td class="filename"><a href="../">Parent directory</a></td>
+        <td class="filename" data-sortname="/"><a href="../">Parent directory</a></td>
     </tr>
     % endif
     % for dir in dirs:
     <tr class="dir">
-        <td class="filename"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
+        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
     </tr>
     % endfor
 </tbody>
