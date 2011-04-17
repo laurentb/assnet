@@ -93,6 +93,18 @@ footer address {
     font-style: normal;
 }
 
+nav#loginform {
+    display: none;
+    border: 1px solid black;
+    background-color: white;
+    border: 1px solid gray;
+    font-size: medium;
+    float: left;
+    left: 4em;
+    top: 1px;
+    position: absolute;
+}
+
 table.list caption {
     display: none;
 }
@@ -171,7 +183,6 @@ section.gallery div.hmedia figcaption {
     font-size: small;
 }
 
-
 img {
     border: 0;
 }
@@ -222,7 +233,7 @@ nav#toolbox {
     width: 100%;
 }
 
-menu#available_views {
+menu#available-views {
     position: absolute;
     right: 0px;
     top: 0px;

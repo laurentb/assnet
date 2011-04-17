@@ -3,7 +3,7 @@
 view_links = [(available_view, url.setvar(view=available_view.name)) \
                 for available_view in available_views if available_view.public is True]
 %>
-    <menu id="available_views">
+    <menu id="available-views">
         % for available_view, view_url in view_links:
             % if available_view.name == view:
             <li class="selected"><a href="${view_url | n,U,h}">${available_view.verbose_name | h}</a></li>
@@ -17,15 +17,35 @@ view_links = [(available_view, url.setvar(view=available_view.name)) \
 <%def name="loginbox()">
     % if user:
         Logged as ${display_user(user)}
-        <a href="${root_url.setvar(action='logout') | n,U,h}">Logout</a>
+        <a id="logout-link" href="${root_url.setvar(action='logout') | n,U,h}">Logout</a>
     % else:
-        <a href="${root_url.setvar(action='login') | n,U,h}">Login</a>
+        <a id="login-link" href="${root_url.setvar(action='login') | n,U,h}">Login</a>
     % endif
+</%def>
+
+<%def name="loginform()">
+<nav id="loginform">
+    <form method="post" action="${root_url.setvar(action='login') | n,U,h}">
+        <label for="login_username">Username</label>
+        <input id="login_username"
+            name="login[username]"
+            value="" />
+        <label for="login_password">Password</label>
+        <input id="login_password"
+            name="login[password]"
+            value=""
+            type="password" />
+        <input type="submit" value="Login"/>
+    </form>
+</nav>
 </%def>
 
 <%def name="toolbox()">
     <nav id="toolbox">
         ${loginbox()}
+        % if not user:
+            ${loginform()}
+        % endif
         ${viewslist()}
     </nav>
 </%def>
