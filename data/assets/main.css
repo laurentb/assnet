@@ -168,6 +168,7 @@ section.gallery div.hmedia img.photo:focus {
 section.gallery div.hmedia figcaption {
     margin-top: -5px;
     margin-bottom: 5px;
+    font-size: small;
 }
 
 
