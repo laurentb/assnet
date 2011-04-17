@@ -40,7 +40,7 @@ else:
     paths = path.split('/')
     paths[0] = '[root]'
 %>
-<nav class="breadcrumbs">
+<span class="breadcrumbs">
 % for index, pathpart in enumerate(paths, 1):
 <%
 classes = []
@@ -64,5 +64,5 @@ chr = ':/'
 % endif
 <a class="${' '.join(classes)}" href="${parturl | n,U,h}">${pathpart | h}</a>${chr}\
 % endfor
-</nav>
+</span>
 </%def>

@@ -68,11 +68,7 @@ header nav menu li.selected a {
     color: black;
 }
 
-header nav.breadcrumbs {
-    display: inline;
-}
-
-header nav.breadcrumbs a.last {
+header span.breadcrumbs a.last {
     color: black;
 }
 
@@ -90,6 +86,10 @@ footer {
 
 footer address {
     font-style: normal;
+}
+
+table.list caption {
+    display: none;
 }
 
 table.list td,

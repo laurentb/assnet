@@ -10,10 +10,11 @@
 
 <section>
 % for photo in photos:
-<a href="${URL(photo.get_name()) | n,U,h}"><img src="${URL(photo.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U}" /></a>
+<a href="${URL(photo.get_name()) | n,U,h}"><img src="${URL(photo.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U,h}" /></a>
 % endfor
 
-<table summary="Directory listing" class="list">
+<table class="list">
+<caption>Directory listing</caption>
 <thead>
     <tr>
         <th class="filename">Name</th>
