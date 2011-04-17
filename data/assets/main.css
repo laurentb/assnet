@@ -29,8 +29,8 @@ a:visited {
 
 a:hover,
 a:focus {
-    text-decoration: underline;
-    color: red;
+    text-decoration: none;
+    color: red !important;
 }
 
 article {
@@ -45,6 +45,12 @@ article {
 
 section {
     padding-bottom: 9px;
+    clear: both;
+}
+
+figure {
+    text-align: center;
+    margin: 0;
 }
 
 header {
@@ -71,7 +77,6 @@ header nav menu li.selected a {
 header span.breadcrumbs a.last {
     color: black;
 }
-
 
 header h1 {
     font-weight: normal;
@@ -145,6 +150,24 @@ table.table-sortable th.table-th-sort span.table-th-sort-span:after {
 
 table.table-sortable th.table-th-sort-rev span.table-th-sort-span:after {
     content: '\25BC';
+}
+
+section.gallery div.hmedia {
+    float: left;
+}
+
+section.gallery div.hmedia img.photo {
+    border: 1px solid transparent;
+}
+
+section.gallery div.hmedia img.photo:hover,
+section.gallery div.hmedia img.photo:focus {
+    border: 1px solid red;
+}
+
+section.gallery div.hmedia figcaption {
+    margin-top: -5px;
+    margin-bottom: 5px;
 }
 
 
