@@ -19,6 +19,7 @@
 
 
 import sys
+import re
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command, ConsolePart
@@ -342,20 +343,32 @@ class ContactsRemoveCmd(Command):
 
 
 class LoginAction(Action):
-    def get(self):
+    FORM_RE = re.compile('login\[(\w+)\]')
+
+    def _get_form(self):
+        form = dict([(self.FORM_RE.match(k).groups()[0], v) \
+                            for k, v in self.ctx.req.str_POST.iteritems() \
+                            if self.FORM_RE.match(k)])
+        form['referer'] = form.get('referer') \
+                or self.ctx.req.referer \
+                or quote_url(self.ctx.root_url)
+        return form
+
+    def get(self, form = None):
+        form = form or self._get_form()
+        self.ctx.template_vars['form'] = form
         self.ctx.res.body = self.ctx.render('login.html')
 
     def post(self):
-        form_username = self.ctx.req.str_POST.get('username')
-        form_password = self.ctx.req.str_POST.get('password')
-        if form_username and form_password:
-            user = self.ctx.storage.get_user(form_username)
-            if user and user.is_valid_password(form_password):
-                self.ctx.res = HTTPFound(location=quote_url(self.ctx.url))
+        form = self._get_form()
+        if form.get('username') and form.get('password'):
+            user = self.ctx.storage.get_user(form['username'])
+            if user and user.is_valid_password(form['password']):
+                self.ctx.res = HTTPFound(location=form['referer'])
                 # set cookie
                 self.ctx.login(user)
                 return
-        self.get()
+        self.get(form)
 
 
 class LogoutAction(Action):

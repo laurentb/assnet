@@ -32,25 +32,35 @@ class LoginTest(TestCase):
     def test_formLogin(self):
         res = self.app.get('/?action=login', status=200)
         assert 'Not logged in.' in res.body
+        assert 'Invalid username or password.' not in res.body
+        assert 'Logged as.' not in res.body
 
         form = res.form
-        form['username'] = 'invalid'
-        form['password'] = 'invalid'
+        form['login[username]'] = 'invalid'
+        form['login[password]'] = 'invalid'
         res = form.submit()
-        assert 'Not logged in.' in res.body
+        assert 'Not logged in.' not in res.body
+        assert 'Invalid username or password.' in res.body
+        assert 'Logged as.' not in res.body
 
         form = res.form
-        form['username'] = 'penguin'
-        form['password'] = 'invalid'
+        form['login[username]'] = 'penguin'
+        form['login[password]'] = 'invalid'
         res = form.submit()
-        assert 'Not logged in.' in res.body
+        assert 'Not logged in.' not in res.body
+        assert 'Invalid username or password.' in res.body
+        assert 'Logged as.' not in res.body
 
         form = res.form
-        form['username'] = 'penguin'
-        form['password'] = 'monkey1'
+        form['login[username]'] = 'penguin'
+        form['login[password]'] = 'monkey1'
         res = form.submit(status=302)
         res = res.follow(status=200)
-        assert 'Current user: <abbr title="Penguin">penguin</abbr>' in res.body
+        assert 'Logged as <abbr title="Penguin">penguin</abbr>' in res.body
+        res = self.app.get('/?action=login', status=200)
+        assert 'Not logged in.' not in res.body
+        assert 'Invalid username or password.' not in res.body
+        assert 'Already logged in as <abbr title="Penguin">penguin</abbr>' in res.body
 
         res = self.app.get('/')
         assert 'Login' not in res.body

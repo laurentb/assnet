@@ -89,8 +89,8 @@ class WebPermsTest(TestCase):
 
         # login
         form = res.form
-        form['username'] = 'penguin'
-        form['password'] = 'monkey1'
+        form['login[username]'] = 'penguin'
+        form['login[password]'] = 'monkey1'
         res = form.submit(status=302)
 
         # check user perms

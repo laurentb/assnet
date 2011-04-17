@@ -63,8 +63,8 @@ Attendees:
 
         res = self.app.get('/?action=login', status=200)
         form = res.form
-        form['username'] = 'penguin'
-        form['password'] = 'monkey1'
+        form['login[username]'] = 'penguin'
+        form['login[password]'] = 'monkey1'
         res = form.submit(status=302)
         res = res.follow(status=200)
 
