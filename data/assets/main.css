@@ -124,6 +124,10 @@ table.list td .not-applicable {
     color: #aaa;
 }
 
+table.table-sortable th {
+    cursor: pointer;
+}
+
 table.table-sortable th span.table-th-sort-span {
     font-size: 1px;
 }
