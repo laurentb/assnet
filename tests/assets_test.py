@@ -42,7 +42,7 @@ class AssetsTest(TestCase):
 
     def test_stylesheets(self):
         res = self.app.get('/', status=200)
-        assert '<link rel="stylesheet" type="text/css" href="/?action=asset&file=main.css" />' in res.body
+        assert '<link rel="stylesheet" type="text/css" href="/?action=asset&amp;file=main.css" />' in res.body
 
         res = self.app.get('/test_data/?view=gallery', status=200)
-        assert '<link rel="stylesheet" type="text/css" href="/?action=asset&file=main.css" />' in res.body
+        assert '<link rel="stylesheet" type="text/css" href="/?action=asset&amp;file=main.css" />' in res.body

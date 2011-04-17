@@ -6,9 +6,9 @@ view_links = [(available_view, url.setvar(view=available_view.name)) \
     <menu id="available_views">
         % for available_view, view_url in view_links:
             % if available_view.name == view:
-            <li class="selected"><a href="${view_url | n,U}">${available_view.verbose_name | h}</a></li>
+            <li class="selected"><a href="${view_url | n,U,h}">${available_view.verbose_name | h}</a></li>
             % else:
-            <li><a href="${view_url | n,U}">${available_view.verbose_name | h}</a></li>
+            <li><a href="${view_url | n,U,h}">${available_view.verbose_name | h}</a></li>
             % endif
         % endfor
     </menu>
@@ -17,9 +17,9 @@ view_links = [(available_view, url.setvar(view=available_view.name)) \
 <%def name="loginbox()">
     % if user:
         Logged as ${display_user(user)}
-        <a href="${root_url.setvar(action='logout') | n,U}">Logout</a>
+        <a href="${root_url.setvar(action='logout') | n,U,h}">Logout</a>
     % else:
-        <a href="${root_url.setvar(action='login') | n,U}">Login</a>
+        <a href="${root_url.setvar(action='login') | n,U,h}">Login</a>
     % endif
 </%def>
 
@@ -62,7 +62,7 @@ parturl = root_url
 chr = ':/'
 %>\
 % endif
-<a class="${' '.join(classes)}" href="${parturl | n,U}">${pathpart | h}</a>${chr}\
+<a class="${' '.join(classes)}" href="${parturl | n,U,h}">${pathpart | h}</a>${chr}\
 % endfor
 </nav>
 </%def>

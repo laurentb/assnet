@@ -57,7 +57,7 @@ event_classes = {
         <strong>declined</strong>.
     % endif
     </p>
-    <form method="post" action="${url | n,U }">
+    <form method="post" action="${url | n,U,h}">
         % if user_state != event.USER_CONFIRMED:
             <input name="action" type="submit" value="Confirm"/>
         % endif
@@ -69,7 +69,7 @@ event_classes = {
 </section>
 
 <section>
-<a href="${url.setvar(view='raw') | n,U}">Download as text</a>
+<a href="${url.setvar(view='raw') | n,U,h}">Download as text</a>
 </section>
 </article>
 

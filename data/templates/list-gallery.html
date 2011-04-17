@@ -10,7 +10,7 @@
 
 <section>
 % for photo in photos:
-<a href="${URL(photo.get_name()) | n,U}"><img src="${URL(photo.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U}" /></a>
+<a href="${URL(photo.get_name()) | n,U,h}"><img src="${URL(photo.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U}" /></a>
 % endfor
 
 <table summary="Directory listing" class="list">
@@ -27,7 +27,7 @@
     % endif
     % for dir in dirs:
     <tr class="dir">
-        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
+        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U,h}">${dir.get_name() | h}</a>/</td>
     </tr>
     % endfor
 </tbody>

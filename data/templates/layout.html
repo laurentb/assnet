@@ -9,15 +9,15 @@
     % endif
     <title>${self.title(html=False)}</title>
     % for stylesheet in stylesheets:
-        <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet) | n,U}" />
+        <link rel="stylesheet" type="text/css" href="${root_url.setvar(action='asset', file=stylesheet) | n,U,h}" />
     % endfor
     % for script in scripts:
-        <script src="${root_url.setvar(action='asset', file=script) | n,U}"></script>
+        <script src="${root_url.setvar(action='asset', file=script) | n,U,h}"></script>
     % endfor
     % if path:
         <link rel="up" href="../" />
     % endif
-    <link rel="top" href="${root_url | n,U}" />
+    <link rel="top" href="${root_url | n,U,h}" />
 </head>
 <body>
     <header>${self.header()}</header>
@@ -33,9 +33,9 @@
     %>
     % for available_view, view_url in view_links:
         % if available_view == view:
-            <link rel="canonical" href="${view_url | n,U}" />
+            <link rel="canonical" href="${view_url | n,U,h}" />
         % else:
-            <link rel="alternate" title="Alternate view ${available_view | h}" href="${view_url | n,U}" />
+            <link rel="alternate" title="Alternate view ${available_view | h}" href="${view_url | n,U,h}" />
         % endif
     % endfor
 </%def>

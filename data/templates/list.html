@@ -20,7 +20,7 @@
     % endif
     % for dir in dirs:
     <tr class="dir">
-        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U}">${dir.get_name() | h}</a>/</td>
+        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U,h}">${dir.get_name() | h}</a>/</td>
         <td class="lastmod">
             <time datetime="${dir.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${dir.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>
@@ -29,7 +29,7 @@
     % endfor
     % for file in files:
     <tr class="file">
-        <td class="filename" data-sortname="${file.get_name() | h}"><a href="${URL(file.get_name()) | n,U}">${file.get_name() | h}</a></td>
+        <td class="filename" data-sortname="${file.get_name() | h}"><a href="${URL(file.get_name()) | n,U,h}">${file.get_name() | h}</a></td>
         <td class="lastmod">
             <time datetime="${file.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${file.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>
