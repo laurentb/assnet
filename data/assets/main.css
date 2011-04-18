@@ -164,22 +164,38 @@ table.table-sortable th.table-th-sort-rev span.table-th-sort-span:after {
     content: '\25BC';
 }
 
-section.gallery div.hmedia {
+ul.gallery {
+    list-style-type: none;
+    list-style-position: outside;
+}
+
+ul.gallery li.hmedia {
+    display: block;
     float: left;
+    width: 210px;
+    height: 250px;
+    text-align: center;
+    margin: 4px;
 }
 
-section.gallery div.hmedia img.photo {
-    border: 1px solid transparent;
+ul.gallery li.hmedia figure span.frame {
+    width: 205px;
+    height: 205px;
+    display: table-cell;
+    margin: 0;
+    vertical-align: middle;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    background-color: #fcfcfc;
 }
 
-section.gallery div.hmedia img.photo:hover,
-section.gallery div.hmedia img.photo:focus {
+ul.gallery li.hmedia a:hover span.frame,
+ul.gallery li.hmedia a:focus span.frame {
     border: 1px solid red;
 }
 
-section.gallery div.hmedia figcaption {
-    margin-top: -5px;
-    margin-bottom: 5px;
+ul.gallery li.hmedia figcaption {
     font-size: small;
 }
 

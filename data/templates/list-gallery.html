@@ -8,19 +8,21 @@
 % endif
 </section>
 
-<section class="gallery">
+<section>
+<ul class="gallery">
 % for photo in photos:
-<div class="hmedia">
-    <a rel="enclosure original" type="${photo.get_mimetype() | h}" href="${URL(photo.get_name()) | n,U,h}" title="${photo.get_name() | h}">
-    <figure>
-        <img class="thumbnail photo" src="${URL(photo.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U,h}" />
-        <figcaption>
-            <span class="fn">${photo.get_name() | h}</span>
-        </figcaption>
-    </figure>
-    </a>
-</div>
+    <li class="hmedia">
+        <a rel="enclosure original" type="${photo.get_mimetype() | h}" href="${URL(photo.get_name()) | n,U,h}" title="${photo.get_name() | h}">
+        <figure>
+            <span class="frame"><img class="thumbnail photo" src="${URL(photo.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U,h}" /></span>
+            <figcaption>
+                <span class="fn">${photo.get_name() | h}</span>
+            </figcaption>
+        </figure>
+        </a>
+    </li>
 % endfor
+</ul>
 </section>
 
 <section>
