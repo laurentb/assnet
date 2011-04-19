@@ -5,3 +5,15 @@ article.event ul.users li span.state {
 article.event ul.users li.waiting span.state {
     color: gray;
 }
+
+form.change-status {
+    display: inline;
+}
+
+form.accept button {
+    color: green;
+}
+
+form.decline button {
+    color: red;
+}

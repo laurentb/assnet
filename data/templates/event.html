@@ -57,14 +57,18 @@ event_classes = {
         <strong>declined</strong>.
     % endif
     </p>
-    <form method="post" action="${url | n,U,h}">
         % if user_state != event.USER_CONFIRMED:
-            <input name="action" type="submit" value="Confirm"/>
+            <form class="change-status accept" method="post" action="${url | n,U,h}">
+                <input name="_method" type="hidden" value="PUT" />
+                <button type="submit">Confirm</button>
+            </form>
         % endif
         % if user_state != event.USER_DECLINED:
-            <input name="action" type="submit" value="Decline"/>
+            <form class="change-status decline" method="post" action="${url | n,U,h}">
+                <input name="_method" type="hidden" value="DELETE" />
+                <button type="submit">Decline</button>
+            </form>
         % endif
-    </form>
 </section>
 % endif
 

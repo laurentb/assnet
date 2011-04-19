@@ -59,7 +59,9 @@ Attendees:
     def test_viewEvent(self):
         res = self.app.get('/event1.txt', status=200)
         assert '<h3>Place</h3>' in res.body
-        assert 'Decline' not in res.body
+        assert 'Your current status' not in res.body
+        assert 'Accept</button>' not in res.body
+        assert 'Decline</button>' not in res.body
 
         res = self.app.get('/?action=login', status=200)
         form = res.form
@@ -71,4 +73,31 @@ Attendees:
         res = self.app.get('/event1.txt', status=200)
         assert '<h3>Place</h3>' in res.body
         assert '<strong>waiting</strong>' in res.body
-        assert 'Decline' in res.body
+        assert 'Confirm</button>' in res.body
+        assert 'Decline</button>' in res.body
+
+        # decline then accept ('REST' style)
+        res = self.app.delete('/event1.txt', status=200)
+        assert '<h3>Place</h3>' in res.body
+        assert '<strong>declined</strong>' in res.body
+        assert 'Confirm</button>' in res.body
+        assert 'Decline</button>' not in res.body
+
+        res = self.app.put('/event1.txt', status=200)
+        assert '<h3>Place</h3>' in res.body
+        assert '<strong>confirmed</strong>' in res.body
+        assert 'Confirm</button>' not in res.body
+        assert 'Decline</button>' in res.body
+
+        # same but for browsers
+        res = self.app.post('/event1.txt', {'_method': 'DELETE'}, status=200)
+        assert '<h3>Place</h3>' in res.body
+        assert '<strong>declined</strong>' in res.body
+        assert 'Confirm</button>' in res.body
+        assert 'Decline</button>' not in res.body
+
+        res = self.app.put('/event1.txt', {'_method': 'PUT'}, status=200)
+        assert '<h3>Place</h3>' in res.body
+        assert '<strong>confirmed</strong>' in res.body
+        assert 'Confirm</button>' not in res.body
+        assert 'Decline</button>' in res.body

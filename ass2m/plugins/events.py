@@ -248,7 +248,7 @@ class EventCmd(Command):
             event.add_user(added)
 
 class EventAction(ViewAction):
-    def get(self):
+    def get(self, state=None):
         user_state = None
         error_message = None
         confirm_message = None
@@ -260,13 +260,9 @@ class EventAction(ViewAction):
             error_message = unicode(e)
 
         if self.ctx.user.has_perms(event.f, event.f.PERM_WRITE) and \
-           self.ctx.user.name in event.users:
-            form_action = self.ctx.req.str_POST.get('action')
-            if form_action:
-                if form_action == "Confirm":
-                    event.users[self.ctx.user.name] = event.USER_CONFIRMED
-                elif form_action == "Decline":
-                    event.users[self.ctx.user.name] = event.USER_DECLINED
+             self.ctx.user.name in event.users:
+            if state is not None:
+                event.users[self.ctx.user.name] = state
 
                 try:
                     event.save()
@@ -285,8 +281,11 @@ class EventAction(ViewAction):
         self.ctx.template_vars['stylesheets'].append('event.css')
         self.ctx.res.body = self.ctx.render('event.html')
 
-    def post(self):
-        self.get()
+    def delete(self):
+        self.get(Event.USER_DECLINED)
+
+    def put(self):
+        self.get(Event.USER_CONFIRMED)
 
 class EventsPlugin(Plugin):
     def init(self):
