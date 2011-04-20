@@ -41,7 +41,7 @@ class IObject(object):
 
     def read(self):
         mtime = self.storage._get_mtime(self._confname)
-        if self._mtime is None or self._mtime < mtime or self._old_data != self.data:
+        if self._mtime is None or self._mtime < mtime or self.is_modified():
             data = self.storage._read(self._confname)
             self._mtime = mtime
             self.exists = data is not None
@@ -53,7 +53,7 @@ class IObject(object):
         self._prewrite()
         self.data.cleanup()
         # only write as needed
-        if self._old_data is None or self._old_data != self.data or self.exists is not True:
+        if self._old_data is None or self.is_modified() or self.exists is not True:
             self.storage._write(self._confname, self.data)
             self._old_data = deepcopy(self.data)
             self._mtime = self.storage._get_mtime(self._confname)
@@ -65,6 +65,9 @@ class IObject(object):
         self.exists = False
         self.data.clear()
         self._postread()
+
+    def is_modified(self):
+        return self._old_data != self.data
 
 class ConfigDict(defaultdict):
     def __init__(self, _ = None):
