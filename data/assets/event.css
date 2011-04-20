@@ -17,3 +17,8 @@ form.accept button {
 form.decline button {
     color: red;
 }
+
+form.change-status button {
+    display: inline;
+    margin-left: 1em;
+}

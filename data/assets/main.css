@@ -255,3 +255,21 @@ menu#available-views {
     top: 0px;
     margin: 5px;
 }
+
+article form label {
+    text-align: right;
+    width: 12em;
+    display: block;
+    float: left;
+    padding-right: 5px;
+}
+
+article form input, article form textarea, article form select, article form button {
+    display: block;
+}
+
+article form button {
+    margin-top: 5px;
+    margin-left: 13em;
+    font-size: larger;
+}
