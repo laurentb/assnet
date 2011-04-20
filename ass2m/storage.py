@@ -180,7 +180,7 @@ class Storage(object):
     def _get_mtime(self, name):
         path = os.path.join(self.path, name)
         if os.path.exists(path):
-            return os.path.getmtime(path)
+            return int(os.path.getmtime(path))
 
     def _remove(self, name):
         path = os.path.join(self.path, name)

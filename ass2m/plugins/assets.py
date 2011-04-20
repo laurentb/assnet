@@ -64,7 +64,7 @@ class AssetAction(Action):
 
     def gzip_file(self, realpath):
         filename = os.path.basename(realpath)
-        mtime = os.path.getmtime(realpath)
+        mtime = int(os.path.getmtime(realpath))
 
         # first look if there is a (read-only) gzipped version of the asset
         realpath_gz = realpath+'.gz'
@@ -74,7 +74,7 @@ class AssetAction(Action):
         # then look for a local cache of that asset, if not present, create it
         cachedir = os.path.join(self.ctx.storage.path, 'assets_cache')
         dest = os.path.join(cachedir, filename+'.gz')
-        if not os.path.exists(dest) or mtime > os.path.getmtime(dest):
+        if not os.path.exists(dest) or mtime > int(os.path.getmtime(dest)):
             if not os.path.isdir(cachedir):
                 os.makedirs(cachedir)
             with open(realpath, 'rb') as f_in:
