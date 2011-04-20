@@ -86,7 +86,7 @@ class DownloadThumbnailAction(ViewAction):
             os.utime(thumbpath, (mtime, mtime))
 
         self.ctx.res = FileApp(thumbpath)
-        self.ctx.res.cache_control(public=True, max_age=CACHE_CONTROL.ONE_HOUR)
+        self.ctx.res.cache_control(private=True, max_age=CACHE_CONTROL.ONE_HOUR)
 
 
 class GalleryPlugin(Plugin):

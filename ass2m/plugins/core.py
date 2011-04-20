@@ -186,6 +186,7 @@ class DownloadAction(ViewAction):
     def get(self):
         # serve the file, delegate everything to to FileApp
         self.ctx.res = FileApp(self.ctx.file.get_realpath())
+        self.ctx.res.cache_control(private=True)
 
 
 class ListAction(ViewAction):

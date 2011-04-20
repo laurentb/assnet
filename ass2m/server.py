@@ -124,6 +124,7 @@ class Context(object):
         # defaults, may be changed later on
         self.res.status = 200
         self.res.headers['Content-Type'] = 'text/html; charset=UTF-8'
+        self.res.cache_control.private = True
 
     def _init_template_vars(self):
         self.template_vars = {
