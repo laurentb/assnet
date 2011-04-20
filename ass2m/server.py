@@ -108,8 +108,7 @@ class Context(object):
             config.save()
         # store the absolute root url (useful when in CLI)
         if not config.data["web"].get("root_url"):
-            config.data["web"]["root_url"] = urlparse.urlunsplit(
-                    (self.req.scheme, self.req.host, self.root_url.href, '', ''))
+            config.data["web"]["root_url"] = self.req.host_url+self.root_url.href
             config.save()
 
     def _init_templates(self):

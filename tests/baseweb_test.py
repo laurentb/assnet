@@ -138,3 +138,11 @@ class BaseWebTest(TestCase):
 
         self.app.post('/?_method=GET', status=405)
         self.app.post('/?action=login', {'_method': 'HEAD'}, status=405)
+
+    def test_initConfig(self):
+        os.mkdir(os.path.join(self.root, "penguins"))
+        self.app.get('http://ass2m.test/penguins/', status=200)
+
+        storage = Storage.lookup(self.root)
+        assert storage.get_config().data['web']['root_url'] == 'http://ass2m.test/'
+        assert storage.get_config().data['web']['cookie_secret']
