@@ -158,8 +158,11 @@ class File(IObject):
     def get_mimetype(self):
         return mimetypes.guess_type(self.get_name())[0]
 
+    def get_hash(self):
+        return hashlib.sha1(self.path).hexdigest()
+
     def _get_confname(self):
-        return os.path.join('files', hashlib.sha1(self.path).hexdigest())
+        return os.path.join('files', self.get_hash())
 
     def _postread(self):
         self.view = self.data['info'].get('view', None)

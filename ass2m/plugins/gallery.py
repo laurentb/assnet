@@ -19,14 +19,12 @@
 
 
 import os
-import Image
-from cStringIO import StringIO
-from paste.fileapp import DataApp
+from PIL import Image
 from paste.httpheaders import CACHE_CONTROL
 
 from ass2m.plugin import Plugin
 from ass2m.routes import View
-from ass2m.server import ViewAction
+from ass2m.server import ViewAction, FileApp
 
 class ListGalleryAction(ViewAction):
     def get(self):
@@ -53,9 +51,7 @@ class ListGalleryAction(ViewAction):
 class DownloadThumbnailAction(ViewAction):
     DEFAULT_SIZE = 300
 
-    def get(self):
-        img = Image.open(self.ctx.file.get_realpath())
-
+    def _get_size(self):
         try:
             size = int(self.ctx.req.str_GET['thumb_size'])
         except (KeyError,ValueError):
@@ -63,13 +59,35 @@ class DownloadThumbnailAction(ViewAction):
         else:
             if size < 1 or size > 1000:
                 size = self.DEFAULT_SIZE
+        return size
 
-        img.thumbnail((size,size))
-        s = StringIO()
-        img.save(s, 'jpeg', quality=95)
-        self.ctx.res = DataApp(None, content_type='image/jpeg')
-        self.ctx.res.set_content(s.getvalue(), os.path.getmtime(self.ctx.file.get_realpath()))
+    def get(self):
+        size = self._get_size()
+        thumbdir = os.path.join(self.ctx.storage.path, 'thumbnails')
+        f = self.ctx.file
+
+        # use a lossless format in doubt
+        lossy = f.get_mimetype() == 'image/jpeg'
+        thumbext = 'jpg' if lossy else 'png'
+        thumbpath = os.path.join(thumbdir, str(size), '%s.%s' % (f.get_hash(), thumbext))
+
+        mtime = os.path.getmtime(f.get_realpath())
+        if not os.path.exists(thumbpath) or mtime > os.path.getmtime(thumbpath):
+            if not os.path.isdir(os.path.dirname(thumbpath)):
+                os.makedirs(os.path.dirname(thumbpath))
+            with open(f.get_realpath(), 'rb') as fp:
+                img = Image.open(fp)
+                img.thumbnail((size, size), Image.BILINEAR)
+                with open(thumbpath, 'wb') as tfp:
+                    if lossy:
+                        img.save(tfp, 'jpeg', quality=95)
+                    else:
+                        img.save(tfp, 'png')
+            os.utime(thumbpath, (mtime, mtime))
+
+        self.ctx.res = FileApp(thumbpath)
         self.ctx.res.cache_control(public=True, max_age=CACHE_CONTROL.ONE_HOUR)
+
 
 class GalleryPlugin(Plugin):
     def init(self):
