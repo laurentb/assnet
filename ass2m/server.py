@@ -65,7 +65,7 @@ class Context(object):
         self.user = Anonymous()
 
         self._init_paths()
-        self._init_cookie_secret()
+        self._init_default_config()
         self._init_templates()
         self._init_default_response()
         self._init_template_vars()
@@ -97,15 +97,19 @@ class Context(object):
         # Complete URL (without host)
         self.url = URL(urlparse.urljoin(self.root_url.url, self.relurl.url[1:]), query_vars)
 
-    def _init_cookie_secret(self):
+    def _init_default_config(self):
         if not self.storage:
             return
-
         config = self.storage.get_config()
         self.cookie_secret = config.data["web"].get("cookie_secret")
         if self.cookie_secret is None:
             self.cookie_secret = hexlify(new_secret())
             config.data["web"]["cookie_secret"] = self.cookie_secret
+            config.save()
+        # store the absolute root url (useful when in CLI)
+        if not config.data["web"].get("root_url"):
+            config.data["web"]["root_url"] = urlparse.urlunsplit(
+                    (self.req.scheme, self.req.host, self.root_url.href, '', ''))
             config.save()
 
     def _init_templates(self):
