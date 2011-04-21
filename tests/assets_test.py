@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 from ass2m.storage import Storage
-from ass2m.server import Server, Context
+from ass2m.server import Server
 
 from unittest import TestCase
 from webtest import TestApp
@@ -22,15 +22,15 @@ class AssetsTest(TestCase):
         with open(os.path.join(datapath, 'assets', 'main.css'), 'w') as f:
             f.write('body { background-color: pink; }')
         # monkeypatching
-        self.data_paths = Context.DATA_PATHS
-        Context.DATA_PATHS.insert(0, datapath)
-        Context.DATA_PATHS.insert(0, os.path.join(self.root, 'doesnotexist'))
+        self.data_paths = Storage.DATA_PATHS
+        Storage.DATA_PATHS.insert(0, datapath)
+        Storage.DATA_PATHS.insert(0, os.path.join(self.root, 'doesnotexist'))
 
     def tearDown(self):
         if self.root:
             shutil.rmtree(self.root)
         # demonkeypatching
-        Context.DATA_PATHS = self.data_paths
+        Storage.DATA_PATHS = self.data_paths
 
     def test_getAsset(self):
         res = self.app.get('/?action=asset&file=main.css', status=200)

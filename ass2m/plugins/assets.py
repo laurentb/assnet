@@ -53,7 +53,7 @@ class AssetAction(Action):
             self.ctx.res = HTTPPreconditionFailed()
 
     def find_file(self, filename):
-            paths = [os.path.join(path, 'assets') for path in self.ctx.DATA_PATHS]
+            paths = [os.path.join(path, 'assets') for path in self.ctx.storage.DATA_PATHS]
             for path in paths:
                 realpath = os.path.join(path, filename)
                 if os.path.isfile(realpath):

@@ -43,9 +43,6 @@ __all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
 
 class Context(object):
     SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+|/+' % re.escape(r'/.'))
-    DATA_PATHS = [os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data')),
-             '/usr/share/ass2m',
-             '/usr/local/share/ass2m']
 
     def __init__(self, router, environ, start_response):
         self.router = router
@@ -112,7 +109,8 @@ class Context(object):
             config.save()
 
     def _init_templates(self):
-        paths = [os.path.join(path, 'templates') for path in self.DATA_PATHS]
+        data_paths = self.storage.DATA_PATHS if self.storage else Storage.DATA_PATHS
+        paths = [os.path.join(path, 'templates') for path in data_paths]
         imports = ['from ass2m.filters import compact as cpt, quote_and_decode_url as U',
                 'from paste.url import URL']
         self.lookup = TemplateLookup(directories=paths, collection_size=20,

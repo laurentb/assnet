@@ -59,9 +59,13 @@ class GroupsConfig(IObject, dict):
 
 class Storage(object):
     DIRNAME = '.ass2m'
+    DATA_PATHS = [os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'data')),
+             '/usr/share/ass2m',
+             '/usr/local/share/ass2m']
 
     def __init__(self, path):
         self.path = path
+        self.DATA_PATHS.insert(0, os.path.realpath(os.path.join(self.path, 'data')))
 
     @property
     def root(self):
