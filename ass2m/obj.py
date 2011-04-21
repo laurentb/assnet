@@ -41,7 +41,7 @@ class IObject(object):
 
     def read(self):
         mtime = self.storage._get_mtime(self._confname)
-        if self._mtime is None or self._mtime < mtime or self.is_modified():
+        if self._mtime is None or self._mtime != mtime or self.is_modified():
             data = self.storage._read(self._confname)
             self._mtime = mtime
             self.exists = data is not None

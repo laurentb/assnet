@@ -129,7 +129,7 @@ class StorageTest(TestCase):
         # cheat: alter the mtime of the saved file
         cfg2.data['penguin']['gentoo'] = u"666"
         cfg2.save()
-        mtime = cfg2._mtime - 9000
+        mtime = cfg._mtime
         os.utime(os.path.join(self.storage.path, cfg._get_confname()), (mtime, mtime))
         cfg.read()
         # the file was NOT reloaded

@@ -67,14 +67,16 @@ class AssetAction(Action):
         mtime = int(os.path.getmtime(realpath))
 
         # first look if there is a (read-only) gzipped version of the asset
+        # these files may be created by installers and are supposed to be
+        # always up to date
         realpath_gz = realpath+'.gz'
-        if os.path.exists(realpath_gz) and not mtime > os.path.getmtime(realpath_gz):
+        if os.path.exists(realpath_gz):
             return realpath_gz
 
         # then look for a local cache of that asset, if not present, create it
         cachedir = os.path.join(self.ctx.storage.path, 'assets_cache')
         dest = os.path.join(cachedir, filename+'.gz')
-        if not os.path.exists(dest) or mtime > int(os.path.getmtime(dest)):
+        if not os.path.exists(dest) or mtime != int(os.path.getmtime(dest)):
             if not os.path.isdir(cachedir):
                 os.makedirs(cachedir)
             with open(realpath, 'rb') as f_in:

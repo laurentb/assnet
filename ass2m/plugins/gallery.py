@@ -74,7 +74,7 @@ class DownloadThumbnailAction(ViewAction):
         f.save()
 
         mtime = int(os.path.getmtime(f.get_realpath()))
-        if not os.path.exists(thumbpath) or mtime > int(os.path.getmtime(thumbpath)):
+        if not os.path.exists(thumbpath) or mtime != int(os.path.getmtime(thumbpath)):
             if not os.path.isdir(os.path.dirname(thumbpath)):
                 os.makedirs(os.path.dirname(thumbpath))
             with open(f.get_realpath(), 'rb') as fp:
