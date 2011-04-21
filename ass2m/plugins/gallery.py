@@ -70,6 +70,8 @@ class DownloadThumbnailAction(ViewAction):
         lossy = f.get_mimetype() == 'image/jpeg'
         thumbext = 'jpg' if lossy else 'png'
         thumbpath = os.path.join(thumbdir, str(size), '%s.%s' % (f.get_hash(), thumbext))
+        f.data['thumbnail']['ext'] = thumbext
+        f.save()
 
         mtime = int(os.path.getmtime(f.get_realpath()))
         if not os.path.exists(thumbpath) or mtime > int(os.path.getmtime(thumbpath)):
