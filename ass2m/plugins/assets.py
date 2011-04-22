@@ -22,6 +22,7 @@ from contextlib import closing
 import os
 import re
 from gzip import GzipFile
+from mimetypes import guess_type
 
 from ass2m.plugin import Plugin
 from ass2m.server import Action, FileApp
@@ -41,7 +42,7 @@ class AssetAction(Action):
         if self.SANITIZE_REGEXP.match(filename):
             realpath = self.find_file(filename)
             if realpath:
-                if self.accepts_gzip():
+                if self.accepts_gzip() and self.compressible(filename):
                     realpath = self.gzip_file(realpath)
                 self.ctx.res = FileApp(realpath)
                 self.ctx.res.cache_control(public=True, max_age=CACHE_CONTROL.ONE_DAY)
@@ -60,6 +61,10 @@ class AssetAction(Action):
 
     def accepts_gzip(self):
         return 'gzip' in self.ctx.req.accept_encoding
+
+    def compressible(self, filename):
+        mimetype = guess_type(filename)[0]
+        return mimetype.startswith('application/') or mimetype.startswith('text/')
 
     def gzip_file(self, realpath):
         filename = os.path.basename(realpath)
