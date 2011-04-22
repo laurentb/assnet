@@ -1,5 +1,3 @@
-from __future__ import with_statement
-
 from ass2m.storage import Storage
 from ass2m.users import User, Group
 from ass2m.files import File

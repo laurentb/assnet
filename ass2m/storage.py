@@ -18,10 +18,9 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import with_statement
-
 import os
 from ConfigParser import RawConfigParser
+
 from .users import Group, User, Anonymous
 from .files import File
 from .obj import IObject, ConfigDict

@@ -18,15 +18,14 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import with_statement
 from contextlib import closing
 import os
 import re
 from gzip import GzipFile
 
 from ass2m.plugin import Plugin
-
 from ass2m.server import Action, FileApp
+
 from paste.httpheaders import CACHE_CONTROL, CONTENT_DISPOSITION
 from webob.exc import HTTPNotFound, HTTPPreconditionFailed
 
