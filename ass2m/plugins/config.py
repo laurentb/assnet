@@ -19,6 +19,7 @@
 
 import os
 import sys
+import subprocess
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command, CommandParent
@@ -109,6 +110,20 @@ class SetConfigCmd(Command):
         config.save()
 
 
+class EditConfigCmd(Command):
+    DESCRIPTION = 'Edit the whole configuration file'
+
+    def cmd(self, args):
+        try:
+            config = ConfigCmdParent.get_config(self.storage, args.config_info)
+        except GetConfigError, e:
+            print >>sys.stderr, 'Error: %s' % e
+            return 1
+
+        return subprocess.call([os.environ.get('EDITOR', 'vi'),
+                    os.path.join(self.storage.path, config._get_confname())])
+
+
 class GetConfigError(Exception):
     pass
 
@@ -145,6 +160,7 @@ class ConfigCmdParent(CommandParent):
 class ConfigPlugin(Plugin):
     def init(self):
         self.register_cli_command('config', ConfigCmdParent)
+        self.register_cli_command('config', 'edit',    EditConfigCmd)
         self.register_cli_command('config', 'get',     GetConfigCmd)
         self.register_cli_command('config', 'list',    ListConfigCmd)
         self.register_cli_command('config', 'resolve', ResolveCmd)
