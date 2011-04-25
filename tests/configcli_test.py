@@ -28,17 +28,26 @@ class ConfigCLITest(TestCase):
         if self.root:
             shutil.rmtree(self.root)
 
-    def beginCapture(self):
+    def beginCapture(self, with_stderr = False):
         self.stdout = sys.stdout
         # begin capture
         sys.stdout = StringIO()
+        if with_stderr:
+            self.stderr = sys.stderr
+            sys.stderr = sys.stdout
+        elif not hasattr(self, 'stderr'):
+            self.stderr = None
 
     def endCapture(self):
-        captured = sys.stdout
+        captured = sys.stdout.getvalue()
         # end capture
-        sys.stdout = self.stdout
-        self.stdout = None
-        return captured.getvalue()
+        if self.stdout is not None:
+            sys.stdout = self.stdout
+            self.stdout = None
+        if self.stderr is not None:
+            sys.stderr = self.stderr
+            self.stderr = None
+        return captured
 
     def test_resolve(self):
         for p in (os.path.join(self.root, 'penguins'), os.path.join(self.root, 'penguins'+os.path.sep)):
@@ -100,3 +109,28 @@ class ConfigCLITest(TestCase):
         output = self.endCapture()
         assert len(output)
         self.assertRaises(ValueError, output.split('\n').index, 'info.realname=Penguin')
+
+    def test_getAndSet(self):
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'config', '-g', 'list']) in (0, None)
+        output = self.endCapture()
+        assert len(output) == 0
+
+        self.beginCapture(True)
+        assert self.app.main(['ass2m_test', 'config', '-g', 'get', 'lol.cat']) == 2
+        output = self.endCapture()
+        assert output.strip() == 'Error: lol.cat is undefined.'
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'config', '-g', 'set', 'lol.cat', '42']) in (0, None)
+        output = self.endCapture()
+        assert len(output) == 0
+
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'config', '-g', 'get', 'lol.cat']) in (0, None)
+        output = self.endCapture()
+        assert output.strip() == '42'
+
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'config', '-g', 'list']) in (0, None)
+        output = self.endCapture()
+        assert len(output.strip().split('\n')) == 1

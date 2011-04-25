@@ -18,17 +18,26 @@ class BaseCLITest(TestCase):
         if self.root:
             shutil.rmtree(self.root)
 
-    def beginCapture(self):
+    def beginCapture(self, with_stderr = False):
         self.stdout = sys.stdout
         # begin capture
         sys.stdout = StringIO()
+        if with_stderr:
+            self.stderr = sys.stderr
+            sys.stderr = sys.stdout
+        elif not hasattr(self, 'stderr'):
+            self.stderr = None
 
     def endCapture(self):
-        captured = sys.stdout
+        captured = sys.stdout.getvalue()
         # end capture
-        sys.stdout = self.stdout
-        self.stdout = None
-        return captured.getvalue()
+        if self.stdout is not None:
+            sys.stdout = self.stdout
+            self.stdout = None
+        if self.stderr is not None:
+            sys.stderr = self.stderr
+            self.stderr = None
+        return captured
 
     def test_init(self):
         self.beginCapture()

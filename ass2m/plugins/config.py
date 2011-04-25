@@ -52,10 +52,62 @@ class ListConfigCmd(Command):
         except GetConfigError, e:
             print >>sys.stderr, 'Error: %s' % e
             return 1
+
         for sectionkey, section in config.data.iteritems():
             if args.section is None or sectionkey == args.section:
                 for key, value in section.iteritems():
                     print "%s.%s=%s" % (sectionkey, key, value)
+
+
+class GetConfigCmd(Command):
+    DESCRIPTION = 'Get the value of a configuration entry'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('section_key', metavar='SECTION.KEY')
+
+    def cmd(self, args):
+        try:
+            config = ConfigCmdParent.get_config(self.storage, args.config_info)
+        except GetConfigError, e:
+            print >>sys.stderr, 'Error: %s' % e
+            return 1
+
+        if '.' not in args.section_key:
+            print >>sys.stderr, 'You must provide a section and a key (SECTION.KEY).'
+            return 1
+
+        section, key = args.section_key.split('.')
+        if not config.data[section].has_key(key):
+            print >>sys.stderr, 'Error: %s is undefined.' % args.section_key
+            return 2
+
+        print config.data[section][key]
+
+
+class SetConfigCmd(Command):
+    DESCRIPTION = 'Set the value of a configuration entry'
+
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('section_key', metavar='SECTION.KEY')
+        parser.add_argument('value')
+
+    def cmd(self, args):
+        try:
+            config = ConfigCmdParent.get_config(self.storage, args.config_info)
+        except GetConfigError, e:
+            print >>sys.stderr, 'Error: %s' % e
+            return 1
+
+        if '.' not in args.section_key:
+            print >>sys.stderr, 'You must provide a section and a key (SECTION.KEY).'
+            return 1
+
+        section, key = args.section_key.split('.')
+        config.data[section][key] = args.value
+        config.save()
+
 
 class GetConfigError(Exception):
     pass
@@ -93,5 +145,7 @@ class ConfigCmdParent(CommandParent):
 class ConfigPlugin(Plugin):
     def init(self):
         self.register_cli_command('config', ConfigCmdParent)
+        self.register_cli_command('config', 'get',     GetConfigCmd)
+        self.register_cli_command('config', 'list',    ListConfigCmd)
         self.register_cli_command('config', 'resolve', ResolveCmd)
-        self.register_cli_command('config', 'list', ListConfigCmd)
+        self.register_cli_command('config', 'set',     SetConfigCmd)
