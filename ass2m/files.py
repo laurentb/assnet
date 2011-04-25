@@ -66,6 +66,9 @@ class File(IObject):
         self.perms = {}
         IObject.__init__(self, storage)
 
+    def __str__(self):
+        return self.path
+
     def set_all_perms(self, perms):
         self.perms['all'] = perms
 

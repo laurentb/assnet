@@ -21,53 +21,77 @@ import os
 import sys
 
 from ass2m.plugin import Plugin
-from ass2m.cmd import Command
+from ass2m.cmd import Command, CommandParent
 
 
 __all__ = ['ConfigPlugin']
 
 
 class ResolveCmd(Command):
-    DESCRIPTION = 'Get the storage name of a path'
-
-    @staticmethod
-    def configure_parser(parser):
-        parser.add_argument('path', nargs='+')
+    DESCRIPTION = 'Get the absolute path of the configuration file'
 
     def cmd(self, args):
-        for path in args.path:
-            if not os.path.exists(path):
-                print >>sys.stderr, 'Error: Path "%s" does not exist.' % path
-                continue
-
-            f = self.storage.get_file_from_realpath(os.path.realpath(path))
-            if not f:
-                print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
-                continue
-            print '%s => %s' % (f.path, os.path.join(self.storage.path, f._get_confname()))
+        try:
+            config = ConfigCmdParent.get_config(self.storage, args.config_info)
+        except GetConfigError, e:
+            print >>sys.stderr, 'Error: %s' % e
+            return 1
+        print '%s => %s' % (config, os.path.join(self.storage.path, config._get_confname()))
 
 
 class ListConfigCmd(Command):
-    DESCRIPTION = 'Get all the values of the global config'
+    DESCRIPTION = 'Get all the values of a configuration'
 
     @staticmethod
     def configure_parser(parser):
         parser.add_argument('section', nargs='?')
 
     def cmd(self, args):
-        config = self.storage.get_config()
-        self._print_config(config.data, args.section)
-
-    def _print_config(self, data, filter_section = None):
-        for sectionkey, section in data.iteritems():
-            if filter_section is None or sectionkey == filter_section:
+        try:
+            config = ConfigCmdParent.get_config(self.storage, args.config_info)
+        except GetConfigError, e:
+            print >>sys.stderr, 'Error: %s' % e
+            return 1
+        for sectionkey, section in config.data.iteritems():
+            if args.section is None or sectionkey == args.section:
                 for key, value in section.iteritems():
                     print "%s.%s=%s" % (sectionkey, key, value)
 
+class GetConfigError(Exception):
+    pass
+
+
+class ConfigCmdParent(CommandParent):
+    DESCRIPTION = 'Interact with the stored configurations'
+
+    @staticmethod
+    def configure_parser(parser):
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('-g', '--global', help='Use global configuration',
+                action='store_const', const=('global', None), dest='config_info')
+        group.add_argument('-f', '--file', help='Use a file\'s configuration',
+                type=lambda v: ('file', v), metavar='FILEPATH', dest='config_info')
+        group.add_argument('-u', '--user', help='Use an user\'s configuration',
+                type=lambda v: ('user', v), metavar='USERNAME', dest='config_info')
+
+    @staticmethod
+    def get_config(storage, config_info):
+        config_type, config_name = config_info
+        if config_type == 'global':
+            return storage.get_config()
+        elif config_type == 'file':
+            f = storage.get_file_from_realpath(os.path.realpath(config_name))
+            if not f:
+                raise GetConfigError('Path "%s" is not in working directory %s.' % (config_name, storage.root))
+            return f
+        elif config_type == 'user':
+            u = storage.get_user(config_name)
+            if not u or not u.exists:
+                raise GetConfigError('User "%s" does not exist.' % config_name)
+            return u
 
 class ConfigPlugin(Plugin):
     def init(self):
-        self.register_cli_command('config', 'Interact with the stored configurations')
+        self.register_cli_command('config', ConfigCmdParent)
         self.register_cli_command('config', 'resolve', ResolveCmd)
-        self.register_cli_command('config', 'global', 'Interact with the global configuration')
-        self.register_cli_command('config', 'global', 'list', ListConfigCmd)
+        self.register_cli_command('config', 'list', ListConfigCmd)

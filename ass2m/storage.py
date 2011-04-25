@@ -30,6 +30,9 @@ __all__ = ['Storage']
 
 
 class GlobalConfig(IObject):
+    def __str__(self):
+        return '<global>'
+
     def _get_confname(self):
         return 'config'
 
