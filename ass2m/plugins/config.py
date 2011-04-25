@@ -50,18 +50,24 @@ class ResolveCmd(Command):
 class ListConfigCmd(Command):
     DESCRIPTION = 'Get all the values of the global config'
 
-    def cmd(self, args):
-        c = self.storage.get_config()
-        self._print_config(c.data)
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('section', nargs='?')
 
-    def _print_config(self, data):
+    def cmd(self, args):
+        config = self.storage.get_config()
+        self._print_config(config.data, args.section)
+
+    def _print_config(self, data, filter_section = None):
         for sectionkey, section in data.iteritems():
-            for key, value in section.iteritems():
-                print "%s.%s=%s" % (sectionkey, key, value)
+            if filter_section is None or sectionkey == filter_section:
+                for key, value in section.iteritems():
+                    print "%s.%s=%s" % (sectionkey, key, value)
 
 
 class ConfigPlugin(Plugin):
     def init(self):
         self.register_cli_command('config', 'Interact with the stored configurations')
         self.register_cli_command('config', 'resolve', ResolveCmd)
+        self.register_cli_command('config', 'global', 'Interact with the global configuration')
         self.register_cli_command('config', 'global', 'list', ListConfigCmd)
