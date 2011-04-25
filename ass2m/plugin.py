@@ -18,7 +18,7 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-from .cmd import Command
+from .cmd import CommandParent
 
 
 __all__ = ['Plugin']
@@ -43,11 +43,11 @@ class Plugin(object):
         names = args[:-1]
         cmd = args[-1]
 
-        if isinstance(cmd, type) and issubclass(cmd, Command):
-            description = cmd.DESCRIPTION
-        else:
+        if isinstance(cmd, basestring):
             description = cmd
-            cmd = None
+            cmd = CommandParent
+        else:
+            description = cmd.DESCRIPTION
 
         for name in names:
             # XXX hack to store and get the subparser object.
@@ -64,8 +64,8 @@ class Plugin(object):
             else:
                 parser = subparsers.add_parser(name, help=description)
 
-        if cmd:
-            cmd.configure_parser(parser)
+        cmd.configure_parser(parser)
+        if hasattr(cmd, 'cmd'):
             parser.set_defaults(cmd=cmd)
 
     def register_web_action(self, *args, **kwargs):

@@ -89,9 +89,7 @@ class ConsolePart(object):
             return line
 
 class Command(ConsolePart):
-    NAME = None
     DESCRIPTION = None
-    ALIASES = ()
     WORKDIR = True
 
     def cmd(self, args):
@@ -112,3 +110,10 @@ class Command(ConsolePart):
             return 1
 
         return self.cmd(args)
+
+class CommandParent(object):
+    DESCRIPTION = None
+
+    @staticmethod
+    def configure_parser(parser):
+        return
