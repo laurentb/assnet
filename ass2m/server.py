@@ -18,11 +18,9 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-import os
 import posixpath
 import re
 from binascii import hexlify
-from mako.lookup import TemplateLookup
 from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from paste.fileapp import FileApp as PasteFileApp
@@ -34,6 +32,7 @@ import urlparse
 
 from .butt import Butt
 from .storage import Storage
+from .template import build_lookup
 from .version import VERSION
 from .users import Anonymous
 from .routes import Router
@@ -63,7 +62,7 @@ class Context(object):
 
         self._init_paths()
         self._init_default_config()
-        self._init_templates()
+        self.lookup = build_lookup(self.storage)
         self._init_default_response()
         self._init_template_vars()
 
@@ -107,16 +106,6 @@ class Context(object):
         if not config.data["web"].get("root_url"):
             config.data["web"]["root_url"] = self.req.host_url+self.root_url.href
             config.save()
-
-    def _init_templates(self):
-        data_paths = self.storage.DATA_PATHS if self.storage else Storage.DATA_PATHS
-        paths = [os.path.join(path, 'templates') for path in data_paths]
-        imports = ['from ass2m.filters import compact as cpt, quote_and_decode_url as U',
-                'from paste.url import URL']
-        self.lookup = TemplateLookup(directories=paths, collection_size=20,
-                         output_encoding='utf-8', input_encoding='utf-8',
-                         default_filters=['decode.utf8'],
-                         imports=imports)
 
     def _init_default_response(self):
         # defaults, may be changed later on
