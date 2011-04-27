@@ -32,8 +32,7 @@ import urlparse
 
 from .butt import Butt
 from .storage import Storage
-from .template import build_lookup
-from .version import VERSION
+from .template import build_lookup, build_vars
 from .users import Anonymous
 from .routes import Router
 from .filters import quote_url, quote_path
@@ -63,8 +62,8 @@ class Context(object):
         self._init_paths()
         self._init_default_config()
         self.lookup = build_lookup(self.storage)
-        self._init_default_response()
         self._init_template_vars()
+        self._init_default_response()
 
     def _init_paths(self):
         path = self.req.path_info
@@ -114,15 +113,15 @@ class Context(object):
         self.res.cache_control.private = True
 
     def _init_template_vars(self):
-        self.template_vars = {
-            'ass2m_version': VERSION,
+        self.template_vars = build_vars(self.storage)
+        # add and override variables specific to the web responses
+        self.template_vars.update({
             'path': self.path,
             'url': self.url,
             'root_url': self.root_url,
-            'global': dict(),
             'stylesheets': ['main.css'],
             'scripts': ['mootools-core-1.3.1.js', 'mootools-more-1.3.1.1.js', 'main.js'],
-        }
+        })
 
     def render(self, template):
         return self.lookup.get_template(template).render(**self.template_vars)

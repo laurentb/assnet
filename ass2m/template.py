@@ -22,6 +22,7 @@ import os
 from mako.lookup import TemplateLookup
 
 from .storage import Storage
+from .version import VERSION
 
 def build_lookup(storage):
     """
@@ -37,3 +38,15 @@ def build_lookup(storage):
                      output_encoding='utf-8', input_encoding='utf-8',
                      default_filters=['decode.utf8'],
                      imports=imports)
+
+def build_vars(storage):
+    """
+    Get useful default variables to use with Mako templates.
+    If a Storage object is provided (it should be most of the time),
+    it will set a root_url, which is useful when outside of the web server.
+    """
+    return {
+        'ass2m_version': VERSION,
+        'root_url': storage.get_config().data['web']['root_url'] if storage else None,
+        'global': dict(),
+    }
