@@ -29,6 +29,7 @@ from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllow
 from paste.url import URL
 from datetime import timedelta
 import urlparse
+import json
 
 from .butt import Butt
 from .storage import Storage
@@ -64,6 +65,7 @@ class Context(object):
         self.lookup = build_lookup(self.storage)
         self._init_template_vars()
         self._init_default_response()
+        self._init_session()
 
     def _init_paths(self):
         path = self.req.path_info
@@ -135,28 +137,65 @@ class Context(object):
                 if self.user.has_perms(f, f.PERM_LIST):
                     yield f
 
-    def login(self, user):
+    def login(self, user, set_cookie = True):
         """
         Log in an user.
         user: User
+        set_cookie: bool, to chose if we set the cookie to remember the user.
+
         Do note that if you replace the "res" attribute after,
         that the cookie will not be sent.
         """
         assert user.exists
-        signer = AuthCookieSigner(secret=self.cookie_secret)
-        cookie = signer.sign(user.name)
-        self.res.set_cookie('ass2m_auth', cookie,
+        if set_cookie:
+            signer = AuthCookieSigner(secret=self.cookie_secret)
+            cookie = signer.sign(user.name)
+            self.res.set_cookie('ass2m_auth', cookie,
                 max_age=timedelta(days=120), httponly=True, path=quote_url(self.root_url))
+            # ensure there is a session cookie
+            self.update_session()
         self.user = user
 
-    def logout(self):
+    def logout(self, delete_cookie = True):
         """
         Log out the current user.
+        delete_cookie: bool, to chose if we remove the cookie to forget the user.
+
         Do note that if you replace the "res" attribute after,
         that the cookie will not be removed.
         """
-        self.res.delete_cookie('ass2m_auth', path=quote_url(self.root_url))
+        if delete_cookie:
+            self.res.delete_cookie('ass2m_auth', path=quote_url(self.root_url))
         self.user = Anonymous()
+
+    def update_session(self):
+        """
+        Update the session cookie from the session attribute, encoded in plain JSON.
+        It is not designed to be authoritative.
+        JSON is readable client-side and allows us to restrict the types
+        injected by the cookie compared to pickle.
+
+        session should be a dict.
+
+        Do note that if you replace the "res" attribute after,
+        that the session cookie will not be sent.
+        """
+        self.res.set_cookie('ass2m_session', json.dumps(self.session),
+            path=quote_url(self.root_url))
+
+    def _init_session(self):
+        """
+        Get the session cookie. It must be a dict
+        and will ignore invalid data.
+        """
+        try:
+            session = json.loads(self.req.str_cookies.get('ass2m_session', ''))
+        except ValueError:
+            session = dict()
+        else:
+            if not isinstance(session, dict):
+                session = dict()
+        self.session = session
 
 
 class Action(object):
@@ -219,18 +258,20 @@ class Dispatcher(object):
         self.ctx = ctx
 
     def _authenticate(self):
-        authkey = self.ctx.req.str_params.get('authkey')
-        cookie = self.ctx.req.str_cookies.get('ass2m_auth')
+        ctx = self.ctx
+        authkey = ctx.req.str_params.get('authkey')
+        cookie = ctx.req.str_cookies.get('ass2m_auth')
         if authkey:
-            for user in self.ctx.storage.iter_users():
+            for user in ctx.storage.iter_users():
                 if authkey == user.key:
                     # set the cookie for the following requests
-                    return self.ctx.login(user)
+                    return ctx.login(user)
         elif cookie:
-            signer = AuthCookieSigner(secret=self.ctx.cookie_secret)
+            signer = AuthCookieSigner(secret=ctx.cookie_secret)
             username = signer.auth(cookie)
             if username:
-                self.ctx.user = self.ctx.storage.get_user(username)
+                user = ctx.storage.get_user(username)
+                ctx.login(user, set_cookie='ass2m_session' not in ctx.req.str_cookies)
 
     def dispatch(self):
         ctx = self.ctx
