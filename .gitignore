@@ -1,1 +1,4 @@
 *.pyc
+/ass2m.egg-info/
+/build/
+/dist/

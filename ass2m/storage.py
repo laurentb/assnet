@@ -19,6 +19,7 @@
 
 
 import os
+import sys
 from ConfigParser import RawConfigParser
 
 from .users import Group, User, Anonymous
@@ -62,8 +63,8 @@ class GroupsConfig(IObject, dict):
 class Storage(object):
     DIRNAME = '.ass2m'
     DATA_PATHS = [os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'data')),
-             '/usr/share/ass2m',
-             '/usr/local/share/ass2m']
+        os.path.join(sys.prefix, 'share', 'ass2m'),
+        os.path.join(sys.prefix, 'local', 'share', 'ass2m')]
 
     def __init__(self, path):
         self.path = path
