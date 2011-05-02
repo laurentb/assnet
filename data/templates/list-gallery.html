@@ -25,28 +25,30 @@
 </ul>
 </section>
 
-<section>
-<table class="list">
-<caption>Directory listing</caption>
-<thead>
-    <tr>
-        <th class="filename">Name</th>
-    </tr>
-</thead>
-<tbody>
-    % if path:
-    <tr class="parent">
-        <td class="filename" data-sortname="/"><a href="../">Parent directory</a></td>
-    </tr>
-    % endif
-    % for dir in dirs:
-    <tr class="dir">
-        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U,h}">${dir.get_name() | h}</a>/</td>
-    </tr>
-    % endfor
-</tbody>
-</table>
-</section>
+% if len(dirs) or path:
+    <section>
+    <table class="list">
+    <caption>Directory listing</caption>
+    <thead>
+        <tr>
+            <th class="filename">Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        % if path:
+        <tr class="parent">
+            <td class="filename" data-sortname="/"><a href="../">Parent directory</a></td>
+        </tr>
+        % endif
+        % for dir in dirs:
+        <tr class="dir">
+            <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U,h}">${dir.get_name() | h}</a>/</td>
+        </tr>
+        % endfor
+    </tbody>
+    </table>
+    </section>
+% endif
 </article>
 
 <%def name="title(html=False)" filter="cpt">
