@@ -21,6 +21,7 @@
 import os
 from PIL import Image
 from paste.httpheaders import CACHE_CONTROL
+from mako.filters import html_escape
 
 from ass2m.plugin import Plugin
 from ass2m.routes import View
@@ -39,9 +40,11 @@ class ListGalleryAction(ViewAction):
                 mimetype = f.get_mimetype()
                 if mimetype is not None and mimetype.startswith('image'):
                     photos.append(f)
-                elif filename == 'DESCRIPTION':
+                elif filename in ('DESCRIPTION', 'DESCRIPTION.html'):
                     with open(f.get_realpath(), 'r') as f:
                         description = f.read()
+                        if not filename.endswith('.html'):
+                            description = html_escape(description.decode('utf-8'))
 
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['photos'] = photos
