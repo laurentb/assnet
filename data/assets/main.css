@@ -48,6 +48,10 @@ section {
     clear: both;
 }
 
+div.clear {
+    clear: both;
+}
+
 figure {
     text-align: center;
     margin: 0;
