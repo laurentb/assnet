@@ -9,6 +9,7 @@ import shutil
 import sys
 from StringIO import StringIO
 
+
 class BaseCLITest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
@@ -18,7 +19,7 @@ class BaseCLITest(TestCase):
         if self.root:
             shutil.rmtree(self.root)
 
-    def beginCapture(self, with_stderr = False):
+    def beginCapture(self, with_stderr=False):
         self.stdout = sys.stdout
         # begin capture
         sys.stdout = StringIO()
@@ -48,8 +49,8 @@ class BaseCLITest(TestCase):
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'tree']) in (0, None)
         output = self.endCapture()
-        assert re.match(re.escape(r'/')+r'\s+'+re.escape(r'all(rl-)'), output, re.S)
-        assert re.match(".+"+re.escape(r'/.ass2m/')+r'\s+'+re.escape(r'all(---)'), output, re.S)
+        assert re.match(re.escape(r'/') + r'\s+' + re.escape(r'all(rl-)'), output, re.S)
+        assert re.match(".+" + re.escape(r'/.ass2m/') + r'\s+' + re.escape(r'all(---)'), output, re.S)
 
     def test_findRoot(self):
         self.beginCapture()

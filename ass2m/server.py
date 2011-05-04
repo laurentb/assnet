@@ -38,7 +38,9 @@ from .users import Anonymous
 from .routes import Router
 from .filters import quote_url, quote_path
 
+
 __all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
+
 
 class Context(object):
     SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+|/+' % re.escape(r'/.'))
@@ -54,7 +56,7 @@ class Context(object):
             script_path = quote_path(environ['SCRIPT_URL'])
             if self.req.path_info:
                 level = len(self.req.path_info.split('/')) - 1
-                environ['SCRIPT_NAME'] = '/'.join(script_path.split('/')[:-level])+'/'
+                environ['SCRIPT_NAME'] = '/'.join(script_path.split('/')[:-level]) + '/'
             else:
                 environ['SCRIPT_NAME'] = script_path
         self.res = Response()
@@ -105,7 +107,7 @@ class Context(object):
             config.save()
         # store the absolute root url (useful when in CLI)
         if not config.data["web"].get("root_url"):
-            config.data["web"]["root_url"] = self.req.host_url+self.root_url.href
+            config.data["web"]["root_url"] = self.req.host_url + self.root_url.href
             config.save()
 
     def _init_default_response(self):
@@ -137,7 +139,7 @@ class Context(object):
                 if self.user.has_perms(f, f.PERM_LIST):
                     yield f
 
-    def login(self, user, set_cookie = True):
+    def login(self, user, set_cookie=True):
         """
         Log in an user.
         user: User
@@ -156,7 +158,7 @@ class Context(object):
             self.update_session()
         self.user = user
 
-    def logout(self, delete_cookie = True):
+    def logout(self, delete_cookie=True):
         """
         Log out the current user.
         delete_cookie: bool, to chose if we remove the cookie to forget the user.

@@ -8,6 +8,7 @@ from webtest import TestApp
 from tempfile import mkdtemp
 import shutil
 
+
 class LoginTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')

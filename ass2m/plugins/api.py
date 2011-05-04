@@ -64,7 +64,7 @@ class TextListAction(ViewAction):
         filenames = []
         for f in self.ctx.iter_files():
             if f.isdir():
-                filenames.append(f.get_name()+'/')
+                filenames.append(f.get_name() + '/')
             else:
                 filenames.append(f.get_name())
 

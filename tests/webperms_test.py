@@ -10,6 +10,7 @@ from tempfile import mkdtemp
 import shutil
 import os
 
+
 class WebPermsTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
@@ -69,7 +70,7 @@ class WebPermsTest(TestCase):
         assert 'HELLO' == res.body
 
         # force the display of one file in the directory
-        self._set_perms('/penguins/gentoo', all=File.PERM_READ|File.PERM_LIST)
+        self._set_perms('/penguins/gentoo', all=File.PERM_READ | File.PERM_LIST)
         res = self.app.get('/penguins/', status=200)
         assert 'gentoo' in res.body
 
@@ -92,7 +93,7 @@ class WebPermsTest(TestCase):
         res = form.submit(status=302)
 
         # check user perms
-        self._set_perms('/penguins', all=0, u_penguin=File.PERM_READ|File.PERM_LIST)
+        self._set_perms('/penguins', all=0, u_penguin=File.PERM_READ | File.PERM_LIST)
         res = self.app.get('/', status=200)
         assert 'penguins' in res.body
         res = self.app.get('/penguins/', status=200)
@@ -104,7 +105,7 @@ class WebPermsTest(TestCase):
         self.app.get('/penguins/', status=403)
 
         # check group perms
-        self._set_perms('/penguins', all=0, g_admin=File.PERM_READ|File.PERM_LIST)
+        self._set_perms('/penguins', all=0, g_admin=File.PERM_READ | File.PERM_LIST)
         res = self.app.get('/', status=200)
         assert 'penguins' in res.body
         res = self.app.get('/penguins/', status=200)
@@ -116,16 +117,16 @@ class WebPermsTest(TestCase):
         self.app.get('/penguins/', status=403)
 
         # check recursive perms
-        self._set_perms('/', all=0, g_admin=File.PERM_LIST|File.PERM_READ)
+        self._set_perms('/', all=0, g_admin=File.PERM_LIST | File.PERM_READ)
         self._set_perms('/penguins')
         res = self.app.get('/penguins/', status=200)
         assert 'gentoo' in res.body
 
-        self._set_perms('/', all=File.PERM_LIST|File.PERM_READ, g_admin=0)
+        self._set_perms('/', all=File.PERM_LIST | File.PERM_READ, g_admin=0)
         self.app.get('/penguins/', status=403)
 
-        self._set_perms('/', all=File.PERM_LIST|File.PERM_READ, u_penguins=0)
-        self._set_perms('/penguins', g_admin=File.PERM_LIST|File.PERM_READ)
+        self._set_perms('/', all=File.PERM_LIST | File.PERM_READ, u_penguins=0)
+        self._set_perms('/penguins', g_admin=File.PERM_LIST | File.PERM_READ)
         self.app.get('/penguins/', status=200)
 
     def _set_perms(self, path, **perms):

@@ -29,7 +29,7 @@ setup(name="ass2m",
     zip_safe=False,
     packages=find_packages(),
     scripts=['bin/ass2m', 'bin/ass2m-serve'],
-    data_files = [
+    data_files=[
         ('%s/assets' % DATA_DIR,    glob('data/assets/*')),
         ('%s/templates' % DATA_DIR, glob('data/templates/*')),
         ('%s/scripts' % DATA_DIR,   glob('data/scripts/*')),

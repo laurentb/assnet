@@ -1,14 +1,17 @@
 from ass2m.routes import View, Router
 from unittest import TestCase
 
+
 def fn1():
     pass
+
 
 def fn2():
     pass
 
+
 class FakeFile(object):
-    def __init__(self, name, object_type, view = None, mimetype = None):
+    def __init__(self, name, object_type, view=None, mimetype=None):
         self.name = name
         self.object_type = object_type
         self.view = view
@@ -19,6 +22,7 @@ class FakeFile(object):
 
     def get_mimetype(self):
         return self.mimetype
+
 
 class RoutesTest(TestCase):
     def test_actions(self):

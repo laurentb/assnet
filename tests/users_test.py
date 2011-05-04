@@ -4,6 +4,7 @@ from unittest import TestCase
 from tempfile import mkdtemp
 import shutil
 
+
 class UsersTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')

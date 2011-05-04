@@ -24,6 +24,10 @@ from ass2m.plugin import Plugin
 from ass2m.routes import View
 from ass2m.server import ViewAction, FileApp
 
+
+__all__ = ['WebsitePlugin']
+
+
 class WebsiteAction(ViewAction):
     PAGENAME = 'index.html'
 
@@ -36,7 +40,8 @@ class WebsiteAction(ViewAction):
         else:
             self.ctx.res = FileApp(path)
 
-class CorePlugin(Plugin):
+
+class WebsitePlugin(Plugin):
     def init(self):
         self.register_web_view(
                 View(object_type='directory', name='website'),

@@ -132,7 +132,7 @@ class ContactsManagement(ConsolePart):
                 print '%s q)%s --stop--' % (self.BOLD, self.NC)
                 print ''
                 r = self.print_menu()
-            except (KeyboardInterrupt,EOFError):
+            except (KeyboardInterrupt, EOFError):
                 break
 
             if r.isdigit():
@@ -191,6 +191,7 @@ class ContactsManagement(ConsolePart):
         print '%s%2d)%s %s%-20s%s "%s <%s>"' % (self.BOLD, i, self.NC,
                                                 self.BOLD, user.name, self.NC,
                                                 user.realname, user.email)
+
 
 class ContactsSelection(ContactsManagement):
     def __init__(self, storage, sel_users=[], sel_groups=None):
@@ -255,6 +256,7 @@ class ContactsSelection(ContactsManagement):
         else:
             self.sel_groups.add(group.name)
 
+
 class ContactsAddCmd(Command):
     DESCRIPTION = 'Add a contact'
 
@@ -266,6 +268,7 @@ class ContactsAddCmd(Command):
         cm = ContactsManagement(self.storage)
         if not cm.add_contact(args.username):
             return 1
+
 
 class ContactsPasswordCmd(Command):
     DESCRIPTION = 'Change the password of a contact'
@@ -279,6 +282,7 @@ class ContactsPasswordCmd(Command):
         if not cm.edit_contact_password(args.username):
             return 1
 
+
 class ContactsGenKeyCmd(Command):
     DESCRIPTION = 'Create or reset the key on a contact'
 
@@ -291,12 +295,14 @@ class ContactsGenKeyCmd(Command):
         if not cm.generate_contact_key(args.username):
             return 1
 
+
 class ContactsMenuCmd(Command):
     DESCRIPTION = 'Display the contacts menu'
 
     def cmd(self, args):
         cm = ContactsManagement(self.storage)
         cm.main()
+
 
 class ContactsMergeCmd(Command):
     DESCRIPTION = 'Merge contacts from another working directory'
@@ -317,6 +323,7 @@ class ContactsMergeCmd(Command):
             user.save()
             print 'Imported %s (%s <%s>)' % (user.name, user.realname, user.email)
 
+
 class ContactsListCmd(Command):
     DESCRIPTION = 'List contacts'
     WORKDIR = True
@@ -324,6 +331,7 @@ class ContactsListCmd(Command):
     def cmd(self, args):
         cm = ContactsManagement(self.storage)
         cm.print_users()
+
 
 class ContactsRemoveCmd(Command):
     DESCRIPTION = 'Remove a contact'
@@ -354,7 +362,7 @@ class LoginAction(Action):
                 or quote_url(self.ctx.root_url)
         return form
 
-    def get(self, form = None):
+    def get(self, form=None):
         form = form or self._get_form()
         self.ctx.template_vars['form'] = form
         self.ctx.res.body = self.ctx.render('login.html')

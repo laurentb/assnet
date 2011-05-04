@@ -7,6 +7,7 @@ from tempfile import mkdtemp
 import shutil
 import os
 
+
 class StorageTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
@@ -24,7 +25,7 @@ class StorageTest(TestCase):
     def test_configDict(self):
         d = ConfigDict()
         d['a']
-        d['b']['a']=1
+        d['b']['a'] = 1
         assert len(d) == 2
         d.cleanup()
         assert len(d) == 1
@@ -137,13 +138,13 @@ class StorageTest(TestCase):
 
     def test_filePreAndPost(self):
         f = File(self.storage, '/penguin')
-        f.perms['all'] = File.PERM_READ|File.PERM_LIST
+        f.perms['all'] = File.PERM_READ | File.PERM_LIST
         f.view = 'html'
         f.save()
 
         f = File(self.storage, '/penguin')
         f.read()
-        assert f.perms['all'] == File.PERM_READ|File.PERM_LIST
+        assert f.perms['all'] == File.PERM_READ | File.PERM_LIST
         assert f.view == 'html'
         f.remove()
         assert len(f.perms) == 0
@@ -282,11 +283,12 @@ class StorageTest(TestCase):
         class Chafouin(File):
             def __init__(self, fakesize):
                 self.fakesize = fakesize
+
             def get_size(self):
                 return self.fakesize
 
         assert Chafouin(1).get_human_size() == '1.0 B'
         assert Chafouin(1024).get_human_size() == '1.0 KiB'
-        assert Chafouin(4*1024+128).get_human_size() == '4.1 KiB'
-        assert Chafouin(4*1024*1024).get_human_size() == '4.0 MiB'
-        assert Chafouin(42*1024*1024*1024).get_human_size() == '42.0 GiB'
+        assert Chafouin(4 * 1024 + 128).get_human_size() == '4.1 KiB'
+        assert Chafouin(4 * 1024 * 1024).get_human_size() == '4.0 MiB'
+        assert Chafouin(42 * 1024 * 1024 * 1024).get_human_size() == '42.0 GiB'

@@ -21,6 +21,7 @@
 from collections import defaultdict
 from copy import deepcopy
 
+
 class IObject(object):
     def __init__(self, storage):
         self.storage = storage
@@ -69,8 +70,9 @@ class IObject(object):
     def is_modified(self):
         return self._old_data != self.data
 
+
 class ConfigDict(defaultdict):
-    def __init__(self, _ = None):
+    def __init__(self, _=None):
         defaultdict.__init__(self, dict)
 
     def cleanup(self):

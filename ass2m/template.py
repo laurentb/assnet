@@ -24,6 +24,7 @@ from mako.lookup import TemplateLookup
 from .storage import Storage
 from .version import VERSION
 
+
 def build_lookup(storage):
     """
     Get the Mako TemplateLookup.
@@ -38,6 +39,7 @@ def build_lookup(storage):
                      output_encoding='utf-8', input_encoding='utf-8',
                      default_filters=['decode.utf8'],
                      imports=imports)
+
 
 def build_vars(storage):
     """

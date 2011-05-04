@@ -8,6 +8,7 @@ import shutil
 import sys
 from StringIO import StringIO
 
+
 class ConfigCLITest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')
@@ -28,7 +29,7 @@ class ConfigCLITest(TestCase):
         if self.root:
             shutil.rmtree(self.root)
 
-    def beginCapture(self, with_stderr = False):
+    def beginCapture(self, with_stderr=False):
         self.stdout = sys.stdout
         # begin capture
         sys.stdout = StringIO()
@@ -50,7 +51,7 @@ class ConfigCLITest(TestCase):
         return captured
 
     def test_resolve(self):
-        for p in (os.path.join(self.root, 'penguins'), os.path.join(self.root, 'penguins'+os.path.sep)):
+        for p in (os.path.join(self.root, 'penguins'), os.path.join(self.root, 'penguins' + os.path.sep)):
             self.beginCapture()
             assert self.app.main(['ass2m_test', 'config', '-f', p, 'resolve']) in (0, None)
             output = self.endCapture()
@@ -90,11 +91,11 @@ class ConfigCLITest(TestCase):
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-f', self.root, 'list']) in (0, None)
         output = self.endCapture()
-        assert len(output) # it has the default perms
+        assert len(output)  # it has the default perms
 
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-u', 'penguin', 'list']) in (0, None)
-        output = self.endCapture() # no ValueError
+        output = self.endCapture()  # no ValueError
         assert len(output)
 
     def test_filterList(self):
@@ -102,7 +103,7 @@ class ConfigCLITest(TestCase):
         assert self.app.main(['ass2m_test', 'config', '-u', 'penguin', 'list']) in (0, None)
         output = self.endCapture()
         assert len(output)
-        output.split('\n').index('info.realname=Penguin') # no ValueError
+        output.split('\n').index('info.realname=Penguin')  # no ValueError
 
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-u', 'penguin', 'list', 'auth']) in (0, None)

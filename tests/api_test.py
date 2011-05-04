@@ -10,6 +10,7 @@ import shutil
 import json
 from datetime import datetime
 
+
 class ApiTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')

@@ -79,7 +79,7 @@ class GetConfigCmd(Command):
             return 1
 
         section, key = args.section_key.split('.')
-        if not config.data[section].has_key(key):
+        if not key in config.data[section]:
             print >>sys.stderr, 'Error: %s is undefined.' % args.section_key
             return 2
 
@@ -156,6 +156,7 @@ class ConfigCmdParent(CommandParent):
             if not u or not u.exists:
                 raise GetConfigError('User "%s" does not exist.' % config_name)
             return u
+
 
 class ConfigPlugin(Plugin):
     def init(self):

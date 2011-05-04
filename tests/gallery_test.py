@@ -10,6 +10,7 @@ from StringIO import StringIO
 import os
 import shutil
 
+
 class GalleryTest(TestCase):
     def setUp(self):
         self.root = mkdtemp(prefix='ass2m_test_root')

@@ -59,8 +59,8 @@ class Event(object):
 
         self.f.clear_user_perms()
         for username in self.users.iterkeys():
-            self.f.set_user_perms(username, self.f.PERM_WRITE|
-                                            self.f.PERM_READ|
+            self.f.set_user_perms(username, self.f.PERM_WRITE |
+                                            self.f.PERM_READ |
                                             self.f.PERM_LIST)
         self.f.view = 'event'
         self.f.save()
@@ -83,7 +83,7 @@ class Event(object):
         fp.write('%s\n\n' % binary(self.place))
         fp.write('Attendees:\n')
         stats = [0, 0, 0]
-        for username, state in sorted(self.users.items(), key=lambda (k,v): (v,k)):
+        for username, state in sorted(self.users.items(), key=lambda (k, v): (v, k)):
             realname = self.f.storage.get_user(username).realname
             checked = self.get_sign(state)
             stats[state] += 1
@@ -151,6 +151,7 @@ class Event(object):
     def add_user(self, username):
         self.users[username] = self.USER_WAITING
 
+
 class EventCmd(Command):
     DESCRIPTION = 'Create or edit an event'
     WORKDIR = True
@@ -200,7 +201,7 @@ class EventCmd(Command):
                     continue
                 if r == 'q':
                     continue
-            except (KeyboardInterrupt,EOFError):
+            except (KeyboardInterrupt, EOFError):
                 print '\nAborted.'
             else:
                 event.save()
@@ -245,6 +246,7 @@ class EventCmd(Command):
         for added in cs.sel_users - set(event.users.keys()):
             event.add_user(added)
 
+
 class EventAction(ViewAction):
     def get(self, state=None):
         user_state = None
@@ -284,6 +286,7 @@ class EventAction(ViewAction):
 
     def put(self):
         self.get(Event.USER_CONFIRMED)
+
 
 class EventsPlugin(Plugin):
     def init(self):

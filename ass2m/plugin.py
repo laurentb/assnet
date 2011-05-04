@@ -83,4 +83,3 @@ class Plugin(object):
             return
 
         router.register_view(*args, **kwargs)
-

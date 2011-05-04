@@ -88,6 +88,7 @@ class ConsolePart(object):
         else:
             return line
 
+
 class Command(ConsolePart):
     DESCRIPTION = None
     WORKDIR = True
@@ -110,6 +111,7 @@ class Command(ConsolePart):
             return 1
 
         return self.cmd(args)
+
 
 class CommandParent(object):
     DESCRIPTION = None

@@ -45,6 +45,7 @@ class InitCmd(Command):
         self.storage = Storage.create(self.working_dir)
         print 'Ass2m working directory created.'
 
+
 class TreeCmd(Command):
     DESCRIPTION = 'Display the working tree'
     WORKDIR = True
@@ -70,7 +71,8 @@ class TreeCmd(Command):
 
             self.print_perms(path + '/', depth)
             for filename in files:
-                self.print_perms(os.path.join(path, filename), depth+1)
+                self.print_perms(os.path.join(path, filename), depth + 1)
+
 
 class ChViewCmd(Command):
     DESCRIPTION = 'Change default view of a path'
@@ -93,6 +95,7 @@ class ChViewCmd(Command):
 
             f.view = args.view
             f.save()
+
 
 class ChModCmd(Command):
     DESCRIPTION = 'Change permissions of a path'

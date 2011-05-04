@@ -22,9 +22,11 @@ __all__ = ['Group', 'IUser', 'User', 'Anonymous']
 
 
 from .obj import IObject
+
 import os
 import hashlib
 from binascii import hexlify
+
 
 class Group(object):
     def __init__(self, name):
@@ -32,12 +34,14 @@ class Group(object):
         self.description = u''
         self.users = []
 
+
 class IUser(object):
     def has_perms(self, f, perm):
         raise NotImplementedError()
 
     def __str__(self):
         return self.name
+
 
 class User(IUser, IObject):
     def __init__(self, storage, name):
@@ -102,7 +106,7 @@ class User(IUser, IObject):
 
     @staticmethod
     def hash_password(password, salt, version):
-        assert version == 1 # the only one supported for now
+        assert version == 1  # the only one supported for now
         return hashlib.sha512(password + salt).hexdigest()
 
     def is_valid_password(self, password):

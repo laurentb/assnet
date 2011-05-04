@@ -27,6 +27,10 @@ from ass2m.plugin import Plugin
 from ass2m.routes import View
 from ass2m.server import ViewAction, FileApp
 
+
+__all__ = ['GalleryPlugin']
+
+
 class ListGalleryAction(ViewAction):
     def get(self):
         dirs = []
@@ -51,13 +55,14 @@ class ListGalleryAction(ViewAction):
         self.ctx.template_vars['description'] = description
         self.ctx.res.body = self.ctx.render('list-gallery.html')
 
+
 class DownloadThumbnailAction(ViewAction):
     DEFAULT_SIZE = 300
 
     def _get_size(self):
         try:
             size = int(self.ctx.req.str_GET['thumb_size'])
-        except (KeyError,ValueError):
+        except (KeyError, ValueError):
             size = self.DEFAULT_SIZE
         else:
             if size < 1 or size > 1000:

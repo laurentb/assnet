@@ -37,6 +37,7 @@ class GlobalConfig(IObject):
     def _get_confname(self):
         return 'config'
 
+
 class GroupsConfig(IObject, dict):
     def __init__(self, storage):
         IObject.__init__(self, storage)
@@ -59,6 +60,7 @@ class GroupsConfig(IObject, dict):
             self.data[name] = {}
             self.data[name]['users'] = ' '.join([uname for uname in group.users])
             self.data[name]['description'] = group.description
+
 
 class Storage(object):
     DIRNAME = '.ass2m'
@@ -101,7 +103,7 @@ class Storage(object):
 
         # Default perms on /
         f = File(storage, '')
-        f.perms = {'all': File.PERM_READ|File.PERM_LIST}
+        f.perms = {'all': File.PERM_READ | File.PERM_LIST}
         f.save()
 
         return storage
@@ -165,7 +167,7 @@ class Storage(object):
 
         data = ConfigDict()
         for sec in config.sections():
-            data[sec] = dict([(k,v.decode('utf-8')) for k,v in config.items(sec)])
+            data[sec] = dict([(k, v.decode('utf-8')) for k, v in config.items(sec)])
 
         return data
 

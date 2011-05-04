@@ -22,8 +22,8 @@ __all__ = ['View', 'Router']
 
 
 class View(object):
-    def __init__(self, name, object_type = None, mimetype = None,
-            verbose_name = None, public = True):
+    def __init__(self, name, object_type=None, mimetype=None,
+            verbose_name=None, public=True):
         """
         name: Arbitrary name.
         object_type: "file" or "directory", or None for both.
@@ -73,7 +73,6 @@ class View(object):
                 priority += 1
         return priority
 
-
     def __str__(self):
         return self.name
 
@@ -91,7 +90,7 @@ class Router(object):
         """
         self.actions[name] = action
 
-    def register_view(self, view, action, priority = None):
+    def register_view(self, view, action, priority=None):
         """
         Register a view. A view is related to a file.
         See the View class for more details.
@@ -110,7 +109,7 @@ class Router(object):
         """
         return self.actions.get(name)
 
-    def find_view(self, f, name = None):
+    def find_view(self, f, name=None):
         """
         Find a view suitable for a file
         f: File
