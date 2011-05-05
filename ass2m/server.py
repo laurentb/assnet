@@ -25,7 +25,7 @@ from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from paste.fileapp import FileApp as PasteFileApp
 from webob import Request, Response
-from webob.exc import HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
+from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
 from paste.url import URL
 from datetime import timedelta
 import urlparse
@@ -295,8 +295,7 @@ class Dispatcher(object):
         # check perms
         f = ctx.file
         if not ctx.user.has_perms(f, f.PERM_READ):
-            ctx.res = HTTPForbidden()
-            return
+            raise HTTPForbidden()
 
         # normalize paths
         if ctx.object_type:
@@ -317,8 +316,7 @@ class Dispatcher(object):
 
         # no object type means no real file exists
         if ctx.object_type is None:
-            ctx.res = HTTPNotFound('File not found')
-            return
+            raise HTTPNotFound('File not found')
 
         # find the action to forward the request to
         view, action = router.find_view(f, ctx.req.str_GET.get('view'))
@@ -330,7 +328,7 @@ class Dispatcher(object):
             return action(ctx).answer()
 
         # action/view not found
-        ctx.res = HTTPNotFound('No route found')
+        raise HTTPNotFound('No route found')
 
     def error_notworkingdir(self):
         self.ctx.res.status = 500
@@ -371,5 +369,8 @@ class Server(object):
         if self.root:
             environ.setdefault("ASS2M_ROOT", self.root)
         ctx = Context(self.butt.router, environ, start_response)
-        Dispatcher(ctx).dispatch()
-        return ctx.respond()
+        try:
+            Dispatcher(ctx).dispatch()
+            return ctx.respond()
+        except HTTPError, e:
+            return e(environ, start_response)

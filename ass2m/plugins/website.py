@@ -36,7 +36,7 @@ class WebsiteAction(ViewAction):
         try:
             open(path, 'r')
         except IOError, e:
-            self.ctx.res = HTTPNotFound('File %s not found: %s' % (self.PAGENAME, e))
+            raise HTTPNotFound('File %s not found: %s' % (self.PAGENAME, e))
         else:
             self.ctx.res = FileApp(path)
 

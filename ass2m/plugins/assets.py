@@ -48,9 +48,8 @@ class AssetAction(Action):
                 self.ctx.res.cache_control(public=True, max_age=CACHE_CONTROL.ONE_DAY)
                 CONTENT_DISPOSITION.apply(self.ctx.res.headers, inline=True, filename=filename)
                 return
-            self.ctx.res = HTTPNotFound()
-        else:
-            self.ctx.res = HTTPPreconditionFailed()
+            raise HTTPNotFound()
+        raise HTTPPreconditionFailed()
 
     def find_file(self, filename):
             paths = [os.path.join(path, 'assets') for path in self.ctx.storage.DATA_PATHS]
