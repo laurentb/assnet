@@ -317,7 +317,8 @@ class Dispatcher(object):
         elif cookie:
             signer = AuthCookieSigner(secret=ctx.cookie_secret)
             username = signer.auth(cookie)
-            valid_user = ctx.storage.get_user(username)
+            if username:
+                valid_user = ctx.storage.get_user(username)
         if valid_user:
             ctx.login(valid_user, set_cookie='ass2m_session' not in ctx.req.str_cookies)
 
