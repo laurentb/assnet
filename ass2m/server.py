@@ -27,6 +27,8 @@ from paste.fileapp import FileApp as PasteFileApp
 from webob import Request, Response
 from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
 from paste.url import URL
+from paste.auth.basic import AuthBasicAuthenticator
+from paste.httpheaders import REMOTE_USER, AUTH_TYPE
 from datetime import timedelta
 import urlparse
 import json
@@ -255,25 +257,69 @@ class ViewAction(Action):
     pass
 
 
+class WSGIMethodException(Exception):
+    """
+    Wrapper used to raise any WSGI application that is not an exception.
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        return self.app(environ, start_response)
+
+
 class Dispatcher(object):
     def __init__(self, ctx):
         self.ctx = ctx
+        self.basic_auther = AuthBasicAuthenticator(
+            "ass2m at %s" % quote_url(ctx.root_url),
+            self.basic_authfunc)
+
+    def basic_authfunc(self, environ, username, password):
+        """
+        Auth function for AuthBasicAuthenticator.
+        Allows to login by username/password, or if the username is _key,
+        allows to login by key.
+        """
+        if username == '_key':
+            for user in self.ctx.storage.iter_users():
+                if password == user.key:
+                    # hack to pass the real username
+                    environ['key_username'] = user.name
+                    return True
+        user = self.ctx.storage.get_user(username)
+        return user and user.is_valid_password(password)
 
     def _authenticate(self):
         ctx = self.ctx
         authkey = ctx.req.str_params.get('authkey')
         cookie = ctx.req.str_cookies.get('ass2m_auth')
+        authby = ctx.req.str_params.get('authby')
+        valid_user = None
+        if authby == 'http':
+            username = REMOTE_USER(ctx.req.environ)
+            if not username:
+                username = self.basic_auther(ctx.req.environ)
+                if isinstance(username, str):
+                    if username == '_key':
+                        username = ctx.req.environ['key_username']
+                    AUTH_TYPE.update(ctx.req.environ, 'basic')
+                    REMOTE_USER.update(ctx.req.environ, username)
+                    valid_user = ctx.storage.get_user(username)
+                else:
+                    raise WSGIMethodException(username.wsgi_application)
         if authkey:
             for user in ctx.storage.iter_users():
                 if authkey == user.key:
                     # set the cookie for the following requests
-                    return ctx.login(user)
+                    valid_user = user
         elif cookie:
             signer = AuthCookieSigner(secret=ctx.cookie_secret)
             username = signer.auth(cookie)
-            if username:
-                user = ctx.storage.get_user(username)
-                ctx.login(user, set_cookie='ass2m_session' not in ctx.req.str_cookies)
+            valid_user = ctx.storage.get_user(username)
+        if valid_user:
+            ctx.login(valid_user, set_cookie='ass2m_session' not in ctx.req.str_cookies)
 
     def dispatch(self):
         ctx = self.ctx
@@ -372,5 +418,5 @@ class Server(object):
         try:
             Dispatcher(ctx).dispatch()
             return ctx.respond()
-        except HTTPError, e:
+        except (HTTPError, WSGIMethodException), e:
             return e(environ, start_response)
