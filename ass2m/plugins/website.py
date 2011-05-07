@@ -33,15 +33,23 @@ class WebsiteAction(ViewAction):
 
     def get(self):
         path = os.path.join(self.ctx.file.get_realpath(), self.PAGENAME)
+        # file unreable or does not exist
         if not os.access(path, os.R_OK):
+            # file exists, thus is unreadable
             if os.access(path, os.F_OK):
                 raise HTTPNotFound('File %s is unreadable.' % self.PAGENAME)
             raise HTTPNotFound('File %s does not exist.' % self.PAGENAME)
         self.ctx.res = FileApp(path)
 
 
+class WebsiteView(View):
+    def check_file(self, f):
+        return os.path.exists(os.path.join(f.get_realpath(),
+                WebsiteAction.PAGENAME))
+
+
 class WebsitePlugin(Plugin):
     def init(self):
         self.register_web_view(
-                View(object_type='directory', name='website'),
+                WebsiteView(object_type='directory', name='website'),
                 WebsiteAction)

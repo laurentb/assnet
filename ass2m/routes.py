@@ -59,6 +59,15 @@ class View(object):
         return self.match_mimetype(mimetype) and \
             (self.object_type == object_type or self.object_type is None)
 
+    def check_file(self, f):
+        """
+        Check if the file is able to be handled by the view.
+        This is for checks more advanced, but usually slower,
+        than those of match().
+        Don't forget this is run for every View so it must be fast.
+        """
+        return True
+
     def guess_priority(self):
         """
         Guess the priority of a view.
@@ -127,7 +136,7 @@ class Router(object):
 
         for priority in sorted(self.views.keys(), reverse=True):
             for view, action in self.views[priority]:
-                if view.match(object_type, mimetype):
+                if view.match(object_type, mimetype) and view.check_file(f):
                     # if no view was requested, or if we found the requested view
                     if name is None or view.name == name:
                         return (view, action)
@@ -143,5 +152,5 @@ class Router(object):
 
         for views in self.views.itervalues():
             for view, action in views:
-                if view.match(object_type, mimetype):
+                if view.match(object_type, mimetype) and view.check_file(f):
                     yield view
