@@ -33,12 +33,11 @@ class WebsiteAction(ViewAction):
 
     def get(self):
         path = os.path.join(self.ctx.file.get_realpath(), self.PAGENAME)
-        try:
-            open(path, 'r')
-        except IOError, e:
-            raise HTTPNotFound('File %s not found: %s' % (self.PAGENAME, e))
-        else:
-            self.ctx.res = FileApp(path)
+        if not os.access(path, os.R_OK):
+            if os.access(path, os.F_OK):
+                raise HTTPNotFound('File %s is unreadable.' % self.PAGENAME)
+            raise HTTPNotFound('File %s does not exist.' % self.PAGENAME)
+        self.ctx.res = FileApp(path)
 
 
 class WebsitePlugin(Plugin):
