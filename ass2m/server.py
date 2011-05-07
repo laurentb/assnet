@@ -152,7 +152,7 @@ class Context(object):
         """
         assert user.exists
         if set_cookie:
-            signer = AuthCookieSigner(secret=self.cookie_secret)
+            signer = AuthCookieSigner(secret=self.cookie_secret, timeout=120*24*60)
             cookie = signer.sign(user.name)
             self.res.set_cookie('ass2m_auth', cookie,
                 max_age=timedelta(days=120), httponly=True, path=quote_url(self.root_url))
