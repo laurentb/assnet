@@ -116,6 +116,7 @@ class Context(object):
                 config.save()
         except IOError:
             e = HTTPInternalServerError()
+            self.template_vars.update({'scripts': [], 'stylesheets': []})
             e.body = self.render('error_writeconfig.html')
             raise e
 
@@ -334,7 +335,14 @@ class Dispatcher(object):
         router = ctx.router
 
         if not ctx.storage:
-            return self.error_notworkingdir()
+            e = HTTPInternalServerError()
+            ctx.template_vars.update({'scripts': [], 'stylesheets': []})
+            if 'ASS2M_ROOT' in ctx.req.environ:
+                ctx.template_vars['root'] = ctx.req.environ['ASS2M_ROOT']
+                e.body = ctx.render('error_notworkingdir.html')
+            else:
+                e.body = ctx.render('error_norootpath.html')
+            raise e
 
         self._authenticate()
         ctx.template_vars["user"] = ctx.user if ctx.user.exists else None
@@ -383,14 +391,6 @@ class Dispatcher(object):
 
         # action/view not found
         raise HTTPNotFound('No route found')
-
-    def error_notworkingdir(self):
-        self.ctx.res.status = 500
-        if 'ASS2M_ROOT' in self.ctx._environ:
-            self.ctx.template_vars['root'] = self.ctx._environ['ASS2M_ROOT']
-            self.ctx.res.body = self.ctx.render('error_notworkingdir.html')
-        else:
-            self.ctx.res.body = self.ctx.render('error_norootpath.html')
 
 
 class FileApp(PasteFileApp):
