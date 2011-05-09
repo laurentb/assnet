@@ -49,6 +49,6 @@ def build_vars(storage):
     """
     return {
         'ass2m_version': VERSION,
-        'root_url': storage.get_config().data['web']['root_url'] if storage else None,
+        'root_url': storage.get_config().data['web'].get('root_url') if storage else None,
         'global': dict(),
     }

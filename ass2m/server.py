@@ -25,7 +25,7 @@ from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from paste.fileapp import FileApp as PasteFileApp
 from webob import Request, Response
-from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed
+from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed, HTTPInternalServerError
 from paste.url import URL
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
@@ -64,11 +64,13 @@ class Context(object):
         self.res = Response()
         self.user = Anonymous()
 
-        self._init_paths()
-        self._init_default_config()
-        self.lookup = build_lookup(self.storage)
-        self._init_template_vars()
         self._init_default_response()
+
+        self._init_paths()
+        self._init_template_vars()
+        self.lookup = build_lookup(self.storage)
+
+        self._init_default_config()
         self._init_session()
 
     def _init_paths(self):
@@ -103,14 +105,19 @@ class Context(object):
             return
         config = self.storage.get_config()
         self.cookie_secret = config.data["web"].get("cookie_secret")
-        if self.cookie_secret is None:
-            self.cookie_secret = hexlify(new_secret())
-            config.data["web"]["cookie_secret"] = self.cookie_secret
-            config.save()
-        # store the absolute root url (useful when in CLI)
-        if not config.data["web"].get("root_url"):
-            config.data["web"]["root_url"] = self.req.host_url + self.root_url.href
-            config.save()
+        try:
+            if self.cookie_secret is None:
+                self.cookie_secret = hexlify(new_secret())
+                config.data["web"]["cookie_secret"] = self.cookie_secret
+                config.save()
+            # store the absolute root url (useful when in CLI)
+            if not config.data["web"].get("root_url"):
+                config.data["web"]["root_url"] = self.req.host_url + self.root_url.href
+                config.save()
+        except IOError:
+            e = HTTPInternalServerError()
+            e.body = self.render('error_writeconfig.html')
+            raise e
 
     def _init_default_response(self):
         # defaults, may be changed later on
@@ -415,8 +422,8 @@ class Server(object):
         """
         if self.root:
             environ.setdefault("ASS2M_ROOT", self.root)
-        ctx = Context(self.butt.router, environ, start_response)
         try:
+            ctx = Context(self.butt.router, environ, start_response)
             Dispatcher(ctx).dispatch()
             return ctx.respond()
         except (HTTPError, WSGIMethodException), e:
