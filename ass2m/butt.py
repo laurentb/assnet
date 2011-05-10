@@ -57,7 +57,7 @@ class Butt(object):
         klass = None
         for attrname in dir(package):
             attr = getattr(package, attrname)
-            if isinstance(attr, type) and issubclass(attr, Plugin) and attr != Plugin:
+            if isinstance(attr, type) and issubclass(attr, Plugin) and attr is not Plugin:
                 klass = attr
                 break
 
