@@ -25,7 +25,8 @@ from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
 from paste.fileapp import FileApp as PasteFileApp
 from webob import Request, Response
-from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, HTTPMethodNotAllowed, HTTPInternalServerError
+from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, \
+        HTTPMethodNotAllowed, HTTPInternalServerError
 from paste.url import URL
 from paste.auth.basic import AuthBasicAuthenticator
 from paste.httpheaders import REMOTE_USER, AUTH_TYPE
@@ -47,8 +48,8 @@ __all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
 class Context(object):
     SANITIZE_REGEXP = re.compile(r'/[%s+r]+/|\\+|/+' % re.escape(r'/.'))
 
-    def __init__(self, router, environ, start_response):
-        self.router = router
+    def __init__(self, butt, environ, start_response):
+        self.router = butt.router
         self.storage = Storage.lookup(environ.get("ASS2M_ROOT"))
         self._environ = environ
         self._start_response = start_response
@@ -423,7 +424,7 @@ class Server(object):
         if self.root:
             environ.setdefault("ASS2M_ROOT", self.root)
         try:
-            ctx = Context(self.butt.router, environ, start_response)
+            ctx = Context(self.butt, environ, start_response)
             Dispatcher(ctx).dispatch()
             return ctx.respond()
         except (HTTPError, WSGIMethodException), e:

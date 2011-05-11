@@ -100,9 +100,10 @@ class Command(ConsolePart):
     def configure_parser(parser):
         return
 
-    def __init__(self, storage, working_dir):
+    def __init__(self, storage, working_dir, butt):
         self.storage = storage
         self.working_dir = working_dir
+        self.butt = butt
 
     def run(self, args):
         if self.WORKDIR and not self.storage:

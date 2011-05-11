@@ -83,3 +83,6 @@ class Plugin(object):
             return
 
         router.register_view(*args, **kwargs)
+
+    def register_hook(self, name, hook):
+        self.butt.hooks[name].append(hook)

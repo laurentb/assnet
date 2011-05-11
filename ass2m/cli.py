@@ -35,14 +35,14 @@ class CLI(object):
         self.butt = Butt(parser=self.parser)
 
         self.parser.add_argument('-V', '--version', action='version',
-                                 version='%(prog)s ' + VERSION + ' ' + COPYRIGHT)
+                             version='%(prog)s ' + VERSION + ' ' + COPYRIGHT)
 
     def main(self, argv):
         # TODO use cmd.Cmd to have a REPL application when no command
         # is supplied.
         storage = Storage.lookup(self.working_dir)
         args = self.parser.parse_args(argv[1:])
-        cmd = args.cmd(storage, self.working_dir)
+        cmd = args.cmd(storage, self.working_dir, self.butt)
         try:
             return cmd.run(args)
         except KeyboardInterrupt:

@@ -20,6 +20,7 @@
 
 import os
 import re
+from collections import defaultdict
 
 from .plugin import Plugin
 
@@ -31,6 +32,7 @@ class Butt(object):
     def __init__(self, parser=None, router=None):
         self.parser = parser
         self.router = router
+        self.hooks = defaultdict(list)
         self.load_plugins()
 
     def iter_existing_plugin_names(self):
