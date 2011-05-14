@@ -182,3 +182,19 @@ class File(IObject):
             self.data['info'].pop('view', None)
         self.data['info']['path'] = self.path
         self.data['perms'] = self.perms
+
+
+class UnknownFile(File):
+    """
+    File not know by its path, but only by its hash.
+    This should only be used for special cases.
+    """
+
+    def __init__(self, storage, hsh):
+        self._confname = os.path.join('files', hsh)
+        File.__init__(self, storage, '')
+        self.read()
+        self.path = self.data['info'].get('path')
+
+    def _get_confname(self):
+        return self._confname

@@ -28,6 +28,7 @@ from ass2m.files import File
 
 from ass2m.routes import View
 from ass2m.server import ViewAction, FileApp
+from .cleanup import ICleaner
 
 
 __all__ = ['CorePlugin']
@@ -189,6 +190,19 @@ class ListAction(ViewAction):
         self.ctx.res.body = self.ctx.render('list.html')
 
 
+class CoreCleaner(ICleaner):
+    def fsck(self):
+        self.invalid_paths = []
+        for f in self.storage.iter_files():
+            if f.path is None or f._get_confname() != File._get_confname(f):
+                print "%s has an invalid path: %s." % (f._get_confname(), f.path)
+                self.invalid_paths.append(f)
+
+    def gc(self):
+        for f in self.invalid_paths:
+            self.remove(f)
+
+
 class CorePlugin(Plugin):
     def init(self):
         self.register_cli_command('init', InitCmd)
@@ -202,3 +216,5 @@ class CorePlugin(Plugin):
         self.register_web_view(
                 View(object_type='directory', name='list', verbose_name='Detailed list'),
                 ListAction, 10)
+
+        self.register_hook('cleanup', CoreCleaner)

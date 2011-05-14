@@ -23,7 +23,7 @@ import sys
 from ConfigParser import RawConfigParser
 
 from .users import Group, User, Anonymous
-from .files import File
+from .files import File, UnknownFile
 from .obj import IObject, ConfigDict
 
 
@@ -109,6 +109,10 @@ class Storage(object):
         return storage
 
     def get_user(self, name):
+        """
+        Get a particular user by its name.
+        Returns Anonymous if no user is found.
+        """
         user = User(self, name)
         user.read()
         if not user.exists:
@@ -116,14 +120,29 @@ class Storage(object):
         return user
 
     def iter_users(self):
+        """
+        Get all stored users.
+        """
         usersdir = os.path.join(self.path, 'users')
         if os.path.exists(usersdir):
             for name in sorted(os.listdir(usersdir)):
                 user = self.get_user(name)
-                if user:
-                    yield user
+                yield user
+
+    def iter_files(self):
+        """
+        Get all files with a stored configuration.
+        """
+        filesdir = os.path.join(self.path, 'files')
+        if os.path.exists(filesdir):
+            for hsh in sorted(os.listdir(filesdir)):
+                f = UnknownFile(self, hsh)
+                yield f
 
     def user_exists(self, name):
+        """
+        Test if an user exists by its name. Returns boolean.
+        """
         user = User(self, name)
         user.read()
         return user.exists
