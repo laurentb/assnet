@@ -22,7 +22,7 @@ from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 
 
-__all__ = ['CleanupPlugin']
+__all__ = ['CleanupPlugin', 'ICleaner']
 
 
 class ICleaner(object):
