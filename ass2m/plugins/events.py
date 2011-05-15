@@ -30,6 +30,7 @@ from ass2m.server import ViewAction
 from ass2m.cmd import Command
 
 from .contacts import ContactsSelection
+from .cleanup import ICleaner
 
 
 __all__ = ['EventsPlugin']
@@ -62,7 +63,7 @@ class Event(object):
             self.f.set_user_perms(username, self.f.PERM_WRITE |
                                             self.f.PERM_READ |
                                             self.f.PERM_LIST)
-        self.f.view = 'event'
+        self.f.mimetype = 'text/event'
         self.f.save()
 
     def print_me(self):
@@ -288,9 +289,25 @@ class EventAction(ViewAction):
         self.get(Event.USER_CONFIRMED)
 
 
+class EventsCleaner(ICleaner):
+    def fsck(self):
+        for f in self.storage.iter_files():
+            # update new way to know the file is an event
+            if f.view == 'event':
+                f.mimetype = 'text/event'
+                # not needed anymore, the default view will be the most precise
+                f.view = None
+                f.save()
+                print "%s updated to a newer Event config." % f.path
+
+    def gc(self):
+        pass
+
+
 class EventsPlugin(Plugin):
     def init(self):
         self.register_cli_command('event', EventCmd)
         self.register_web_view(
-            View(object_type='file', mimetype='text/plain', name='event'),
+            View(object_type='file', mimetype='text/event', name='event'),
             EventAction)
+        self.register_hook('cleanup', EventsCleaner)

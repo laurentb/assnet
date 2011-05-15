@@ -103,7 +103,7 @@ class GalleryPlugin(Plugin):
     def init(self):
         self.register_web_view(
             View(object_type='directory', name='gallery'),
-            ListGalleryAction)
+            ListGalleryAction, 0)
         self.register_web_view(
             View(object_type='file', mimetype='image', name='thumbnail'),
-            DownloadThumbnailAction)
+            DownloadThumbnailAction, -1)

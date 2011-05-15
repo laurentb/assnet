@@ -212,9 +212,9 @@ class CorePlugin(Plugin):
 
         self.register_web_view(
                 View(object_type='file', name='raw'),
-                DownloadAction, 10)
+                DownloadAction, 1)
         self.register_web_view(
                 View(object_type='directory', name='list', verbose_name='Detailed list'),
-                ListAction, 10)
+                ListAction, 2)
 
         self.register_hook('cleanup', CoreCleaner)

@@ -47,7 +47,7 @@ Attendees:
             f.write(event_text)
 
         f = storage.get_file('/event1.txt')
-        f.view = 'event'
+        f.mimetype = 'text/event'
         f.perms['u.penguin'] = f.PERM_READ | f.PERM_WRITE
         f.save()
 

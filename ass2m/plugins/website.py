@@ -52,4 +52,4 @@ class WebsitePlugin(Plugin):
     def init(self):
         self.register_web_view(
                 WebsiteView(object_type='directory', name='website'),
-                WebsiteAction)
+                WebsiteAction, 0)

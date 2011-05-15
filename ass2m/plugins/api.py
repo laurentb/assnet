@@ -77,12 +77,12 @@ class ApiPlugin(Plugin):
     def init(self):
         self.register_web_view(
             View(object_type=None, name='json_info', public=False, verbose_name='JSON info'),
-            JsonInfoAction)
+            JsonInfoAction, -1)
 
         self.register_web_view(
             View(object_type='directory', name='json_list', public=False, verbose_name='JSON list'),
-            JsonListAction)
+            JsonListAction, -1)
 
         self.register_web_view(
             View(object_type='directory', name='text_list', public=False, verbose_name='Text-only list'),
-            TextListAction)
+            TextListAction, -1)
