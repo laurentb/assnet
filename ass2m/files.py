@@ -162,6 +162,8 @@ class File(IObject):
     def get_mimetype(self):
         if self.mimetype:
             return self.mimetype
+        if self.isdir():
+            return 'directory'
         return mimetypes.guess_type(self.get_name())[0]
 
     def get_hash(self):

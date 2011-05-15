@@ -303,3 +303,16 @@ class StorageTest(TestCase):
 
         f = self.storage.get_file('/penguin.txt')
         assert f.get_mimetype() == 'text/penguin'
+
+        os.mkdir(os.path.join(self.root, 'penguins'))
+        f = self.storage.get_file('/penguins')
+        assert f.get_mimetype() == 'directory'
+        f.mimetype = 'text/penguins'
+        f.save()
+
+        f = self.storage.get_file('/penguins')
+        assert f.get_mimetype() == 'text/penguins'
+
+        os.mkdir(os.path.join(self.root, 'penguins.txt'))
+        f = self.storage.get_file('/penguins.txt')
+        assert f.get_mimetype() == 'directory'
