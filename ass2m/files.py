@@ -63,6 +63,7 @@ class File(IObject):
 
         self.path = path
         self.view = None
+        self.mimetype = None
         self.perms = {}
         IObject.__init__(self, storage)
 
@@ -159,6 +160,8 @@ class File(IObject):
         return posixpath.basename(self.path)
 
     def get_mimetype(self):
+        if self.mimetype:
+            return self.mimetype
         return mimetypes.guess_type(self.get_name())[0]
 
     def get_hash(self):
@@ -169,6 +172,7 @@ class File(IObject):
 
     def _postread(self):
         self.view = self.data['info'].get('view', None)
+        self.mimetype = self.data['info'].get('mimetype', None)
         if self.view in ["", "None"]:
             self.view = None
         self.perms.clear()
@@ -180,6 +184,10 @@ class File(IObject):
             self.data['info']['view'] = self.view
         else:
             self.data['info'].pop('view', None)
+        if self.mimetype is not None:
+            self.data['info']['mimetype'] = self.mimetype
+        else:
+            self.data['info'].pop('mimetype', None)
         self.data['info']['path'] = self.path
         self.data['perms'] = self.perms
 

@@ -292,3 +292,14 @@ class StorageTest(TestCase):
         assert Chafouin(4 * 1024 + 128).get_human_size() == '4.1 KiB'
         assert Chafouin(4 * 1024 * 1024).get_human_size() == '4.0 MiB'
         assert Chafouin(42 * 1024 * 1024 * 1024).get_human_size() == '42.0 GiB'
+
+    def test_getMimetype(self):
+        with open(os.path.join(self.root, 'penguin.txt'), 'w') as f:
+            f.write('')
+        f = self.storage.get_file('/penguin.txt')
+        assert f.get_mimetype() == 'text/plain'
+        f.mimetype = 'text/penguin'
+        f.save()
+
+        f = self.storage.get_file('/penguin.txt')
+        assert f.get_mimetype() == 'text/penguin'
