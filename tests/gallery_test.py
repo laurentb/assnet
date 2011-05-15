@@ -70,3 +70,12 @@ class GalleryTest(TestCase):
         assert img.size[1] == 42
 
         res = self.app.get('/images/notanimage.txt?view=thumbnail', status=404)
+
+    def test_getRaw(self):
+        # check we get the full image and not the thumbnail
+        res = self.app.get('/images/image1.jpg')
+        img = Image.open(StringIO(res.body))
+        img.verify()
+        img = Image.open(StringIO(res.body))
+        assert img.size[0] == 1337
+        assert img.size[1] == 1337
