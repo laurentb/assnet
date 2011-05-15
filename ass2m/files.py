@@ -175,8 +175,6 @@ class File(IObject):
     def _postread(self):
         self.view = self.data['info'].get('view', None)
         self.mimetype = self.data['info'].get('mimetype', None)
-        if self.view in ["", "None"]:
-            self.view = None
         self.perms.clear()
         for key, value in self.data.get('perms', {}).iteritems():
             self.perms[key] = int(value)

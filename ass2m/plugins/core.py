@@ -197,6 +197,11 @@ class CoreCleaner(ICleaner):
             if f.path is None or f._get_confname() != File._get_confname(f):
                 print "%s has an invalid path: %s." % (f._get_confname(), f.path)
                 self.invalid_paths.append(f)
+            else:
+                if f.view in ["", "None"]:
+                    f.view = None
+                    f.save()
+                    print "%s: fixed empty view." % f._get_confname()
 
     def gc(self):
         for f in self.invalid_paths:

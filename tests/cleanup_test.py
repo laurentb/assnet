@@ -75,3 +75,12 @@ class CleanupTest(TestCase):
         assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/c93c3312483174a3170ebe7395612c404a0620d0 has an invalid path: /hello.\nRemoved files/c93c3312483174a3170ebe7395612c404a0620d0.'
+
+    def test_oldStorageBug(self):
+        with open(os.path.join(self.storage.path, 'files', '3be00feb429b32b7705b689475e3ab8bdf16733f'), 'w') as f:
+            f.write('[info]\npath = /hello\nview = None')
+
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        output = self.endCapture()
+        print output.strip() == 'files/3be00feb429b32b7705b689475e3ab8bdf16733f: fixed empty view.'
