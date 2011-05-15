@@ -41,7 +41,8 @@ class ContactsManagement(ConsolePart):
         self.groupscfg = self.storage.get_groupscfg()
         self.groups = sorted(self.groupscfg.itervalues())
 
-    def add_contact(self, username=None):
+    def add_contact(self, username=None, interactive=True,
+                            realname=None, email=None):
         try:
             if username is None:
                 username = self.ask('Enter the username', regexp='^\w+$')
@@ -50,7 +51,8 @@ class ContactsManagement(ConsolePart):
                 print >>sys.stderr, 'Error: user %s already exists.' % username
                 return None
             user = User(self.storage, username)
-            self.edit_contact(user)
+            self.edit_contact(user, interactive=interactive,
+                                realname=realname, email=email)
             self.users.append(user)
             print 'User %s correctly added.' % user.name
             return user
@@ -87,9 +89,15 @@ class ContactsManagement(ConsolePart):
         print 'Key of user %s set to %s.' % (user.name, user.key)
         return user
 
-    def edit_contact(self, user):
-        user.realname = self.ask('Enter the realname', default=user.realname)
-        user.email = self.ask('Enter the email address', default=user.email, regexp='^[^ ]+@[^ ]+$')
+    def edit_contact(self, user, interactive=True, realname=None, email=None):
+        if interactive:
+            user.realname = self.ask('Enter the real name', default=user.realname or realname)
+        elif realname:
+            user.realname = realname
+        if interactive:
+            user.email = self.ask('Enter the email address', default=user.email or email, regexp='^[^ ]+@[^ ]+$')
+        elif email:
+            user.email = email
         user.save()
 
     def add_group(self, name=None):
@@ -262,11 +270,38 @@ class ContactsAddCmd(Command):
 
     @staticmethod
     def configure_parser(parser):
-        parser.add_argument('username')
+        # TODO validate arguments like in ContactsManagement
+        parser.add_argument('username', nargs='?')
+        parser.add_argument('-e', '--email', nargs='?')
+        parser.add_argument('-r', '--realname', nargs='?')
 
     def cmd(self, args):
         cm = ContactsManagement(self.storage)
-        if not cm.add_contact(args.username):
+        if not cm.add_contact(args.username,
+                interactive=not (args.email and args.realname),
+                email=args.email, realname=args.realname):
+            return 1
+
+
+class ContactsEditCmd(Command):
+    DESCRIPTION = 'Edit a contact'
+
+    @staticmethod
+    def configure_parser(parser):
+        # TODO validate arguments like in ContactsManagement
+        parser.add_argument('username')
+        parser.add_argument('-e', '--email', nargs='?')
+        parser.add_argument('-r', '--realname', nargs='?')
+
+    def cmd(self, args):
+        if not self.storage.user_exists(args.username):
+            print >>sys.stderr, 'Error: user %s does not exist.' % args.username
+            return 1
+        user = self.storage.get_user(args.username)
+        cm = ContactsManagement(self.storage)
+        if not cm.edit_contact(user,
+                interactive=not (args.email or args.realname),
+                email=args.email, realname=args.realname):
             return 1
 
 
@@ -390,11 +425,12 @@ class ContactsPlugin(Plugin):
     def init(self):
         self.register_cli_command('contacts', 'Contacts Management')
         self.register_cli_command('contacts', 'add', ContactsAddCmd)
-        self.register_cli_command('contacts', 'password', ContactsPasswordCmd)
+        self.register_cli_command('contacts', 'edit', ContactsEditCmd)
         self.register_cli_command('contacts', 'genkey', ContactsGenKeyCmd)
-        self.register_cli_command('contacts', 'merge', ContactsMergeCmd)
-        self.register_cli_command('contacts', 'menu', ContactsMenuCmd)
         self.register_cli_command('contacts', 'list', ContactsListCmd)
+        self.register_cli_command('contacts', 'menu', ContactsMenuCmd)
+        self.register_cli_command('contacts', 'merge', ContactsMergeCmd)
+        self.register_cli_command('contacts', 'password', ContactsPasswordCmd)
         self.register_cli_command('contacts', 'remove', ContactsRemoveCmd)
 
         self.register_web_action('login', LoginAction)
