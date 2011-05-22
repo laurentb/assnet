@@ -18,7 +18,7 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-from urlparse import urlsplit
+from urlparse import urlsplit, urlunsplit
 from urllib import quote
 from paste.url import URL
 
@@ -58,9 +58,14 @@ def quote_url(url):
     of the URL class.
     """
     purl = urlsplit(url.url)
-    # we do not support escaping an URL with a scheme and netloc yet
-    assert not purl.scheme and not purl.netloc
-    return URL(quote_path(url.url), vars=url.vars).href
+    # do not escape the scheme and netloc
+    if purl.scheme or purl.netloc:
+        path = urlunsplit((None, None, purl.path, purl.query, purl.fragment))
+        basepath = urlunsplit((purl.scheme, purl.netloc, '', None, None))
+    else:
+        path = url.url
+        basepath = ''
+    return URL(basepath + quote_path(path), vars=url.vars).href
 
 
 def quote_and_decode_url(url):
