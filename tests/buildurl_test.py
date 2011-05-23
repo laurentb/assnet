@@ -8,6 +8,7 @@ from webtest import TestApp
 
 from tempfile import mkdtemp
 import shutil
+import os
 
 
 class BuildURLTest(TestCase):
@@ -33,3 +34,7 @@ class BuildURLTest(TestCase):
                 == 'http://penguin:42/'
         assert quote_url(build_url(self.root_url, self.storage.get_file('/penguin'))) \
                 == 'http://penguin:42/penguin'
+        # if it is a directory, a trailing / is added
+        os.mkdir(os.path.join(self.root, 'penguin'))
+        assert quote_url(build_url(self.root_url, self.storage.get_file('/penguin'))) \
+                == 'http://penguin:42/penguin/'

@@ -67,7 +67,7 @@ def build_root_url(storage):
             return URL(root_url.encode('utf-8'))
 
 
-def build_url(root_url, f, user = None):
+def build_url(root_url, f, user=None):
     """
     Build an URL for a particular file and user if provided.
     root_url: URL (paste.url)
@@ -77,4 +77,7 @@ def build_url(root_url, f, user = None):
     qs = {}
     if user and user.key:
         qs['authkey'] = user.key
-    return root_url.addpath(f.path).setvar(**qs)
+    path = f.path
+    if f.isdir():
+        path += '/'
+    return root_url.addpath(path).setvar(**qs)
