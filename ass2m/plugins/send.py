@@ -21,11 +21,10 @@
 import os
 import sys
 
-from paste.url import URL
-
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 from ass2m.filters import quote_url
+from ass2m.template import build_url, build_root_url
 
 
 __all__ = ['SendPlugin']
@@ -40,11 +39,8 @@ class GetLinkCmd(Command):
         parser.add_argument('-u', '--user')
 
     def cmd(self, args):
-        root_url = self.storage.get_config().data['web'].get('root_url')
-        if root_url:
-            # convert the root_url to dumb str (configs are unicode)
-            self.root_url = URL(root_url.encode('utf-8'))
-        else:
+        root_url = build_root_url(self.storage)
+        if not root_url:
             print >>sys.stderr, \
                     'The web URL of this working directory is unknown.'
             print >>sys.stderr, 'Try to open it on the web or set the', \
@@ -69,13 +65,7 @@ class GetLinkCmd(Command):
                 print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
                 continue
 
-            print quote_url(self.get_url(f, user))
-
-    def get_url(self, f, user):
-        qs = {}
-        if user and user.key:
-            qs['authkey'] = user.key
-        return self.root_url.addpath(f.path).setvar(**qs)
+            print quote_url(build_url(root_url, f, user))
 
 
 class SendPlugin(Plugin):

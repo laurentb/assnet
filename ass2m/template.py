@@ -20,6 +20,7 @@
 import os
 
 from mako.lookup import TemplateLookup
+from paste.url import URL
 
 from .storage import Storage
 from .version import VERSION
@@ -49,6 +50,31 @@ def build_vars(storage):
     """
     return {
         'ass2m_version': VERSION,
-        'root_url': storage.get_config().data['web'].get('root_url') if storage else None,
+        'root_url': build_root_url(storage),
         'global': dict(),
     }
+
+
+def build_root_url(storage):
+    """
+    Try to build a root URL from the Storage instance.
+    If not possible it returns None.
+    """
+    if storage:
+        root_url = storage.get_config().data['web'].get('root_url')
+        if root_url:
+            # convert the root_url to dumb str (configs are unicode)
+            return URL(root_url.encode('utf-8'))
+
+
+def build_url(root_url, f, user = None):
+    """
+    Build an URL for a particular file and user if provided.
+    root_url: URL (paste.url)
+    f: File
+    user: User
+    """
+    qs = {}
+    if user and user.key:
+        qs['authkey'] = user.key
+    return root_url.addpath(f.path).setvar(**qs)
