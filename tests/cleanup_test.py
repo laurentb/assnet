@@ -84,3 +84,7 @@ class CleanupTest(TestCase):
         assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/3be00feb429b32b7705b689475e3ab8bdf16733f: fixed empty view.'
+
+        f = self.storage.get_file('/hello')
+        assert f.data['info'].get('view') is None
+        assert f.view is None

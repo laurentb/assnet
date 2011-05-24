@@ -201,7 +201,8 @@ class Storage(object):
             for key, value in items.iteritems():
                 if isinstance(value, unicode):
                     value = value.encode('utf-8')
-                config.set(sec, key, value)
+                if value is not None:
+                    config.set(sec, key, value)
         with open(path, 'wb') as fp:
             config.write(fp)
 

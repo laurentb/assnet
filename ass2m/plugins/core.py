@@ -202,6 +202,11 @@ class CoreCleaner(ICleaner):
                     f.view = None
                     f.save()
                     print "%s: fixed empty view." % f._get_confname()
+        for user in self.storage.iter_users():
+            if user.key in ["", "None"]:
+                user.key = None
+                user.save()
+                print "%s: fixed empty key." % f._get_confname()
 
     def gc(self):
         for f in self.invalid_paths:
