@@ -1,4 +1,5 @@
 from ass2m.storage import Storage
+from ass2m.users import User
 from ass2m.server import Server
 from ass2m.template import build_url, build_root_url
 from ass2m.filters import quote_url
@@ -21,6 +22,17 @@ class BuildURLTest(TestCase):
         app.get('http://penguin:42/')
         self.root_url = build_root_url(self.storage)
 
+        user = User(self.storage, 'user1')
+        user.realname = 'Penguin'
+        user.password = 'monkey1'
+        user.key = 'fabf37d746da8a45df63489f642b3813'
+        user.save()
+
+        user = User(self.storage, 'user2')
+        user.realname = 'Penguin'
+        user.password = 'monkey1'
+        user.save()
+
     def tearDown(self):
         if self.root:
             shutil.rmtree(self.root)
@@ -38,3 +50,15 @@ class BuildURLTest(TestCase):
         os.mkdir(os.path.join(self.root, 'penguin'))
         assert quote_url(build_url(self.root_url, self.storage.get_file('/penguin'))) \
                 == 'http://penguin:42/penguin/'
+
+    def test_buildKeyUrls(self):
+        assert quote_url(build_url(self.root_url,
+            self.storage.get_file('/penguin'),
+            self.storage.get_user('user1'))) \
+                == 'http://penguin:42/penguin?authkey=fabf37d746da8a45df63489f642b3813'
+
+        # no user.key
+        assert quote_url(build_url(self.root_url,
+            self.storage.get_file('/penguin'),
+            self.storage.get_user('user2'))) \
+                == 'http://penguin:42/penguin'
