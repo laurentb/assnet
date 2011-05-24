@@ -26,6 +26,7 @@ from ass2m.cmd import Command, ConsolePart
 from ass2m.storage import Storage
 from ass2m.users import User, Group
 from ass2m.filters import quote_url
+from .cleanup import ICleaner
 
 from ass2m.server import Action
 from webob.exc import HTTPFound
@@ -421,6 +422,17 @@ class LogoutAction(Action):
         self.ctx.logout()
 
 
+class ContactsCleaner(ICleaner):
+    def fsck(self):
+        for user in self.storage.iter_users():
+            if user.key in ["", "None"]:
+                user.key = None
+                user.save()
+                print "%s: fixed empty key." % user._get_confname()
+
+    def gc(self):
+        pass
+
 class ContactsPlugin(Plugin):
     def init(self):
         self.register_cli_command('contacts', 'Contacts Management')
@@ -435,3 +447,5 @@ class ContactsPlugin(Plugin):
 
         self.register_web_action('login', LoginAction)
         self.register_web_action('logout', LogoutAction)
+
+        self.register_hook('cleanup', ContactsCleaner)
