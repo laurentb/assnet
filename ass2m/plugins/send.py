@@ -20,11 +20,13 @@
 
 import os
 import sys
+from subprocess import list2cmdline
 
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 from ass2m.filters import quote_url
 from ass2m.template import build_url, build_root_url
+from ass2m.users import Anonymous
 
 
 __all__ = ['SendPlugin']
@@ -49,11 +51,17 @@ class GetLinkCmd(Command):
 
         if args.user:
             if not self.storage.user_exists(args.user):
-                print >>sys.stderr, 'Error: user %s does not exists.' % args.user
+                print >>sys.stderr, \
+                    'Error: user %s does not exists.' % args.user
                 return None
             user = self.storage.get_user(args.user)
         else:
-            user = None
+            user = Anonymous()
+
+        if user.exists and user.key is None:
+            print >>sys.stderr, \
+                'Warning: user %s has no key.' % user.name, \
+                'Use contacts genkey %s to create one.' % user.name
 
         for path in args.path:
             if not os.path.exists(path):
@@ -64,6 +72,12 @@ class GetLinkCmd(Command):
             if not f:
                 print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
                 continue
+
+            if not user.has_perms(f, f.PERM_READ):
+                if user.exists:
+                    print >>sys.stderr, \
+                        'Warning: user %s cannot read %s.' % (user.name, f.path), \
+                        'Use chmod u.%s +r %s' % (user.name, list2cmdline([f.path]))
 
             print quote_url(build_url(root_url, f, user))
 

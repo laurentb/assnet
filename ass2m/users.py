@@ -123,9 +123,12 @@ class User(IUser, IObject):
 class Anonymous(IUser):
     name = '<anonymous>'
     email = None
-    realname = 'Ano Nymous'
+    realname = 'Anonymous'
+    password = None
     groups = []
     exists = False
+    key = None
+    groups = []
 
     def has_perms(self, f, perm):
         f_perms = f.get_all_perms()
