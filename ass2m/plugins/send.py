@@ -78,6 +78,9 @@ class GetUrlCmd(Command):
                     print >>sys.stderr, \
                         'Warning: user %s cannot read %s.' % (user.name, f.path), \
                         'Use chmod u.%s +r %s' % (user.name, list2cmdline([f.path]))
+                else:
+                    print >>sys.stderr, \
+                        'Warning: anonymous users cannot read %s.' % (f.path)
 
             print quote_url(build_url(root_url, f, user))
 
