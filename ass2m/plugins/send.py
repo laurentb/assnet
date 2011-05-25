@@ -32,8 +32,8 @@ from ass2m.users import Anonymous
 __all__ = ['SendPlugin']
 
 
-class GetLinkCmd(Command):
-    DESCRIPTION = 'Get a link for a specific file and/or user.'
+class GetUrlCmd(Command):
+    DESCRIPTION = 'Get an URL for a specific file and/or user.'
 
     @staticmethod
     def configure_parser(parser):
@@ -84,4 +84,4 @@ class GetLinkCmd(Command):
 
 class SendPlugin(Plugin):
     def init(self):
-        self.register_cli_command('getlink', GetLinkCmd)
+        self.register_cli_command('geturl', GetUrlCmd)
