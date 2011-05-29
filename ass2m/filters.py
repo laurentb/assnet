@@ -36,6 +36,7 @@ UNSAFE_CHARS = {
     '+': quote('+'),
     ':': quote(':'),
     '$': quote('$'),
+    '"': quote('"'),
 }
 
 
