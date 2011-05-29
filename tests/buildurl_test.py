@@ -62,3 +62,31 @@ class BuildURLTest(TestCase):
             self.storage.get_file('/penguin'),
             self.storage.get_user('user2'))) \
                 == 'http://penguin:42/penguin'
+
+        # user.key, but don't want it
+        assert quote_url(build_url(self.root_url,
+            self.storage.get_file('/penguin'),
+            self.storage.get_user('user1'),
+            use_key=False)) \
+                == 'http://penguin:42/penguin'
+
+    def test_buildHttpAuthUrls(self):
+        assert quote_url(build_url(self.root_url,
+            self.storage.get_file('/penguin'),
+            self.storage.get_user('user1'),
+            http_auth=True)) \
+                == 'http://_key:fabf37d746da8a45df63489f642b3813@penguin:42/penguin?authby=http'
+
+        # no user.key
+        assert quote_url(build_url(self.root_url,
+            self.storage.get_file('/penguin'),
+            self.storage.get_user('user2'),
+            http_auth=True)) \
+                == 'http://user2@penguin:42/penguin?authby=http'
+
+        # user.key, but don't want it
+        assert quote_url(build_url(self.root_url,
+            self.storage.get_file('/penguin'),
+            self.storage.get_user('user1'),
+            http_auth=True, use_key=False)) \
+                == 'http://user1@penguin:42/penguin?authby=http'

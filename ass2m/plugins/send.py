@@ -38,7 +38,13 @@ class GetUrlCmd(Command):
     @staticmethod
     def configure_parser(parser):
         parser.add_argument('path', nargs='+')
-        parser.add_argument('-u', '--user')
+        parser.add_argument('-u', '--user', metavar='USERNAME')
+        parser.add_argument('-K', '--no-key',
+                action='store_false', dest='use_key',
+                help="Don't use the user's key")
+        parser.add_argument('-H', '--http-auth',
+                action='store_true',
+                help="Use HTTP authentication (for downloaders for instance)")
 
     def cmd(self, args):
         root_url = build_root_url(self.storage)
@@ -58,7 +64,7 @@ class GetUrlCmd(Command):
         else:
             user = Anonymous()
 
-        if user.exists and user.key is None:
+        if args.use_key and user.exists and user.key is None:
             print >>sys.stderr, \
                 'Warning: user %s has no key.' % user.name, \
                 'Use contacts genkey %s to create one.' % user.name
@@ -70,7 +76,8 @@ class GetUrlCmd(Command):
 
             f = self.storage.get_file_from_realpath(os.path.realpath(path))
             if not f:
-                print >>sys.stderr, 'Error: Path "%s" is not in working directory.' % path
+                print >>sys.stderr, \
+                        'Error: Path "%s" is not in working directory.' % path
                 continue
 
             if not user.has_perms(f, f.PERM_READ):
@@ -83,7 +90,8 @@ class GetUrlCmd(Command):
                     print >>sys.stderr, \
                         'Warning: anonymous users cannot read %s.' % (f.path)
 
-            print quote_url(build_url(root_url, f, user))
+            print quote_url(build_url(root_url, f, user=user,
+                use_key=args.use_key, http_auth=args.http_auth))
 
 
 class SendPlugin(Plugin):

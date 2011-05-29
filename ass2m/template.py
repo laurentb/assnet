@@ -21,6 +21,7 @@ import os
 
 from mako.lookup import TemplateLookup
 from paste.url import URL
+from urlparse import urlsplit, urlunsplit
 
 from .storage import Storage
 from .version import VERSION
@@ -67,17 +68,28 @@ def build_root_url(storage):
             return URL(root_url.encode('utf-8'))
 
 
-def build_url(root_url, f, user=None):
+def build_url(root_url, f, user=None, use_key=True, http_auth=False):
     """
     Build an URL for a particular file and user if provided.
     root_url: URL (paste.url)
     f: File
     user: User
+    use_key: Add the user key to the URL if possible
+    http_auth: Make an URL for HTTP authentication (for downloaders for instance)
     """
     qs = {}
-    if user and user.key:
+    if http_auth:
+        qs['authby'] = 'http'
+        purl = urlsplit(root_url.url)
+        netloc = purl.netloc
+        if use_key and user and user.key:
+            netloc = '%s:%s@%s' % ('_key', user.key, netloc)
+        elif user and user.password:
+            netloc = '%s@%s' % (user.name, netloc)
+        root_url = URL(urlunsplit((purl.scheme, netloc, purl.path, purl.query, purl.fragment)))
+    elif use_key and user and user.key:
         qs['authkey'] = user.key
     path = f.path
     if f.isdir():
         path += '/'
-    return root_url.addpath(path).setvar(**qs)
+    return root_url.addpath(path).setvars(**qs)
