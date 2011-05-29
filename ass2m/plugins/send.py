@@ -77,7 +77,8 @@ class GetUrlCmd(Command):
                 if user.exists:
                     print >>sys.stderr, \
                         'Warning: user %s cannot read %s.' % (user.name, f.path), \
-                        'Use chmod u.%s +r %s' % (user.name, list2cmdline([f.path]))
+                        'Use chmod u.%s +r %s' % (user.name, \
+                            list2cmdline([os.path.relpath(f.get_realpath())]))
                 else:
                     print >>sys.stderr, \
                         'Warning: anonymous users cannot read %s.' % (f.path)
