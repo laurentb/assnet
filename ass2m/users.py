@@ -34,6 +34,12 @@ class Group(object):
         self.description = u''
         self.users = []
 
+    def __str__(self):
+        return self.name
+
+    def __lt__(self, g):
+        return self.name < g.name
+
 
 class IUser(object):
     def has_perms(self, f, perm):

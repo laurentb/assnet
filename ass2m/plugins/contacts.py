@@ -181,7 +181,7 @@ class ContactsManagement(ConsolePart):
                         regexp='^(\d+|q|a|g)$')
 
     def print_groups(self, start=1):
-        for i, group in enumerate(self.storage.get_groupscfg().itervalues()):
+        for i, group in enumerate(self.groups):
             self.print_group(i + start, group)
 
     def print_group(self, i, group):
