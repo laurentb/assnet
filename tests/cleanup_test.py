@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from unittest import TestCase
 from ass2m.cli import CLI
 from ass2m.storage import Storage
@@ -88,3 +90,12 @@ class CleanupTest(TestCase):
         f = self.storage.get_file('/hello')
         assert f.data['info'].get('view') is None
         assert f.view is None
+
+    def test_unicode(self):
+        with open(os.path.join(self.storage.path, 'files', 'eed3d4c0aac6375a40412d0c4e689d3da85c44d0'), 'w') as f:
+            f.write('[info]\npath = /héy')
+
+        self.beginCapture()
+        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        output = self.endCapture()
+        assert output.strip() == ''

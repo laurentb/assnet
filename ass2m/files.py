@@ -202,7 +202,11 @@ class UnknownFile(File):
         self._confname = os.path.join('files', hsh)
         File.__init__(self, storage, '')
         self.read()
-        self.path = self.data['info'].get('path')
+        pth = self.data['info'].get('path')
+        if pth is not None:
+            self.path = pth.encode('utf-8')
+        else:
+            self.path = None
 
     def _get_confname(self):
         return self._confname
