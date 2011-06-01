@@ -20,7 +20,7 @@
 
 import os
 from PIL import Image
-from paste.httpheaders import CACHE_CONTROL
+from paste.httpheaders import CACHE_CONTROL, CONTENT_DISPOSITION
 from mako.filters import html_escape
 
 from ass2m.plugin import Plugin
@@ -97,6 +97,8 @@ class DownloadThumbnailAction(ViewAction):
 
         self.ctx.res = FileApp(thumbpath)
         self.ctx.res.cache_control(private=True, max_age=CACHE_CONTROL.ONE_HOUR)
+        CONTENT_DISPOSITION.apply(self.ctx.res.headers, inline=True,
+            filename="%s_thumb_%s.%s" % (os.path.splitext(f.get_name())[0], size, thumbext))
 
 
 class GalleryPlugin(Plugin):
