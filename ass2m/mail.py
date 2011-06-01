@@ -22,6 +22,7 @@ from smtplib import SMTP
 from email.Header import Header
 from email.Utils import parseaddr, formataddr
 
+
 class Mail(object):
     def __init__(self, storage, template, sender, recipient, subject, smtp):
         from .template import build_lookup
