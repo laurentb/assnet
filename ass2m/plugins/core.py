@@ -21,11 +21,12 @@
 import sys
 import os
 
+from paste.httpheaders import CONTENT_DISPOSITION
+
 from ass2m.plugin import Plugin
 from ass2m.cmd import Command
 from ass2m.storage import Storage
 from ass2m.files import File
-
 from ass2m.routes import View
 from ass2m.server import ViewAction, FileApp
 from .cleanup import ICleaner
@@ -172,6 +173,8 @@ class DownloadAction(ViewAction):
         # serve the file, delegate everything to to FileApp
         self.ctx.res = FileApp(self.ctx.file.get_realpath())
         self.ctx.res.cache_control(private=True)
+        CONTENT_DISPOSITION.apply(self.ctx.res.headers, \
+                inline=True, filename=self.ctx.file.get_name())
 
 
 class ListAction(ViewAction):
