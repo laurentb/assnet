@@ -22,6 +22,7 @@ __all__ = ['Group', 'IUser', 'User', 'Anonymous']
 
 
 from .obj import IObject
+from .mail import Mail
 
 import os
 import hashlib
@@ -79,6 +80,15 @@ class User(IUser, IObject):
 
         f_parent = f.parent()
         return f_parent and self.has_perms(f_parent, perm)
+
+    def new_mail(self, template, subject):
+        config = self.storage.get_config()
+        sender = config.data['mail'].get('sender', 'Ass2m')
+        recipient = '%s <%s>' % (self.realname, self.email)
+        smtp = config.data['mail'].get('smtp', 'localhost')
+
+        mail = Mail(self.storage, template, sender, recipient, subject, smtp)
+        return mail
 
     def gen_key(self):
         self.key = hexlify(os.urandom(16))
