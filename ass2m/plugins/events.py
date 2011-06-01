@@ -28,6 +28,7 @@ from ass2m.plugin import Plugin
 from ass2m.routes import View
 from ass2m.server import ViewAction
 from ass2m.cmd import Command
+from ass2m.template import build_url, build_root_url
 
 from .contacts import ContactsSelection
 from .cleanup import ICleaner
@@ -53,6 +54,7 @@ class Event(object):
         self.date = None
         self.place = None
         self.users = {}
+        self.users_to_notify = set()
 
     def save(self):
         with open(self.f.get_realpath(), 'w') as fp:
@@ -65,6 +67,27 @@ class Event(object):
                                             self.f.PERM_LIST)
         self.f.mimetype = 'text/event'
         self.f.save()
+
+        while len(self.users_to_notify) > 0:
+            self.send_email(self.users_to_notify.pop())
+
+        self.users_to_notify.clear()
+
+    def send_email(self, username):
+        user = self.f.storage.get_user(username)
+        if not user.exists:
+            return
+
+        if not user.key:
+            user.gen_key()
+            user.save()
+        url = build_url(build_root_url(self.f.storage),
+                        self.f, user=user, use_key=True)
+        mail = user.new_mail('event-notification.mail', 'Notification of event')
+        mail.vars['realname'] = user.realname
+        mail.vars['description'] = self.summary
+        mail.vars['url'] = url
+        mail.send()
 
     def print_me(self):
         print '-' * len(unicode(self.title))
@@ -151,6 +174,7 @@ class Event(object):
 
     def add_user(self, username):
         self.users[username] = self.USER_WAITING
+        self.users_to_notify.add(username)
 
 
 class EventCmd(Command):
