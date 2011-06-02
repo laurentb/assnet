@@ -108,7 +108,7 @@ class Event(object):
         fp.write('Attendees:\n')
         stats = [0, 0, 0]
         for username, state in sorted(self.users.items(), key=lambda (k, v): (v, k)):
-            realname = self.f.storage.get_user(username).realname
+            realname = self.get_user(username).realname
             checked = self.get_sign(state)
             stats[state] += 1
             fp.write('[%s] %s (%s)\n' % (checked, binary(username), binary(realname)))
@@ -167,7 +167,10 @@ class Event(object):
 
     def iter_users(self):
         for username in sorted(self.users.keys(), key=unicode.lower):
-            yield self.f.storage.get_user(username)
+            yield self.get_user(username)
+
+    def get_user(self, username):
+        return self.f.storage.get_user(username, want_fake=True)
 
     def remove_user(self, username):
         self.users.pop(username)
@@ -284,8 +287,9 @@ class EventAction(ViewAction):
         except IOError, e:
             error_message = unicode(e)
 
-        if self.ctx.user.has_perms(event.f, event.f.PERM_WRITE) and \
-             self.ctx.user.name in event.users:
+        if self.ctx.user.exists and \
+                self.ctx.user.has_perms(event.f, event.f.PERM_WRITE) and \
+                self.ctx.user.name in event.users:
             if state is not None:
                 event.users[self.ctx.user.name] = state
 

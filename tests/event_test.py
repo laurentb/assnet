@@ -40,6 +40,7 @@ Somewhere
 Attendees:
 [ ] penguin (Penguin)
 [x] platypus (Platypus)
+[ ] doesnotexist (Does Not Exist)
 -- 0 confirmed, 0 waiting, 0 declined
 
         """

@@ -146,6 +146,10 @@ class Anonymous(IUser):
     key = None
     groups = []
 
+    def __init__(self, fake_name=None):
+        if fake_name:
+            self.name = fake_name
+
     def has_perms(self, f, perm):
         f_perms = f.get_all_perms()
         if f_perms is not None:

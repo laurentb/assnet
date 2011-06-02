@@ -108,7 +108,7 @@ class Storage(object):
 
         return storage
 
-    def get_user(self, name):
+    def get_user(self, name, want_fake=True):
         """
         Get a particular user by its name.
         Returns Anonymous if no user is found.
@@ -116,6 +116,8 @@ class Storage(object):
         user = User(self, name)
         user.read()
         if not user.exists:
+            if want_fake:
+                return Anonymous(name)
             return Anonymous()
         return user
 
