@@ -68,10 +68,18 @@ class Event(object):
         self.f.mimetype = 'text/event'
         self.f.save()
 
+    def send(self):
+        """
+        Send mails to new users.
+        """
+        mails = set()
         while len(self.users_to_notify) > 0:
-            self.send_email(self.users_to_notify.pop())
+            mail = self.send_email(self.users_to_notify.pop())
+            if mail:
+                mails.add(mail)
 
         self.users_to_notify.clear()
+        return mails
 
     def send_email(self, username):
         user = self.f.storage.get_user(username)
@@ -88,6 +96,7 @@ class Event(object):
         mail.vars['description'] = self.summary
         mail.vars['url'] = url
         mail.send()
+        return user.email
 
     def print_me(self):
         print '-' * len(unicode(self.title))
@@ -174,6 +183,7 @@ class Event(object):
 
     def remove_user(self, username):
         self.users.pop(username)
+        self.users_to_notify.discard(username)
 
     def add_user(self, username):
         self.users[username] = self.USER_WAITING
@@ -202,7 +212,7 @@ class EventCmd(Command):
                 try:
                     event.save()
                 except IOError, e:
-                    print >>sys.stderr, 'Error: %s' % e
+                    print >>sys.stderr, 'Unable to save: %s' % e
                     return 1
 
                 os.unlink(f.get_realpath())
@@ -232,8 +242,21 @@ class EventCmd(Command):
             except (KeyboardInterrupt, EOFError):
                 print '\nAborted.'
             else:
-                event.save()
                 event.print_me()
+                try:
+                    event.save()
+                except IOError, e:
+                    print >>sys.stderr, 'Unable to save: %s' % e
+                    return 1
+                try:
+                    mails = []
+                    mails = event.send()
+                except IOError, e:
+                    print >>sys.stderr, 'Unable to send mails: %s' % e
+                    return 1
+                finally:
+                    if mails:
+                        print 'Mails sent to %s' % ', '.join(mails)
 
     def edit_event(self, event):
         self.edit_title(event)

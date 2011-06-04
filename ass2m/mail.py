@@ -18,9 +18,20 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 from email.mime.text import MIMEText
-from smtplib import SMTP
+import smtplib
 from email.Header import Header
 from email.Utils import parseaddr, formataddr
+
+
+class SMTP(smtplib.SMTP):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            self.quit()
+        except smtplib.SMTPServerDisconnected:
+            pass
 
 
 class Mail(object):
@@ -64,8 +75,6 @@ class Mail(object):
         msg['To'] = formataddr((recipient_name, recipient_addr))
         msg['Subject'] = Header(unicode(self.subject), header_charset)
 
-        try:
-            smtp = SMTP(self.smtp)
+        with SMTP() as smtp:
+            smtp.connect(self.smtp)
             smtp.sendmail(self.sender, self.recipient, msg.as_string())
-        finally:
-            smtp.quit()
