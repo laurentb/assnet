@@ -131,6 +131,7 @@ class Context(object):
         self.template_vars = build_vars(self.storage)
         # add and override variables specific to the web responses
         self.template_vars.update({
+            'file': self.file,
             'path': self.path,
             'url': self.url,
             'root_url': self.root_url,

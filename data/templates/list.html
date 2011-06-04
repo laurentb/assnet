@@ -28,13 +28,13 @@
         <td class="size"><span class="not-applicable">-</span></td>
     </tr>
     % endfor
-    % for file in files:
+    % for f in files:
     <tr class="file">
-        <td class="filename" data-sortname="${file.get_name() | h}"><a href="${URL(file.get_name()) | n,U,h}">${file.get_name() | h}</a></td>
+        <td class="filename" data-sortname="${f.get_name() | h}"><a href="${URL(f.get_name()) | n,U,h}">${f.get_name() | h}</a></td>
         <td class="lastmod">
-            <time datetime="${file.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${file.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
+            <time datetime="${f.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${f.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
         </td>
-        <td class="size"><span title="${file.get_size() | h}">${file.get_human_size() | h}</span></td>
+        <td class="size"><span title="${f.get_size() | h}">${f.get_human_size() | h}</span></td>
     </tr>
     % endfor
 </tbody>
