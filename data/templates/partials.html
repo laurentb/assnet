@@ -64,7 +64,10 @@ else:
 % for index, pathpart in enumerate(paths, 1):
 <%
 classes = []
-parturl = URL('../' * (len(paths)-index))
+levels = len(paths)-index
+if not isdir:
+    levels -= 1
+parturl = URL('../' * levels)
 chr = '/'
 %>\
 % if index == len(paths):
@@ -73,6 +76,11 @@ classes.append('last')
 parturl = url
 if not isdir:
     chr = ''
+%>\
+% endif
+% if index == len(paths)-1 and not isdir:
+<%
+parturl = URL('./')
 %>\
 % endif
 % if index == 1:
