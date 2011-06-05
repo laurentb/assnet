@@ -330,7 +330,8 @@ class Dispatcher(object):
             if username:
                 valid_user = ctx.storage.get_user(username)
         if valid_user:
-            ctx.login(valid_user, set_cookie='ass2m_session' not in ctx.req.str_cookies)
+            has_cookies = cookie and 'ass2m_session' in ctx.req.str_cookies
+            ctx.login(valid_user, set_cookie=not has_cookies)
 
     def dispatch(self):
         ctx = self.ctx
