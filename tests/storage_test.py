@@ -138,13 +138,13 @@ class StorageTest(TestCase):
 
     def test_filePreAndPost(self):
         f = File(self.storage, '/penguin')
-        f.perms['all'] = File.PERM_READ | File.PERM_LIST
+        f.perms['all'] = File.PERM_READ | File.PERM_LIST | File.PERM_IN
         f.view = 'html'
         f.save()
 
         f = File(self.storage, '/penguin')
         f.read()
-        assert f.perms['all'] == File.PERM_READ | File.PERM_LIST
+        assert f.perms['all'] == File.PERM_READ | File.PERM_LIST | File.PERM_IN
         assert f.view == 'html'
         f.remove()
         assert len(f.perms) == 0

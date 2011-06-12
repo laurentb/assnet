@@ -49,7 +49,7 @@ Attendees:
 
         f = storage.get_file('/event1.txt')
         f.mimetype = 'text/event'
-        f.perms['u.penguin'] = f.PERM_READ | f.PERM_WRITE
+        f.perms['u.penguin'] = f.PERM_READ | f.PERM_WRITE | f.PERM_IN
         f.save()
 
     def tearDown(self):

@@ -86,7 +86,7 @@ class ConfigCLITest(TestCase):
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-g', 'list']) in (0, None)
         output = self.endCapture()
-        assert len(output) == 0
+        assert 'storage.version' in output
 
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-f', self.root, 'list']) in (0, None)
@@ -115,7 +115,7 @@ class ConfigCLITest(TestCase):
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-g', 'list']) in (0, None)
         output = self.endCapture()
-        assert len(output) == 0
+        assert 'lol.cat' not in output
 
         self.beginCapture(True)
         assert self.app.main(['ass2m_test', 'config', '-g', 'get', 'lol.cat']) == 2
@@ -134,4 +134,4 @@ class ConfigCLITest(TestCase):
         self.beginCapture()
         assert self.app.main(['ass2m_test', 'config', '-g', 'list']) in (0, None)
         output = self.endCapture()
-        assert len(output.strip().split('\n')) == 1
+        assert 'lol.cat=42' in output

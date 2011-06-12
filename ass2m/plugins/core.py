@@ -195,6 +195,7 @@ class ListAction(ViewAction):
 
 class CoreCleaner(ICleaner):
     def fsck(self):
+        self.v1()
         self.invalid_paths = []
         for f in self.storage.iter_files():
             if f.path is None or f._get_confname() != File._get_confname(f):
@@ -205,6 +206,29 @@ class CoreCleaner(ICleaner):
                     f.view = None
                     f.save()
                     print "%s: fixed empty view." % f._get_confname()
+
+    def v1(self):
+        """
+        Migration for the introduction of the +i permission
+        """
+        config = self.storage.get_config()
+        if config.data['storage'].get('version', 0) > 0:
+            return
+        for f in self.storage.iter_files():
+            for key in f.perms.keys():
+                perms = f.perms[key]
+                # directories with the LIST perm will also get the IN perm
+                # so files inherit it
+                if perms & File.PERM_LIST:
+                    perms = perms | File.PERM_IN
+                # remove LIST perm for files (does not make sense)
+                if f.isfile() and perms & File.PERM_LIST:
+                    perms = perms & File.PERM_LIST
+                f.perms[key] = perms
+            f.save()
+        print 'Migrated storage to v1'
+        config.data['storage']['version'] = 1
+        config.save()
 
     def gc(self):
         for f in self.invalid_paths:

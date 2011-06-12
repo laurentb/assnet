@@ -96,14 +96,18 @@ class Storage(object):
     def create(cls, path):
         storage = cls(os.path.join(path, cls.DIRNAME))
 
+        config = storage.get_config()
+        config.data['storage']['version'] = 1
+        config.save()
+
         # Default perms on /.ass2m
-        f = File(storage, '/.ass2m')
+        f = storage.get_file('/.ass2m')
         f.perms = {'all': 0}
         f.save()
 
         # Default perms on /
-        f = File(storage, '')
-        f.perms = {'all': File.PERM_READ | File.PERM_LIST}
+        f = storage.get_file('')
+        f.perms = {'all': File.PERM_READ | File.PERM_LIST | File.PERM_IN}
         f.save()
 
         return storage

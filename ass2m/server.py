@@ -148,7 +148,7 @@ class Context(object):
     def iter_files(self):
         if self.object_type == "directory":
             for f in self.file.iter_children():
-                if self.user.has_perms(f, f.PERM_LIST):
+                if self.user.has_perms(f, f.PERM_IN):
                     yield f
 
     def login(self, user, set_cookie=True):
@@ -359,7 +359,10 @@ class Dispatcher(object):
 
         # check perms
         f = ctx.file
-        if not ctx.user.has_perms(f, f.PERM_READ):
+        if ctx.object_type == 'directory':
+            if not ctx.user.has_perms(f, f.PERM_LIST):
+                raise HTTPForbidden()
+        elif not ctx.user.has_perms(f, f.PERM_READ):
             raise HTTPForbidden()
 
         # normalize paths

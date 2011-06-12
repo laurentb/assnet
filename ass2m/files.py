@@ -31,15 +31,17 @@ __all__ = ['File']
 
 
 class File(IObject):
-    PERM_READ =  0x001
-    PERM_LIST =  0x002
+    PERM_READ  = 0x001
+    PERM_LIST  = 0x002
     PERM_WRITE = 0x004
+    PERM_IN    = 0x008
 
     PERM_ALL =   0xfff
 
-    PERMS = (('r', PERM_READ),
+    PERMS = (('i', PERM_IN),
+             ('r', PERM_READ),
              ('l', PERM_LIST),
-             ('w', PERM_WRITE)
+             ('w', PERM_WRITE),
             )
 
     @staticmethod
