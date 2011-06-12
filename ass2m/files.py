@@ -188,7 +188,10 @@ class File(IObject):
             self.data['info']['mimetype'] = self.mimetype
         else:
             self.data['info'].pop('mimetype', None)
-        self.data['info']['path'] = self.path
+        pth = self.path
+        if pth is not None:
+            pth = pth.decode('utf-8')
+        self.data['info']['path'] = pth
         self.data['perms'] = self.perms
 
 
