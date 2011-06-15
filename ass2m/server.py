@@ -361,9 +361,15 @@ class Dispatcher(object):
         f = ctx.file
         if ctx.object_type == 'directory':
             if not ctx.user.has_perms(f, f.PERM_LIST):
-                raise HTTPForbidden()
+                if ctx.user.has_perms(f, f.PERM_IN):
+                    raise HTTPForbidden()
+                else:
+                    raise HTTPNotFound('File not found')
         elif not ctx.user.has_perms(f, f.PERM_READ):
-            raise HTTPForbidden()
+            if ctx.user.has_perms(f, f.PERM_IN):
+                raise HTTPForbidden()
+            else:
+                raise HTTPNotFound('File not found')
 
         # normalize paths
         if ctx.object_type:

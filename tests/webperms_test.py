@@ -38,14 +38,14 @@ class WebPermsTest(TestCase):
         # hide the ass2m dir
         assert ".ass2m" not in res.body
         # don't list the ass2m dir
-        res = self.app.get("/.ass2m/", status=403)
+        res = self.app.get("/.ass2m/", status=404)
 
-        # don't normalize the path
-        res = self.app.get("/.ass2m", status=403)
+        # don't even normalize the path
+        res = self.app.get("/.ass2m", status=404)
         # don't serve the file
-        res = self.app.get("/.ass2m/config", status=403)
+        res = self.app.get("/.ass2m/config", status=404)
         # don't 404
-        res = self.app.get("/.ass2m/penguin", status=403)
+        res = self.app.get("/.ass2m/penguin", status=404)
 
     def test_list(self):
         os.mkdir(os.path.join(self.root, 'penguins'))
@@ -78,7 +78,7 @@ class WebPermsTest(TestCase):
         self._set_perms('/penguins', all=0)
         res = self.app.get('/', status=200)
         assert 'penguins' not in res.body
-        res = self.app.get('/penguins/', status=403)
+        res = self.app.get('/penguins/', status=404)
         assert 'gentoo' not in res.body
         res = self.app.get('/penguins/gentoo', status=200)
         assert 'HELLO' == res.body
@@ -123,11 +123,41 @@ class WebPermsTest(TestCase):
         assert 'gentoo' in res.body
 
         self._set_perms('/', all=File.PERM_LIST | File.PERM_READ | File.PERM_IN, g_admin=0)
+        self.app.get('/penguins/', status=404)
+
+        self._set_perms('/', all=File.PERM_LIST | File.PERM_READ | File.PERM_IN, g_admin=File.PERM_IN)
         self.app.get('/penguins/', status=403)
 
         self._set_perms('/', all=File.PERM_LIST | File.PERM_READ | File.PERM_IN, u_penguins=0)
         self._set_perms('/penguins', g_admin=File.PERM_LIST | File.PERM_READ | File.PERM_IN)
         self.app.get('/penguins/', status=200)
+
+    def test_in(self):
+        os.mkdir(os.path.join(self.root, 'penguins'))
+        with open(os.path.join(self.root, 'penguins', 'gentoo'), 'w') as f:
+            f.write('HELLO')
+
+        self._set_perms('', all=0)
+        self._set_perms('/penguins', all=File.PERM_LIST)
+        # we can list
+        res = self.app.get('/penguins/', status=200)
+        # but the file is hidden
+        assert 'gentoo' not in res.body
+        # and is not readable
+        self.app.get('/penguins/gentoo', status=404)
+
+        # allow the listing of the file
+        self._set_perms('/penguins/gentoo', all=File.PERM_IN)
+        res = self.app.get('/penguins/', status=200)
+        assert 'gentoo' in res.body
+        # we still can't read it
+        self.app.get('/penguins/gentoo', status=403)
+
+        # now allow to read, but hide it
+        self._set_perms('/penguins/gentoo', all=File.PERM_READ)
+        res = self.app.get('/penguins/', status=200)
+        assert 'gentoo' not in res.body
+        self.app.get('/penguins/gentoo', status=200)
 
     def _set_perms(self, path, **perms):
         f = self.storage.get_file(path)
