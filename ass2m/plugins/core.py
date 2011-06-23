@@ -52,7 +52,13 @@ class TreeCmd(Command):
     DESCRIPTION = 'Display the working tree'
     WORKDIR = True
 
-    def add_perms(self, lines, path):
+    @staticmethod
+    def configure_parser(parser):
+        parser.add_argument('path', nargs='?', default=None)
+        parser.add_argument('-a', '--all', default=0, const=-1, nargs='?')
+        parser.add_argument('-d', '--depth', nargs='?')
+
+    def add_perms(self, args, lines, path):
         f = self.storage.get_file(path)
         parent = f.parent()
 
@@ -61,19 +67,29 @@ class TreeCmd(Command):
             if not parent or not key in parent.perms or parent.perms[key] != perms:
                 perms_s += '%s(%s) ' % (key, f.p2str(perms))
 
-        if len(perms_s) == 0:
+        if args.depth is not None and path.strip('/').count('/') >= int(args.depth):
             return
 
-        lines.append((path, perms_s))
+        if len(perms_s) != 0 or args.all < 0 or path.strip('/').count('/') < int(args.all):
+            lines.append((path, perms_s))
 
     def cmd(self, args):
         lines = []
-        for root, directories, files in os.walk(self.working_dir):
+        if args.path is None:
+            path = self.working_dir
+        else:
+            path = os.path.realpath(os.path.join(self.working_dir, args.path))
+
+        if not os.path.exists(path):
+            print >>sys.stderr, 'Error: Path "%s" does not exist.' % path
+            return 1
+
+        for root, directories, files in os.walk(path):
             path = root[len(self.storage.root):]
 
-            self.add_perms(lines, path + '/')
+            self.add_perms(args, lines, path + '/')
             for filename in files:
-                self.add_perms(lines, os.path.join(path, filename))
+                self.add_perms(args, lines, os.path.join(path, filename))
 
         prev_parts = None
         for line in sorted(lines):
