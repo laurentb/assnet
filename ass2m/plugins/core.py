@@ -91,7 +91,6 @@ class TreeCmd(Command):
             for filename in files:
                 self.add_perms(args, lines, os.path.join(path, filename))
 
-        prev_parts = None
         for line in sorted(lines):
             path, perms = line
             parts = path.split('/')
@@ -102,6 +101,7 @@ class TreeCmd(Command):
                 filename = parts[-1]
                 depth = path.count('/')
             print '%-40s %s' % (' |' * depth + '-' + filename, perms)
+
 
 class ChViewCmd(Command):
     DESCRIPTION = 'Change default view of a path'
