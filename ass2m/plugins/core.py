@@ -52,7 +52,7 @@ class TreeCmd(Command):
     DESCRIPTION = 'Display the working tree'
     WORKDIR = True
 
-    def print_perms(self, path, depth):
+    def add_perms(self, lines, path):
         f = self.storage.get_file(path)
         parent = f.parent()
 
@@ -64,17 +64,28 @@ class TreeCmd(Command):
         if len(perms_s) == 0:
             return
 
-        print '%-40s %s' % ('  ' * depth + path, perms_s)
+        lines.append((path, perms_s))
 
     def cmd(self, args):
+        lines = []
         for root, directories, files in os.walk(self.working_dir):
             path = root[len(self.storage.root):]
-            depth = path.count('/')
 
-            self.print_perms(path + '/', depth)
+            self.add_perms(lines, path + '/')
             for filename in files:
-                self.print_perms(os.path.join(path, filename), depth + 1)
+                self.add_perms(lines, os.path.join(path, filename))
 
+        prev_parts = None
+        for line in sorted(lines):
+            path, perms = line
+            parts = path.split('/')
+            if path.endswith('/'):
+                filename = parts[-2] + '/'
+                depth = path.count('/') - 1
+            else:
+                filename = parts[-1]
+                depth = path.count('/')
+            print '%-40s %s' % (' |' * depth + '-' + filename, perms)
 
 class ChViewCmd(Command):
     DESCRIPTION = 'Change default view of a path'
