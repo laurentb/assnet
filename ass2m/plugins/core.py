@@ -55,8 +55,8 @@ class TreeCmd(Command):
     @staticmethod
     def configure_parser(parser):
         parser.add_argument('path', nargs='?', default=None)
-        parser.add_argument('-a', '--all', default=0, const=-1, nargs='?')
-        parser.add_argument('-d', '--depth', nargs='?')
+        parser.add_argument('-a', '--all', default=0, const=-1, nargs='?', type=int)
+        parser.add_argument('-d', '--depth', nargs='?', type=int)
 
     def add_perms(self, args, lines, path):
         f = self.storage.get_file(path)
@@ -67,10 +67,10 @@ class TreeCmd(Command):
             if not parent or not key in parent.perms or parent.perms[key] != perms:
                 perms_s += '%s(%s) ' % (key, f.p2str(perms))
 
-        if args.depth is not None and path.strip('/').count('/') >= int(args.depth):
+        if args.depth is not None and path.strip('/').count('/') >= args.depth:
             return
 
-        if len(perms_s) != 0 or args.all < 0 or path.strip('/').count('/') < int(args.all):
+        if len(perms_s) != 0 or args.all < 0 or path.strip('/').count('/') < args.all:
             lines.append((path, perms_s))
 
     def cmd(self, args):
