@@ -2,44 +2,79 @@
 <%namespace name="partials" file="partials.html"/>
 
 <article>
-<table class="list">
-<caption>Directory listing</caption>
-<thead>
-    <tr>
-        <th class="filename">Name</th>
-        <th class="lastmod">Last modified</th>
-        <th class="size">Size</th>
-    </tr>
-</thead>
-<tbody>
-    % if path:
-    <tr class="parent">
-        <td class="filename" data-sortname="/"><a href="../">Parent directory</a></td>
-        <td class="lastmod"><span class="not-applicable">-</span></td>
-        <td class="size"><span class="not-applicable">-</span></td>
-    </tr>
-    % endif
-    % for dir in dirs:
-    <tr class="dir">
-        <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U,h}">${dir.get_name() | h}</a>/</td>
-        <td class="lastmod">
-            <time datetime="${dir.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${dir.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
-        </td>
-        <td class="size"><span class="not-applicable">-</span></td>
-    </tr>
+% if header_text:
+    <section id="header">${header_text}</section>
+% endif
+
+% if len(thumbs):
+    <section>
+    <ul class="gallery">
+    % for thumb in thumbs:
+        <li class="hmedia">
+            <a rel="enclosure original" type="${thumb.get_mimetype() | h}" href="${URL(thumb.get_name()) | n,U,h}" title="${thumb.get_name() | h}">
+            <figure>
+                <span class="frame"><img class="thumbnail photo" src="${URL(thumb.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U,h}" /></span>
+                <figcaption>
+                    <span class="fn">${thumb.get_name() | h}</span>
+                </figcaption>
+            </figure>
+            </a>
+        </li>
     % endfor
-    % for f in files:
-    <tr class="file">
-        <td class="filename" data-sortname="${f.get_name() | h}"><a href="${URL(f.get_name()) | n,U,h}">${f.get_name() | h}</a></td>
-        <td class="lastmod">
-            <time datetime="${f.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${f.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
-        </td>
-        <td class="size"><span title="${f.get_size() | h}">${f.get_human_size() | h}</span></td>
-    </tr>
-    % endfor
-</tbody>
-</table>
+    </ul>
+    </section>
+%endif
+
+% if len(dirs) or len(files) or path:
+    <section>
+    <table class="list">
+    <caption>Directory listing</caption>
+    <thead>
+        <tr>
+            <th class="filename">Name</th>
+            <th class="lastmod">Last modified</th>
+            <th class="size">Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        % if path:
+        <tr class="parent">
+            <td class="filename" data-sortname="/"><a href="../">Parent directory</a></td>
+            <td class="lastmod"><span class="not-applicable">-</span></td>
+            <td class="size"><span class="not-applicable">-</span></td>
+        </tr>
+        % endif
+        % for dir in dirs:
+        <tr class="dir">
+            <td class="filename" data-sortname="${'/'+dir.get_name() | h}"><a href="${URL(dir.get_name()+'/') | n,U,h}">${dir.get_name() | h}</a>/</td>
+            <td class="lastmod">
+                <time datetime="${dir.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${dir.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
+            </td>
+            <td class="size"><span class="not-applicable">-</span></td>
+        </tr>
+        % endfor
+        % for f in files:
+        <tr class="file">
+            <td class="filename" data-sortname="${f.get_name() | h}"><a href="${URL(f.get_name()) | n,U,h}">${f.get_name() | h}</a></td>
+            <td class="lastmod">
+                <time datetime="${f.get_mtime().strftime('%Y-%m-%dT%H:%M') | h}">${f.get_mtime().strftime('%Y-%m-%d %H:%M:%S') | h}</time>
+            </td>
+            <td class="size"><span title="${f.get_size() | h}">${f.get_human_size() | h}</span></td>
+        </tr>
+        % endfor
+    </tbody>
+    </table>
+
+    </section>
+% endif
+
+% if readme_text:
+    <section id="readme">${readme_text}</section>
+% endif
+
+
 </article>
+
 
 <%def name="title(html=False)" filter="cpt">
 % if html:

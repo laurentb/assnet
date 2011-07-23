@@ -31,31 +31,6 @@ from ass2m.server import ViewAction, FileApp
 __all__ = ['GalleryPlugin']
 
 
-class ListGalleryAction(ViewAction):
-    def get(self):
-        dirs = []
-        photos = []
-        description = None
-        for f in self.ctx.iter_files():
-            if f.isdir():
-                dirs.append(f)
-            elif self.ctx.user.has_perms(f, f.PERM_READ):
-                filename = f.get_name()
-                mimetype = f.get_mimetype()
-                if mimetype is not None and mimetype.startswith('image'):
-                    photos.append(f)
-                elif filename in ('DESCRIPTION', 'DESCRIPTION.html'):
-                    with open(f.get_realpath(), 'r') as f:
-                        description = f.read()
-                        if not filename.endswith('.html'):
-                            description = html_escape(description.decode('utf-8'))
-
-        self.ctx.template_vars['dirs'] = dirs
-        self.ctx.template_vars['photos'] = photos
-        self.ctx.template_vars['description'] = description
-        self.ctx.res.body = self.ctx.render('list-gallery.html')
-
-
 class DownloadThumbnailAction(ViewAction):
     DEFAULT_SIZE = 300
 
@@ -103,9 +78,6 @@ class DownloadThumbnailAction(ViewAction):
 
 class GalleryPlugin(Plugin):
     def init(self):
-        self.register_web_view(
-            View(object_type='directory', name='gallery'),
-            ListGalleryAction, 0)
         self.register_web_view(
             View(object_type='file', mimetype='image', name='thumbnail'),
             DownloadThumbnailAction, -1)

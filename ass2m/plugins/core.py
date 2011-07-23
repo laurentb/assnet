@@ -208,12 +208,29 @@ class ListAction(ViewAction):
     def get(self):
         dirs = []
         files = []
+        thumbs = []
+        self.ctx.template_vars['header_text'] = None
+        self.ctx.template_vars['readme_text'] = None
         for f in self.ctx.iter_files():
             if f.isdir():
                 dirs.append(f)
-            else:
-                files.append(f)
+                continue
+            if self.ctx.user.has_perms(f, f.PERM_READ):
+                filename = f.get_name()
+                mimetype = f.get_mimetype()
+                if mimetype is not None and mimetype.startswith('image'):
+                    thumbs.append(f)
+                    continue
+                if filename in ('README', 'README.html', 'HEADER', 'HEADER.html'):
+                    with open(f.get_realpath(), 'r') as fp:
+                        text = fp.read()
+                        if not filename.endswith('.html'):
+                            text = html_escape(text.decode('utf-8'))
+                        self.ctx.template_vars['%s_text' % filename.split('.')[0].lower()] = text
+                    continue
+            files.append(f)
 
+        self.ctx.template_vars['thumbs'] = thumbs
         self.ctx.template_vars['dirs'] = dirs
         self.ctx.template_vars['files'] = files
         self.ctx.template_vars['scripts'].append('list.js')
