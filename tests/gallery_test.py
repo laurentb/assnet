@@ -39,20 +39,24 @@ class GalleryTest(TestCase):
             shutil.rmtree(self.root)
 
     def test_listAndDefaultView(self):
+        # default view is the medialist
+        res1 = self.app.get('/images/')
+
+        # change it to list
+        f = self.storage.get_file('/images')
+        f.view = 'list'
+        f.save()
+
         res = self.app.get('/images/')
         assert '<title>Index of /images/</title>' in res.body
         assert '<img' not in res.body
         assert 'nothing' in res.body
 
-        res1 = self.app.get('/images/?view=gallery')
-        f = self.storage.get_file('/images')
-        f.view = 'gallery'
-        f.save()
-
-        res2 = self.app.get('/images/')
+        # force medialist
+        res2 = self.app.get('/images/?view=medialist')
 
         for res in (res1, res2):
-            assert '<title>Gallery of /images/</title>' in res.body
+            assert '<title>Index of /images/</title>' in res.body
             assert '<img' in res.body
             assert 'nothing' in res.body
 

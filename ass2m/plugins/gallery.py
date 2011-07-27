@@ -76,8 +76,46 @@ class DownloadThumbnailAction(ViewAction):
             filename="%s_thumb_%s.%s" % (os.path.splitext(f.get_name())[0], size, thumbext))
 
 
+class MediaListAction(ViewAction):
+    IS_MEDIA = True
+
+    def get(self):
+        dirs = []
+        files = []
+        thumbs = []
+        self.ctx.template_vars['header_text'] = None
+        self.ctx.template_vars['readme_text'] = None
+        for f in self.ctx.iter_files():
+            if f.isdir():
+                dirs.append(f)
+                continue
+            if self.ctx.user.has_perms(f, f.PERM_READ):
+                filename = f.get_name()
+                mimetype = f.get_mimetype()
+                if self.IS_MEDIA and mimetype is not None and mimetype.startswith('image'):
+                    thumbs.append(f)
+                    continue
+                if filename in ('README', 'README.html', 'HEADER', 'HEADER.html'):
+                    with open(f.get_realpath(), 'r') as fp:
+                        text = fp.read()
+                        if not filename.endswith('.html'):
+                            text = html_escape(text.decode('utf-8'))
+                        self.ctx.template_vars['%s_text' % os.path.splitext(filename)[0].lower()] = text
+                    continue
+            files.append(f)
+
+        self.ctx.template_vars['thumbs'] = thumbs
+        self.ctx.template_vars['dirs'] = dirs
+        self.ctx.template_vars['files'] = files
+        self.ctx.template_vars['scripts'].append('list.js')
+        self.ctx.res.body = self.ctx.render('list.html')
+
+
 class GalleryPlugin(Plugin):
     def init(self):
         self.register_web_view(
             View(object_type='file', mimetype='image', name='thumbnail'),
             DownloadThumbnailAction, -1)
+        self.register_web_view(
+                View(object_type='directory', name='medialist', verbose_name='Media list'),
+                MediaListAction, 2)
