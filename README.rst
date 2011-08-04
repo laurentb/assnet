@@ -2,7 +2,7 @@ The *Authenticated Social Storage Made for Mothers* (ass2m) project is a web app
 
 You self-host your data and manage permissions to protect your privacy and control exactly who can access what information.
 
-Your contacts go a web interface to see and interact with your data, and you use a command-line tool to control your space.
+Your contacts go to a web interface to see and interact with your data, and you use a command-line tool to control your space.
 
 Overview
 --------
