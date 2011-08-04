@@ -135,7 +135,7 @@ class Context(object):
             'path': self.path,
             'url': self.url,
             'root_url': self.root_url,
-            'stylesheets': ['main.css'],
+            'stylesheets': ['main.css', 'user.css'],
             'scripts': ['mootools-core-1.3.1.js', 'mootools-more-1.3.1.1.js', 'main.js'],
         })
 
