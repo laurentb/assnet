@@ -20,6 +20,7 @@
 
 import posixpath
 import re
+import os
 from binascii import hexlify
 from paste import httpserver
 from paste.auth.cookie import AuthCookieSigner, new_secret
@@ -148,6 +149,22 @@ class Context(object):
     def iter_files(self):
         if self.object_type == "directory":
             for f in self.file.iter_children():
+                if self.user.has_perms(f, f.PERM_IN):
+                    yield f
+
+    def iter_files_recursively(self):
+        if self.object_type != "directory":
+            return
+        for root, directories, files in os.walk(self.file.get_realpath()):
+            path = root[len(self.storage.root):]
+            f = self.storage.get_file(path)
+
+            if not self.user.has_perms(f, f.PERM_LIST):
+                continue
+
+            yield f
+            for filename in files:
+                f = self.storage.get_file(os.path.join(path, filename))
                 if self.user.has_perms(f, f.PERM_IN):
                     yield f
 
