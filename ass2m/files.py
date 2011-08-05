@@ -62,6 +62,8 @@ class File(IObject):
         # skip any trailing /
         if len(path) > 0 and path[-1] == '/':
             path = path[:-1]
+        if len(path) > 0 and path[0] != '/':
+            path = '/%s' % path
 
         self.path = path
         self.view = None
