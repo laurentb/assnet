@@ -37,7 +37,7 @@ Dependencies
 * python-webob
 * python-mako
 * python-imaging
-* python-rss2gen
+* python-pyrss2gen
 
 Those dependencies will be either checked or installed automatically unless you chose the "No installation" method.
 

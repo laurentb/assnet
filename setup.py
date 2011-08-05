@@ -6,7 +6,7 @@ from sys import version_info
 
 assert version_info >= (2, 6)
 DATA_DIR = 'share/ass2m'
-REQUIREMENTS = ['PIL', 'mako', 'webob', 'paste']
+REQUIREMENTS = ['PIL', 'mako', 'webob', 'paste', 'PyRSS2Gen']
 if version_info < (2, 7):
     REQUIREMENTS.append('argparse')
 
