@@ -32,11 +32,12 @@ Dependencies
 ~~~~~~~~~~~~
 
 * Python >= 2.6
+* python-argparse or Python >= 2.7
 * python-paste
 * python-webob
 * python-mako
 * python-imaging
-* python-argparse or Python >= 2.7
+* python-rss2gen
 
 Those dependencies will be either checked or installed automatically unless you chose the "No installation" method.
 
