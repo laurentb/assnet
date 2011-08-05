@@ -19,11 +19,15 @@
 
 
 import json
+from dateutil import tz
+import PyRSS2Gen
+from mako.filters import html_escape
 
 from ass2m.plugin import Plugin
 
 from ass2m.routes import View
 from ass2m.server import ViewAction
+from ass2m.template import build_url, build_root_url
 
 __all__ = ['ApiPlugin']
 
@@ -72,6 +76,50 @@ class TextListAction(ViewAction):
         self.ctx.res.charset = 'UTF-8'
         self.ctx.res.body = '\n'.join(filenames)
 
+class RssListAction(InfoAction):
+    NB_ENTRIES = 20
+
+    class SortableFile(object):
+        def __init__(self, f):
+            self.obj = f
+            self.mtime = f.get_mtime().replace(tzinfo=tz.tzlocal()).astimezone(tz.tzutc())
+
+        def __lt__(self, o):
+            return self.mtime < o.mtime
+
+    def get(self):
+        files = []
+        for f in self.ctx.iter_files_recursively():
+            files.append(self.SortableFile(f))
+        files.sort(reverse=True)
+
+        root_url = build_root_url(self.ctx.storage)
+        items = []
+        for f in files[:self.NB_ENTRIES]:
+            link = build_url(root_url, f.obj, user=self.ctx.user)
+            description = None
+            mimetype = f.obj.get_mimetype()
+            if mimetype is not None:
+                if mimetype.startswith('image'):
+                    description = '<img src="%s" />' % unicode(link.setvars(view='thumbnail', thumb_size=200))
+                elif mimetype.startswith('text'):
+                    with open(f.obj.get_realpath(), 'r') as fp:
+                        description = fp.read()
+                        if not 'html' in mimetype:
+                            description = '<pre>%s</pre>' % html_escape(description.decode('utf-8'))
+            items.append(PyRSS2Gen.RSSItem(title=f.obj.path,
+                                           link=unicode(link),
+                                           description=description,
+                                           guid=PyRSS2Gen.Guid(f.obj.path),
+                                           pubDate=f.mtime))
+        rss = PyRSS2Gen.RSS2(title='Updates of %s/' % self.ctx.file.path,
+                             link='%s' % build_url(root_url, self.ctx.file, user=self.ctx.user),
+                             description='Last updates of %s/' % self.ctx.file.path,
+                             lastBuildDate=files[0].mtime,
+                             items=items)
+        self.ctx.res.content_type = 'application/rss+xml'
+        self.ctx.res.charset = 'UTF-8'
+        self.ctx.res.body = rss.to_xml()
 
 class ApiPlugin(Plugin):
     def init(self):
@@ -86,3 +134,7 @@ class ApiPlugin(Plugin):
         self.register_web_view(
             View(object_type='directory', name='text_list', public=False, verbose_name='Text-only list'),
             TextListAction, -1)
+
+        self.register_web_view(
+            View(object_type='directory', name='rss', public=True, verbose_name='RSS feed'),
+            RssListAction, -1)

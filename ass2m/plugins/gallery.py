@@ -99,7 +99,7 @@ class MediaListAction(ViewAction):
                     with open(f.get_realpath(), 'r') as fp:
                         text = fp.read()
                         if not filename.endswith('.html'):
-                            text = html_escape(text.decode('utf-8'))
+                            text = '<pre>%s</pre>' % html_escape(text.decode('utf-8'))
                         self.ctx.template_vars['%s_text' % os.path.splitext(filename)[0].lower()] = text
                     continue
             files.append(f)
