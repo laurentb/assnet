@@ -81,7 +81,13 @@ class AssetAction(Action):
         dest = os.path.join(cachedir, filename + '.gz')
         if not os.path.exists(dest) or mtime != int(os.path.getmtime(dest)):
             if not os.path.isdir(cachedir):
-                os.makedirs(cachedir)
+                try:
+                    os.makedirs(cachedir)
+                except OSError, e:
+                    # ignore race condition when multiple assets
+                    # are asked at the same
+                    if not e.errno == 17:
+                        raise e
             with open(realpath, 'rb') as f_in:
                 with closing(GzipFile(dest, 'wb')) as f_out:
                     f_out.writelines(f_in)
