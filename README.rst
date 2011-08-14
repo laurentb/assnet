@@ -72,7 +72,7 @@ Beware that if you also have installed ass2m globally, the installed data files 
 Getting started
 ---------------
 
-First, we have to create the *working directory* where all files you want to share will be put.::
+First, we have to create the *working directory* where all files you want to share will be put. ::
 
     $ cd mysharedfiles
     $ ass2m init
@@ -101,7 +101,7 @@ Check all set permissions::
 
 ``all`` is a special name to refer to everyone (anonymous users being part of it of course). ``i`` is for appearing In a list, ``r`` is for Reading, ``w`` is for Writing, and ``l`` is for Listing a directory. All modes are inherited from the parents if they are not specified at a higher level.
 
-Refresh the web page. Now, no one can read and or even know that file exists. But let's do something fun!::
+Refresh the web page. Now, no one can read and or even know that file exists. But let's do something fun! ::
 
     $ ass2m chmod all +i my_gf_naked.jpg
     $ ass2m tree
