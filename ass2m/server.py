@@ -56,7 +56,11 @@ class Context(object):
         self._start_response = start_response
         self.req = Request(environ)
         # fix script_name for weird configurations
-        if 'SCRIPT_URL' in environ:
+        if 'FORCE_SCRIPT_NAME' in environ:
+            environ['SCRIPT_NAME'] = environ['FORCE_SCRIPT_NAME']
+            environ['PATH_INFO'] = environ['PATH_INFO'][len(environ['SCRIPT_NAME']):]
+            del environ['FORCE_SCRIPT_NAME']
+        elif 'SCRIPT_URL' in environ:
             script_path = quote_path(environ['SCRIPT_URL'])
             if self.req.path_info:
                 level = len(self.req.path_info.split('/')) - 1
