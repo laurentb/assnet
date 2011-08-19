@@ -60,7 +60,7 @@ class DownloadThumbnailAction(ViewAction):
         if not os.path.exists(thumbpath) or mtime != int(os.path.getmtime(thumbpath)):
             if not os.path.isdir(os.path.dirname(thumbpath)):
                 os.makedirs(os.path.dirname(thumbpath))
-                os.chmod(os.path.dirname(thumbpath), 0750)
+                os.chmod(os.path.dirname(thumbpath), 0770)
             with open(f.get_realpath(), 'rb') as fp:
                 img = Image.open(fp)
                 img.thumbnail((size, size), Image.BILINEAR)

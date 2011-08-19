@@ -201,7 +201,6 @@ class Storage(object):
         destdir = os.path.dirname(path)
         if not os.path.exists(destdir):
             os.makedirs(destdir)
-            os.chmod(destdir, 0750)
         config = RawConfigParser()
         for sec, items in data.iteritems():
             config.add_section(sec)

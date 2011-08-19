@@ -83,7 +83,7 @@ class AssetAction(Action):
             if not os.path.isdir(cachedir):
                 try:
                     os.makedirs(cachedir)
-                    os.chmod(cachedir, 0750)
+                    os.chmod(cachedir, 0770)
                 except OSError, e:
                     # ignore race condition when multiple assets
                     # are asked at the same
