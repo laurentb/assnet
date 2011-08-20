@@ -100,7 +100,7 @@ class Context(object):
         # Path of the file relative to the Ass2m root
         self.path = path
         # Root application URL (useful for links to Actions)
-        self.root_url = URL(self.req.script_name)
+        self.root_url = URL(self.req.script_name).addpath('/')
         # URL after Ass2m web application base URL
         self.relurl = URL(self.req.path_info, query_vars)
         # Complete URL (without host)
