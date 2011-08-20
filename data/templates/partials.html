@@ -73,7 +73,7 @@ chr = '/'
 % if index == len(paths):
 <%
 classes.append('last')
-parturl = root_url.addpath(url)
+parturl = url
 if not isdir:
     chr = ''
 %>\
@@ -86,7 +86,7 @@ parturl = URL('./')
 % if index == 1:
 <%
 classes.append('root')
-parturl = root_url.addpath('/')
+parturl = root_url
 chr = ':/'
 %>\
 % endif
