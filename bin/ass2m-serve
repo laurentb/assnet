@@ -26,6 +26,8 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('rootdir', help='root directory')
+    parser.add_argument('-p', '--port', help='server port', type=int, default=8042)
+    parser.add_argument('-i', '--ip', help='server IP', default='0.0.0.0')
     args = parser.parse_args()
     server = Server(args.rootdir)
-    server.bind('0.0.0.0', 8042)
+    server.bind(args.ip, args.port)
