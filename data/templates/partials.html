@@ -55,10 +55,10 @@ view_links = [(available_view, url.setvar(view=available_view.name)) \
 <%def name="breadcrumbs(path, isdir=True)">
 <%
 if path == '/':
-    paths = ['[root]']
+    paths = ['⌂']
 else:
     paths = path.split('/')
-    paths[0] = '[root]'
+    paths[0] = '⌂'
 %>
 <span class="breadcrumbs">
 % for index, pathpart in enumerate(paths, 1):
