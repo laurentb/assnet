@@ -437,14 +437,16 @@ class FileApp(PasteFileApp):
 
 
 class Server(object):
-    def __init__(self, root=None):
+    def __init__(self, root=None, default_env=None):
         """
         The optional root parameter is used to force a root directory.
         If not present, the ASS2M_ROOT of environ (provided by the HTTP server)
         will be used.
         """
-        self.root = root
         self.butt = Butt(router=Router())
+        self.default_env = default_env or {}
+        if root:
+            self.default_env['ASS2M_ROOT'] = root
 
     def bind(self, hostname, port):
         httpserver.serve(self.process, host=hostname, port=str(port))
@@ -453,8 +455,8 @@ class Server(object):
         """
         WSGI interface
         """
-        if self.root:
-            environ.setdefault("ASS2M_ROOT", self.root)
+        for key, value in self.default_env.iteritems():
+            environ.setdefault(key, value)
         try:
             ctx = Context(self.butt, environ, start_response)
             Dispatcher(ctx).dispatch()

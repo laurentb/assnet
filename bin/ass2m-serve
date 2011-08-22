@@ -22,12 +22,34 @@
 
 from ass2m.server import Server
 import argparse
+from os import getenv
+
+
+def parse_env_arg(arg):
+    """
+    Split VAR=val into (VAR, val). If no = is present, the value will be
+    taken from the system environment.
+    """
+    arg = arg.split('=', 1)
+    key = arg[0]
+    if len(arg) > 1:
+        value = arg[1]
+    else:
+        value = getenv(arg[0])
+    return (key, value)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('rootdir', help='root directory')
-    parser.add_argument('-p', '--port', help='server port', type=int, default=8042)
-    parser.add_argument('-i', '--ip', help='server IP', default='0.0.0.0')
+    parser.add_argument('rootdir', help="root directory")
+    parser.add_argument('-p', '--port', type=int, default=8042,
+                        help="server port")
+    parser.add_argument('-i', '--ip', default='0.0.0.0',
+                        help="server IP")
+    parser.add_argument('-e', '--env', action='append',
+                        metavar="VAR=val", help="environment default")
+
     args = parser.parse_args()
-    server = Server(args.rootdir)
+    env = dict([parse_env_arg(kv) for kv in args.env])
+    server = Server(args.rootdir, default_env=env)
     server.bind(args.ip, args.port)
