@@ -78,7 +78,7 @@ First, we have to create the *working directory* where all files you want to sha
     $ ass2m init
     Ass2m working directory created.
 
-You can test ass2m *right now* by starting the integrated server. However, for a more serious usage, it is recommended to configure it to work with a full-blown web server (see the Configuration section)::
+You can test ass2m *right now* by starting the integrated server. However, for a more serious usage, it is recommended to configure it to work with a full-blown web server (see the SETUP file)::
 
     $ ass2m-serve .
     serving on 0.0.0.0:8042 view at http://127.0.0.1:8042
@@ -131,43 +131,3 @@ Now, connect as this user::
 
 Open the URL. You can now access the file!
 
-Configuration
--------------
-
-Lighttpd, CGI
-~~~~~~~~~~~~~
-
-This mode is not the best for performance, but it won't take any memory when not used.
-
-You will need to load the ``alias``, ``setenv`` and ``cgi`` modules for this setup to work.
-If they are not loaded, the following directives will be ignored.
-
-Let's say you want http://your.host/data/ to be served by Ass2m. Add this to your ``lighttpd.conf``::
-
-    $HTTP["host"] == "your.host" {
-        $HTTP["url"] =~ "^/data" {
-            # make everything go through ass2m
-            alias.url = ( "" => "/usr/share/ass2m/scripts/ass2m.cgi" )
-            cgi.assign = ( "ass2m.cgi" => "" )
-            # configure ass2m
-            setenv.add-environment = (
-                "FORCE_SCRIPT_NAME" => "/data",
-                "ASS2M_ROOT" => "/path/to/the/work/dir",
-            )
-        }
-    }
-
-Please adjust the paths. You can make use of the ``setenv`` directive to set a different ``PYTHONPATH``.
-The should be no ``/`` at the end of the value of ``FORCE_SCRIPT_NAME``.
-
-If you just want a whole host to be served by Ass2m, you can use a simpler configuration::
-
-    $HTTP["host"] == "your.host" {
-        # make everything go through ass2m
-        alias.url = ( "" => "/usr/share/ass2m/scripts/ass2m.cgi" )
-        cgi.assign = ( "ass2m.cgi" => "" )
-        # configure ass2m
-        setenv.add-environment = (
-            "ASS2M_ROOT" => "/path/to/the/work/dir",
-        )
-    }
