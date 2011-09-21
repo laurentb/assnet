@@ -1,0 +1,35 @@
+menu#categories {
+    float: right;
+    font-size: 12px;
+}
+
+li.cat {
+    display: inline;
+}
+
+div.post {
+    max-width: 40em;
+    margin: 10px;
+}
+
+h2.post_title {
+    margin-bottom: 0px;
+}
+
+span.post_meta {
+    font-size: small;
+    line-height: 1.6em;
+    display: block;
+    color: #bbb;
+    margin-left: 20px;
+}
+
+div.post_content {
+    border-left: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+    border-right: 1px solid #CCCCCC;
+
+    padding: 10px;
+}
+
+

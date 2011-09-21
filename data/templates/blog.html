@@ -1,0 +1,41 @@
+<%inherit file="layout.html"/>
+<%namespace name="partials" file="partials.html"/>
+
+<article>
+% if len(categories):
+    <menu id="categories">
+    Categories:
+    % for cat in categories:
+        <li class="cat">
+            <a href="${URL(cat.get_name()+'/').setvars(view='blog') | n,U,h}">${cat.get_name() | h}</a>
+        </li>
+    % endfor
+    </menu>
+%endif
+
+<section>
+% for post in posts:
+    <div class="post">
+        <h2 class="post_title"><a href="${URL(post.path) | n,U,h}">${post.title | h}</a></h2>
+        <span class="post_meta">Written at <time datetime="${post.date.strftime('%Y-%m-%dT%H:%M') | h}">${post.date.strftime('%Y-%m-%d %H:%M:%S') | h}</time></span>
+        <div class="post_content">
+            ${post.content}
+        </div>
+    </div>
+% endfor
+</section>
+</article>
+
+
+<%def name="title(html=False)" filter="cpt">
+% if html:
+    Blog of ${partials.breadcrumbs(path)}
+% else:
+    Blog of ${path}/
+% endif
+</%def>
+
+<%def name="header()">
+    ${parent.header()}
+    ${partials.toolbox()}
+</%def>
