@@ -90,7 +90,8 @@ class RssListAction(InfoAction):
     def get(self):
         files = []
         for f in self.ctx.iter_files_recursively():
-            files.append(self.SortableFile(f))
+            if not f.isdir():
+                files.append(self.SortableFile(f))
         files.sort(reverse=True)
 
         root_url = build_root_url(self.ctx.storage)
@@ -99,7 +100,7 @@ class RssListAction(InfoAction):
             link = build_url(root_url, f.obj, user=self.ctx.user)
             description = None
             mimetype = f.obj.get_mimetype()
-            if mimetype is not None:
+            if mimetype is not None and self.ctx.user.has_perms(f.obj, f.obj.PERM_READ):
                 if mimetype.startswith('image'):
                     description = '<img src="%s" />' % unicode(link.setvars(view='thumbnail', thumb_size=200))
                 elif mimetype.startswith('text'):
@@ -107,8 +108,11 @@ class RssListAction(InfoAction):
                         description = fp.read()
                         if not 'html' in mimetype:
                             description = '<pre>%s</pre>' % html_escape(description.decode('utf-8'))
-            items.append(PyRSS2Gen.RSSItem(title=f.obj.path,
-                                           link=unicode(link),
+            title = f.obj.path[len(self.ctx.file.path):].replace('_', ' ').lstrip('/').replace('/', ' / ')
+            if title.endswith('.html') or title.endswith('.txt'):
+                title = title.rsplit('.', 1)[0]
+            items.append(PyRSS2Gen.RSSItem(title=title,
+                                           link=str(link),
                                            description=description,
                                            guid=PyRSS2Gen.Guid(f.obj.path),
                                            pubDate=f.mtime))
