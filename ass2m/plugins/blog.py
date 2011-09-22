@@ -36,7 +36,7 @@ class BlogListAction(ViewAction):
     class SortableFile(object):
         def __init__(self, f):
             self.obj = f
-            self.mtime = f.get_mtime().replace(tzinfo=tz.tzlocal()).astimezone(tz.tzutc())
+            self.mtime = f.get_mtime()
 
         def __lt__(self, o):
             return self.mtime < o.mtime
