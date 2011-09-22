@@ -69,7 +69,7 @@ class BlogListAction(ViewAction):
                 continue
 
             post = self.Post()
-            post.path = f.obj.get_name()
+            post.path = f.obj.path[len(self.ctx.file.path):].lstrip('/')
             post.date = f.mtime
             post.title = f.obj.path[len(self.ctx.file.path):].replace('_', ' ') \
                                                               .lstrip('/') \
