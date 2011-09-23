@@ -65,7 +65,7 @@ class BlogListAction(ViewAction):
                 continue
 
             mimetype = f.obj.get_mimetype()
-            if not mimetype.startswith('text'):
+            if mimetype is None or not mimetype.startswith('text'):
                 continue
 
             post = self.Post()
