@@ -68,6 +68,8 @@ class Event(object):
         self.f.mimetype = 'text/event'
         self.f.save()
 
+        self.send()
+
     def send(self):
         """
         Send mails to new users.
@@ -243,20 +245,7 @@ class EventCmd(Command):
                 print '\nAborted.'
             else:
                 event.print_me()
-                try:
-                    event.save()
-                except IOError, e:
-                    print >>sys.stderr, 'Unable to save: %s' % e
-                    return 1
-                try:
-                    mails = []
-                    mails = event.send()
-                except IOError, e:
-                    print >>sys.stderr, 'Unable to send mails: %s' % e
-                    return 1
-                finally:
-                    if mails:
-                        print 'Mails sent to %s' % ', '.join(mails)
+                self.save_event(event)
 
     def edit_event(self, event):
         self.edit_title(event)
@@ -266,7 +255,22 @@ class EventCmd(Command):
         self.edit_attendees(event)
         event.print_me()
         if self.ask('Do you want to save this event?', default=True):
+            self.save_event(event)
+
+    def save_event(self, event):
+        try:
             event.save()
+        except IOError, e:
+            print >>sys.stderr, 'Unable to save: %s' % e
+            return 1
+        try:
+            mails = []
+            mails = event.send()
+        except IOError, e:
+            print >>sys.stderr, 'Unable to send mails: %s' % e
+            return 1
+        if mails:
+            print 'Mails sent to %s' % ', '.join(mails)
 
     def edit_title(self, event):
         event.title = self.ask('Title', default=event.title)
