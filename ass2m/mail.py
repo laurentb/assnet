@@ -48,15 +48,8 @@ class Mail(object):
         body = self.template.render(**self.vars)
 
         header_charset = 'ISO-8859-1'
+        body_charset = 'UTF-8'
 
-        # We must choose the body charset manually
-        for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
-            try:
-                body.encode(body_charset)
-            except UnicodeError:
-                pass
-            else:
-                break
         sender_name, sender_addr = parseaddr(self.sender)
         recipient_name, recipient_addr = parseaddr(self.recipient)
 
@@ -70,7 +63,7 @@ class Mail(object):
         recipient_addr = recipient_addr.encode('ascii')
 
         # Create the message ('plain' stands for Content-Type: text/plain)
-        msg = MIMEText(body.encode(body_charset), 'plain', body_charset)
+        msg = MIMEText(body, 'plain', body_charset)
         msg['From'] = formataddr((sender_name, sender_addr))
         msg['To'] = formataddr((recipient_name, recipient_addr))
         msg['Subject'] = Header(unicode(self.subject), header_charset)
