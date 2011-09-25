@@ -391,7 +391,7 @@ class LoginAction(Action):
 
     def _get_form(self):
         form = dict([(self.FORM_RE.match(k).groups()[0], v) \
-                            for k, v in self.ctx.req.str_POST.iteritems() \
+                            for k, v in self.ctx.req.POST.iteritems() \
                             if self.FORM_RE.match(k)])
         form['referer'] = form.get('referer') \
                 or self.ctx.req.referer \

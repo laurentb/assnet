@@ -38,7 +38,7 @@ class AssetAction(Action):
     SANITIZE_REGEXP = re.compile(r'^[\w\-]+(?:\.[\w\-]+)+$')
 
     def get(self):
-        filename = self.ctx.req.str_GET.get('file')
+        filename = self.ctx.req.GET.get('file')
         if self.SANITIZE_REGEXP.match(filename):
             realpath = self.find_file(filename)
             if realpath:

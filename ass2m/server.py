@@ -55,6 +55,7 @@ class Context(object):
         self._environ = environ
         self._start_response = start_response
         self.req = Request(environ)
+        self.req.charset = 'utf8'
         # fix script_name for weird configurations
         if 'FORCE_SCRIPT_NAME' in environ:
             environ['SCRIPT_NAME'] = environ['FORCE_SCRIPT_NAME']
@@ -96,7 +97,7 @@ class Context(object):
         self.file = f
         self.object_type = f.get_object_type() if f else None
 
-        query_vars = self.req.str_GET.items()
+        query_vars = self.req.GET.items()
         # Path of the file relative to the Ass2m root
         self.path = path
         # Root application URL (useful for links to Actions)
@@ -184,7 +185,7 @@ class Context(object):
         assert user.exists
         if set_cookie:
             signer = AuthCookieSigner(secret=self.cookie_secret, timeout=120*24*60)
-            cookie = signer.sign(user.name)
+            cookie = signer.sign(user.name.encode('utf-8'))
             self.res.set_cookie('ass2m_auth', cookie,
                 max_age=timedelta(days=120), httponly=True, path=quote_url(self.root_url))
             # ensure there is a session cookie
@@ -224,7 +225,7 @@ class Context(object):
         and will ignore invalid data.
         """
         try:
-            session = json.loads(self.req.str_cookies.get('ass2m_session', ''))
+            session = json.loads(self.req.cookies.get('ass2m_session', ''))
         except ValueError:
             session = dict()
         else:
@@ -254,7 +255,7 @@ class Action(object):
         req = self.ctx.req
         method = req.method
         if method == 'POST':
-            param_method = req.str_POST.get('_method')
+            param_method = req.POST.get('_method')
             if param_method:
                 # it's silly to simulate these requests with a _method param
                 if param_method in ('HEAD', 'GET', 'POST'):
@@ -324,9 +325,9 @@ class Dispatcher(object):
 
     def _authenticate(self):
         ctx = self.ctx
-        authkey = ctx.req.str_params.get('authkey')
-        cookie = ctx.req.str_cookies.get('ass2m_auth')
-        authby = ctx.req.str_params.get('authby')
+        authkey = ctx.req.params.get('authkey')
+        cookie = ctx.req.cookies.get('ass2m_auth')
+        authby = ctx.req.params.get('authby')
         valid_user = None
         if authby == 'http':
             username = REMOTE_USER(ctx.req.environ)
@@ -349,9 +350,10 @@ class Dispatcher(object):
             signer = AuthCookieSigner(secret=ctx.cookie_secret)
             username = signer.auth(cookie)
             if username:
+                username = username.decode('utf-8')
                 valid_user = ctx.storage.get_user(username)
         if valid_user:
-            has_cookies = cookie and 'ass2m_session' in ctx.req.str_cookies
+            has_cookies = cookie and 'ass2m_session' in ctx.req.cookies
             ctx.login(valid_user, set_cookie=not has_cookies)
 
     def dispatch(self):
@@ -374,7 +376,7 @@ class Dispatcher(object):
         # actions: not related to a file or directory
         # if we are in the root app URL
         if ctx.url.setvars().href == ctx.root_url.href:
-            action = router.find_action(ctx.req.str_GET.get('action'))
+            action = router.find_action(ctx.req.GET.get('action'))
             if action is not None:
                 return action(ctx).answer()
 
@@ -414,7 +416,7 @@ class Dispatcher(object):
             raise HTTPNotFound('File not found')
 
         # find the action to forward the request to
-        view, action = router.find_view(f, ctx.req.str_GET.get('view'))
+        view, action = router.find_view(f, ctx.req.GET.get('view'))
         if view and action:
             # find out current action/view and available views
             ctx.template_vars['view'] = view.name

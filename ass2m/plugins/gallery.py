@@ -36,7 +36,7 @@ class DownloadThumbnailAction(ViewAction):
 
     def _get_size(self):
         try:
-            size = int(self.ctx.req.str_GET['thumb_size'])
+            size = int(self.ctx.req.GET['thumb_size'])
         except (KeyError, ValueError):
             size = self.DEFAULT_SIZE
         else:
