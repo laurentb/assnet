@@ -88,6 +88,7 @@ class RssListAction(InfoAction):
             return self.mtime < o.mtime
 
     def get(self):
+        base_dir = self.SortableFile(self.ctx.file)
         files = []
         for f in self.ctx.iter_files_recursively():
             if not f.isdir():
@@ -119,7 +120,7 @@ class RssListAction(InfoAction):
         rss = PyRSS2Gen.RSS2(title='Updates of %s/' % self.ctx.file.path,
                              link='%s' % build_url(root_url, self.ctx.file, user=self.ctx.user),
                              description='Last updates of %s/' % self.ctx.file.path,
-                             lastBuildDate=files[0].mtime,
+                             lastBuildDate=files[0].mtime if len(files) else base_dir.mtime,
                              items=items)
         self.ctx.res.content_type = 'application/rss+xml'
         self.ctx.res.charset = 'UTF-8'
