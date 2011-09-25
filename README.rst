@@ -38,6 +38,7 @@ Dependencies
 * python-mako
 * python-imaging
 * python-pyrss2gen
+* python-dateutil
 
 Those dependencies will be either checked or installed automatically unless you chose the "No installation" method.
 
