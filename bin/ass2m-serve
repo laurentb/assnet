@@ -46,7 +46,7 @@ if __name__ == '__main__':
                         help="server port")
     parser.add_argument('-i', '--ip', default='0.0.0.0',
                         help="server IP")
-    parser.add_argument('-e', '--env', action='append',
+    parser.add_argument('-e', '--env', action='append', default=[],
                         metavar="VAR=val", help="environment default")
 
     args = parser.parse_args()
