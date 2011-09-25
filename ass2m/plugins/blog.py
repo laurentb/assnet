@@ -18,7 +18,6 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
-from dateutil import tz
 from mako.filters import html_escape
 
 from ass2m.plugin import Plugin
