@@ -64,7 +64,8 @@ class Event(object):
         for username in self.users.iterkeys():
             self.f.set_user_perms(username, self.f.PERM_WRITE |
                                             self.f.PERM_READ |
-                                            self.f.PERM_LIST)
+                                            self.f.PERM_LIST |
+                                            self.f.PERM_IN)
         self.f.mimetype = 'text/event'
         self.f.save()
 
