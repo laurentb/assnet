@@ -18,6 +18,7 @@
 # along with ass2m. If not, see <http://www.gnu.org/licenses/>.
 
 
+import re
 import os
 import posixpath
 import hashlib
@@ -162,6 +163,13 @@ class File(IObject):
 
     def get_name(self):
         return posixpath.basename(self.path)
+
+    def get_pretty_name(self):
+        name = self.get_name().replace('_', ' ')
+        m = re.match('(.*)\.(\w{1,4})', name)
+        if m:
+            name = m.group(1)
+        return name
 
     def get_mimetype(self):
         if self.mimetype:

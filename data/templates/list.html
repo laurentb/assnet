@@ -15,7 +15,7 @@
             <figure>
                 <span class="frame"><img class="thumbnail photo" src="${URL(thumb.get_name()).setvars(view='thumbnail', thumb_size=200) | n,U,h}" /></span>
                 <figcaption>
-                    <span class="fn">${thumb.get_name() | h}</span>
+                    <span class="fn">${thumb.get_pretty_name() | h}</span>
                 </figcaption>
             </figure>
             </a>
