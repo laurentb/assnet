@@ -23,10 +23,10 @@ __all__ = ['Group', 'IUser', 'User', 'Anonymous']
 
 from .obj import IObject
 from .mail import Mail
+from .security import new_salt, new_user_key
 
 import os
 import hashlib
-from binascii import hexlify
 
 
 class Group(object):
@@ -91,7 +91,7 @@ class User(IUser, IObject):
         return mail
 
     def gen_key(self):
-        self.key = hexlify(os.urandom(16))
+        self.key = new_user_key()
 
     def _get_confname(self):
         return os.path.join('users', self.name)
@@ -112,7 +112,7 @@ class User(IUser, IObject):
         self.data['auth']['key'] = self.key if self.key else None
         # only update password when set
         if isinstance(self.password, basestring):
-            salt = hexlify(os.urandom(42))
+            salt = new_salt()
             version = 1
             hpwd = self.hash_password(self.password, salt, version)
             self.data['auth']['password'] = hpwd

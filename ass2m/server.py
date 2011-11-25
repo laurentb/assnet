@@ -21,9 +21,8 @@
 import posixpath
 import re
 import os
-from binascii import hexlify
 from paste import httpserver
-from paste.auth.cookie import AuthCookieSigner, new_secret
+from paste.auth.cookie import AuthCookieSigner
 from paste.fileapp import FileApp as PasteFileApp
 from webob import Request, Response
 from webob.exc import HTTPError, HTTPFound, HTTPNotFound, HTTPForbidden, \
@@ -41,6 +40,7 @@ from .template import build_lookup, build_vars
 from .users import Anonymous
 from .routes import Router
 from .filters import quote_url, quote_path
+from .security import new_secret
 
 
 __all__ = ['ViewAction', 'Action', 'Server', 'FileApp']
@@ -114,7 +114,7 @@ class Context(object):
         self.cookie_secret = config.data["web"].get("cookie_secret")
         try:
             if self.cookie_secret is None:
-                self.cookie_secret = hexlify(new_secret())
+                self.cookie_secret = new_secret()
                 config.data["web"]["cookie_secret"] = self.cookie_secret
                 config.save()
             # store the absolute root url (useful when in CLI)
