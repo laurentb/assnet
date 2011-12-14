@@ -207,6 +207,11 @@ img {
     border: 0;
 }
 
+img.svg {
+  width: 200px;
+  height: 200px;
+}
+
 p.message {
     margin-left: auto;
     margin-right: auto;

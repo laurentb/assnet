@@ -22,6 +22,7 @@ import os
 from PIL import Image
 from paste.httpheaders import CACHE_CONTROL, CONTENT_DISPOSITION
 from mako.filters import html_escape
+from paste.url import URL
 
 from ass2m.plugin import Plugin
 from ass2m.routes import View
@@ -76,6 +77,33 @@ class DownloadThumbnailAction(ViewAction):
         CONTENT_DISPOSITION.apply(self.ctx.res.headers, inline=True,
             filename="%s_thumb_%s.%s" % (os.path.splitext(f.get_name())[0], size, thumbext))
 
+class Media:
+    __file = None
+    
+    def __init__(self, f):
+        self.__file = f
+
+    def get_name(self):
+        return self.__file.get_name()
+
+    def get_pretty_name(self):
+        return self.__file.get_pretty_name()
+
+    def get_mimetype(self):
+        return self.__file.get_mimetype()
+
+    def get_url(self):
+        return URL(self.get_name())
+
+    def get_thumb_url(self):
+        if self.get_mimetype() == 'image/svg+xml':
+            return self.get_url()
+        return self.get_url().setvars(view='thumbnail', thumb_size=200)
+
+    def get_extra_classes(self):
+        if self.get_mimetype() == 'image/svg+xml':
+            return ' svg'
+        return ''
 
 class MediaListAction(ViewAction):
     IS_MEDIA = True
@@ -94,7 +122,7 @@ class MediaListAction(ViewAction):
                 filename = f.get_name()
                 mimetype = f.get_mimetype()
                 if self.IS_MEDIA and mimetype is not None and mimetype.startswith('image'):
-                    thumbs.append(f)
+                    thumbs.append(Media(f))
                     continue
                 if filename in ('README', 'README.html', 'HEADER', 'HEADER.html'):
                     with open(f.get_realpath(), 'r') as fp:
@@ -110,7 +138,6 @@ class MediaListAction(ViewAction):
         self.ctx.template_vars['files'] = files
         self.ctx.template_vars['scripts'].append('list.js')
         self.ctx.res.body = self.ctx.render('list.html')
-
 
 class GalleryPlugin(Plugin):
     def init(self):
