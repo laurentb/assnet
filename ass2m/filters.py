@@ -30,6 +30,7 @@ UNSAFE_CHARS = {
     '?': quote('?'),
     '&': quote('&'),
     ';': quote(';'),
+    ':': quote(':'),
     ',': quote(','),
     '=': quote('='),
     ' ': quote(' '),
@@ -60,7 +61,7 @@ def quote_url(url):
     """
     purl = urlsplit(url.url)
     # do not escape the scheme and netloc
-    if purl.scheme or purl.netloc:
+    if purl.scheme and purl.netloc:
         path = urlunsplit((None, None, purl.path, purl.query, purl.fragment))
         basepath = urlunsplit((purl.scheme, purl.netloc, '', None, None))
     else:
