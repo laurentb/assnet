@@ -13,7 +13,7 @@
         <li class="hmedia">
             <a rel="enclosure original" type="${thumb.get_mimetype() | h}" href="${thumb.get_url() | n,U,h}" title="${thumb.get_name() | h}">
             <figure>
-                <span class="frame"><img class="thumbnail photo${thumb.get_extra_classes()}" src="${thumb.get_thumb_url() | n,U,h}" /></span>
+                <span class="frame"><img class="thumbnail photo${thumb.get_extra_classes()}" src="${thumb.get_thumb_url() | n,U,h}" alt="" /></span>
                 <figcaption>
                     <span class="fn">${thumb.get_pretty_name() | h}</span>
                 </figcaption>
