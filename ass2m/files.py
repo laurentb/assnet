@@ -72,6 +72,14 @@ class File(IObject):
         self.perms = {}
         IObject.__init__(self, storage)
 
+    def to_class(self, cls):
+        """
+        Convert the File object to another class.
+        That class should inherit from File.
+        This is useful for plugins.
+        """
+        return cls(self.storage, self.path)
+
     def __str__(self):
         return self.path
 
