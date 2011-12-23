@@ -5,14 +5,17 @@ from binascii import hexlify
 __all__ = ['random', 'armored_random',
     'new_user_key', 'new_salt', 'new_secret']
 
+SECURE = os.getenv('ASS2M_FAST_TEST') != '1'
+
 
 def random(n):
     """
     Get random bytes.
     Try to use the best random source or fall back to os.urandom.
     """
+    source = "/dev/random" if SECURE else "/dev/urandom"
     try:
-        with open("/dev/random", "r") as randomfd:
+        with open(source, "r") as randomfd:
             bs = b""
             while n > len(bs):
                 bs += randomfd.read(n - len(bs))
