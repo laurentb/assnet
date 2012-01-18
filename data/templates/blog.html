@@ -16,7 +16,7 @@
 <section>
 % for post in posts:
     <div class="post">
-        <h2 class="post_title"><a href="${URL(post.path) | n,U,h}">${post.title | h}</a></h2>
+        <h2 class="post_title"><a href="${URL(post.path).setvar(view='blog') | n,U,h}">${post.title | h}</a></h2>
         <span class="post_meta">Written at <time datetime="${post.date.strftime('%Y-%m-%dT%H:%M') | h}">${post.date.strftime('%Y-%m-%d %H:%M:%S') | h}</time></span>
         <div class="post_content">
             ${post.content}
@@ -29,7 +29,7 @@
 
 <%def name="title(html=False)" filter="cpt">
 % if html:
-    Blog of ${partials.breadcrumbs(path)}
+    Blog of ${partials.breadcrumbs(path, isdir=file.isdir())}
 % else:
     Blog of ${path}/
 % endif

@@ -32,4 +32,7 @@ div.post_content {
     padding: 10px;
 }
 
-
+div.post_content blockquote {
+    border-left: 3px solid #CCCCCC;
+    padding-left: 5px;
+}

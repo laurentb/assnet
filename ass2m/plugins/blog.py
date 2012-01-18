@@ -29,6 +29,36 @@ from ass2m.server import ViewAction
 __all__ = ['BlogPlugin']
 
 
+class Post(object):
+    def __init__(self):
+        self.path = u''
+        self.date = None
+        self.title = None
+        self.content = None
+
+class BlogAction(ViewAction):
+    def get(self):
+        f = self.ctx.file
+        post = Post()
+        post.path = f.get_name()
+        post.date = f.get_mtime()
+        post.title = f.get_name().replace('_', ' ') \
+                                  .lstrip('/') \
+                                  .replace('/', ' / ') \
+                                  .rsplit('.', 1)[0]
+
+        with open(f.get_realpath(), 'r') as fp:
+            post.content = fp.read()
+            if not 'html' in f.get_mimetype():
+                post.content = '<pre>%s</pre>' % html_escape(post.content.decode('utf-8'))
+
+        self.ctx.template_vars['categories'] = []
+        self.ctx.template_vars['posts'] = [post]
+        self.ctx.template_vars['stylesheets'].append('blog.css')
+        self.ctx.res.body = self.ctx.render('blog.html')
+
+        pass
+
 class BlogListAction(ViewAction):
     NB_ENTRIES = 20
 
@@ -39,13 +69,6 @@ class BlogListAction(ViewAction):
 
         def __lt__(self, o):
             return self.mtime < o.mtime
-
-    class Post(object):
-        def __init__(self):
-            self.path = u''
-            self.date = None
-            self.title = None
-            self.content = None
 
     def get(self):
         posts = []
@@ -67,7 +90,7 @@ class BlogListAction(ViewAction):
             if mimetype is None or not mimetype.startswith('text'):
                 continue
 
-            post = self.Post()
+            post = Post()
             post.path = f.obj.path[len(self.ctx.file.path):].lstrip('/')
             post.date = f.mtime
             post.title = f.obj.path[len(self.ctx.file.path):].replace('_', ' ') \
@@ -90,5 +113,8 @@ class BlogListAction(ViewAction):
 class BlogPlugin(Plugin):
     def init(self):
         self.register_web_view(
-            View(object_type='directory', name='blog', public=True, verbose_name='Blog'),
+            View(object_type='directory', name='blog', public=False, verbose_name='Blog'),
             BlogListAction, -1)
+        self.register_web_view(
+            View(object_type='file', name='blog', public=False, verbose_name='Blog'),
+            BlogAction, -1)
