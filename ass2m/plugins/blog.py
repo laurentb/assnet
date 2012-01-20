@@ -36,6 +36,7 @@ class Post(object):
         self.title = None
         self.content = None
 
+
 class BlogAction(ViewAction):
     def get(self):
         f = self.ctx.file
@@ -57,7 +58,6 @@ class BlogAction(ViewAction):
         self.ctx.template_vars['stylesheets'].append('blog.css')
         self.ctx.res.body = self.ctx.render('blog.html')
 
-        pass
 
 class BlogListAction(ViewAction):
     NB_ENTRIES = 20
@@ -109,6 +109,7 @@ class BlogListAction(ViewAction):
         self.ctx.template_vars['posts'] = posts
         self.ctx.template_vars['stylesheets'].append('blog.css')
         self.ctx.res.body = self.ctx.render('blog.html')
+
 
 class BlogPlugin(Plugin):
     def init(self):
