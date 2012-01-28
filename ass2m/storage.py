@@ -64,9 +64,16 @@ class GroupsConfig(IObject, dict):
 
 class Storage(object):
     DIRNAME = '.ass2m'
-    DATA_PATHS = [os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'data')),
-        os.path.join(sys.prefix, 'share', 'ass2m'),
-        os.path.join(sys.prefix, 'local', 'share', 'ass2m')]
+    DATA_PATHS = [os.path.realpath(os.path.join(
+            os.path.dirname(__file__),
+            os.path.pardir, 'data'))] \
+        + [os.path.join(d, 'ass2m')
+            for d
+            in os.getenv('XDG_DATA_DIRS',
+                ':'.join([os.path.join(sys.prefix, 'share'),
+                    os.path.join(sys.prefix, 'local', 'share')])
+            ).split(':')
+        ]
 
     def __init__(self, path):
         self.path = path
