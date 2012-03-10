@@ -2,3 +2,5 @@ recursive-include data/templates *
 recursive-include data/assets *
 recursive-include data/scripts *
 include COPYING
+include README.rst
+include SETUP.rst
