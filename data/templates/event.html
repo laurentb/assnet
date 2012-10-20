@@ -3,6 +3,7 @@
 <%
 event_classes = {
     event.USER_WAITING: 'waiting',
+    event.USER_MAYBE: 'maybe',
     event.USER_CONFIRMED: 'confirmed',
     event.USER_DECLINED: 'declined',
 }
@@ -24,7 +25,7 @@ event_classes = {
 
 <section>
 <h3>Date</h3>
-<p><time datetime="${event.date.strftime('%Y-%m-%dT%H:%M') | h}">${event.date.strftime('%Y-%m-%d %H:%M') | h}</time></p>
+<p><time datetime="${event.date.strftime('%Y-%m-%dT%H:%M') | h}">${event.date.strftime('%A %d %B %Y, %H:%M') | h}</time></p>
 </section>
 
 <section>
@@ -53,6 +54,8 @@ event_classes = {
         <strong>waiting</strong>.
     % elif user_state == event.USER_CONFIRMED:
         <strong>confirmed</strong>.
+    % elif user_state == event.USER_MAYBE:
+        <strong>maybe</strong>.
     % elif user_state == event.USER_DECLINED:
         <strong>declined</strong>.
     % endif
@@ -60,7 +63,15 @@ event_classes = {
         % if user_state != event.USER_CONFIRMED:
             <form class="change-status accept" method="post" action="${url | n,U,h}">
                 <input name="_method" type="hidden" value="PUT" />
+                <input name="_state" type="hidden" value="confirm" />
                 <button type="submit">Confirm</button>
+            </form>
+        % endif
+        % if user_state != event.USER_MAYBE:
+            <form class="change-status maybe" method="post" action="${url | n,U,h}">
+                <input name="_method" type="hidden" value="PUT" />
+                <input name="_state" type="hidden" value="maybe" />
+                <button type="submit">Maybe</button>
             </form>
         % endif
         % if user_state != event.USER_DECLINED:

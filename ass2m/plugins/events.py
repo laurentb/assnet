@@ -39,10 +39,12 @@ __all__ = ['EventsPlugin']
 
 class Event(object):
     (USER_CONFIRMED,
+     USER_MAYBE,
      USER_WAITING,
-     USER_DECLINED) = range(3)
+     USER_DECLINED) = range(4)
 
     STATES = {'x': USER_CONFIRMED,
+              '?': USER_MAYBE,
               ' ': USER_WAITING,
               '-': USER_DECLINED
              }
@@ -118,7 +120,7 @@ class Event(object):
         fp.write('Place:\n')
         fp.write('%s\n\n' % binary(self.place))
         fp.write('Attendees:\n')
-        stats = [0, 0, 0]
+        stats = [0, 0, 0, 0]
         for username, state in sorted(self.users.items(), key=lambda (k, v): (v, k)):
             realname = self.get_user(username).realname
             checked = self.get_sign(state)
@@ -342,7 +344,11 @@ class EventAction(ViewAction):
         self.get(Event.USER_DECLINED)
 
     def put(self):
-        self.get(Event.USER_CONFIRMED)
+        state = self.ctx.req.POST.get('_state')
+        if state == 'maybe':
+            self.get(Event.USER_MAYBE)
+        else:
+            self.get(Event.USER_CONFIRMED)
 
 
 class EventsCleaner(ICleaner):
