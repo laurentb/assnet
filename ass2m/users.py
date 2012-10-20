@@ -83,7 +83,7 @@ class User(IUser, IObject):
 
     def new_mail(self, template, subject):
         config = self.storage.get_config()
-        sender = config.data['mail'].get('sender', 'Ass2m')
+        sender = config.data['mail'].get('sender', 'ass2m')
         recipient = '%s <%s>' % (self.realname, self.email)
         smtp = config.data['mail'].get('smtp', 'localhost')
 
