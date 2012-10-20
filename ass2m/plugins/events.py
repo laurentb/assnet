@@ -126,7 +126,7 @@ class Event(object):
             checked = self.get_sign(state)
             stats[state] += 1
             fp.write('[%s] %s (%s)\n' % (checked, binary(username), binary(realname)))
-        fp.write('-- %d confirmed, %d waiting, %d declined\n' % (stats[0], stats[1], stats[2]))
+        fp.write('-- %d confirmed, %d maybe, %d waiting, %d declined\n' % (stats[0], stats[1], stats[2], stats[3]))
 
     def get_sign(self, state):
         return dict([(v, k) for k, v in self.STATES.iteritems()])[state]
