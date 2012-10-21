@@ -92,18 +92,16 @@ class ConsolePart(object):
             return line
 
     def acquire_input(self, content=None):
-        editor = os.environ.get('EDITOR')
+        editor = os.getenv('EDITOR', 'vi')
         if sys.stdin.isatty() and editor:
-            f = NamedTemporaryFile(delete=False)
-            filename = f.name
-            if content is not None:
-                f.write(content)
-            f.close()
-            os.system("%s %s" % (editor, filename))
-            f = open(filename, 'r')
-            text = f.read()
-            f.close()
-            os.unlink(filename)
+            with NamedTemporaryFile() as f:
+                filename = f.name
+                if content is not None:
+                    f.write(content)
+                    f.flush()
+                os.system("%s %s" % (editor, filename))
+                f.seek(0)
+                text = f.read()
         else:
             if sys.stdin.isatty():
                 print 'Reading content from stdin... Type ctrl-D ' \
