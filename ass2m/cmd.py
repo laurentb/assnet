@@ -21,6 +21,9 @@
 import sys
 import getpass
 import re
+import os
+import locale
+from tempfile import NamedTemporaryFile
 
 
 __all__ = ['ConsolePart', 'Command']
@@ -67,7 +70,7 @@ class ConsolePart(object):
             if masked:
                 line = getpass.getpass(question)
             else:
-                sys.stdout.write(question.encode('utf-8'))
+                sys.stdout.write(question.encode(sys.stdout.encoding or locale.getpreferredencoding()))
                 sys.stdout.flush()
                 line = sys.stdin.readline()
                 if len(line) == 0:
@@ -87,6 +90,26 @@ class ConsolePart(object):
             return line.lower() == 'y'
         else:
             return line
+
+    def acquire_input(self, content=None):
+        editor = os.environ.get('EDITOR')
+        if sys.stdin.isatty() and editor:
+            f = NamedTemporaryFile(delete=False)
+            filename = f.name
+            if content is not None:
+                f.write(content)
+            f.close()
+            os.system("%s %s" % (editor, filename))
+            f = open(filename, 'r')
+            text = f.read()
+            f.close()
+            os.unlink(filename)
+        else:
+            if sys.stdin.isatty():
+                print 'Reading content from stdin... Type ctrl-D ' \
+                          'from an empty line to stop.'
+            text = sys.stdin.read()
+        return text.decode(sys.stdin.encoding or locale.getpreferredencoding())
 
 
 class Command(ConsolePart):
