@@ -220,7 +220,7 @@ class Event(object):
                         state = READ_FIELD_TITLE
 
     def iter_users(self):
-        for username in sorted(self.users.keys(), key=unicode.lower):
+        for username, state in sorted(self.users.iteritems(), key=lambda (k, v): (v, k)):
             yield self.get_user(username)
 
     def get_user(self, username):
