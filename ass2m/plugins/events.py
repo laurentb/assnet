@@ -29,6 +29,7 @@ from ass2m.routes import View
 from ass2m.server import ViewAction
 from ass2m.cmd import Command
 from ass2m.template import build_url, build_root_url
+from ass2m.mail import Mail
 
 from .contacts import ContactsSelection
 from .cleanup import ICleaner
@@ -48,6 +49,12 @@ class Event(object):
               ' ': USER_WAITING,
               '-': USER_DECLINED
              }
+
+    STATES_LABEL = {USER_CONFIRMED: 'confirmed',
+                    USER_MAYBE:     'maybe',
+                    USER_WAITING:   'waiting',
+                    USER_DECLINED:  'declined',
+                   }
 
     def __init__(self, f):
         self.f = f
@@ -102,6 +109,22 @@ class Event(object):
         mail.vars['url'] = url
         mail.send()
         return user.email
+
+    def notify_state_changed(self, user):
+        config = self.f.storage.get_config()
+        if not 'sender' in config.data['mail']:
+            return
+
+        sender = config.data['mail']['sender']
+        recipient = config.data['mail']['sender']
+        smtp = config.data['mail'].get('smtp', 'localhost')
+        subject = 'A user has changed state'
+
+        mail = Mail(self.f.storage, 'event-state-changed.mail', sender, recipient, subject, smtp)
+        mail.vars['realname'] = user.realname
+        mail.vars['state'] = self.STATES_LABEL[self.users[user.name]]
+        mail.vars['url'] = build_url(build_root_url(self.f.storage), self.f)
+        mail.send()
 
     def print_me(self):
         print '-' * len(unicode(self.title))
@@ -330,6 +353,7 @@ class EventAction(ViewAction):
                     event.load()
                 else:
                     confirm_message = 'Your state has been changed!'
+                    event.notify_state_changed(self.ctx.user)
 
             user_state = event.users[self.ctx.user.name]
 

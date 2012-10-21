@@ -1,0 +1,9 @@
+Hi,
+
+${realname} has changed his state to '${state}' on the following event:
+
+${url}
+
+Regards,
+
+Ass2m
