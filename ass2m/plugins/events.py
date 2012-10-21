@@ -218,7 +218,7 @@ class Event(object):
         self.users_to_notify.add(username)
 
 
-class EventCmd(Command):
+class EventsCmd(Command):
     DESCRIPTION = 'Create or edit an event'
     WORKDIR = True
 
@@ -392,7 +392,7 @@ class EventsCleaner(ICleaner):
 
 class EventsPlugin(Plugin):
     def init(self):
-        self.register_cli_command('event', EventCmd)
+        self.register_cli_command('events', EventsCmd)
         self.register_web_view(
             View(object_type='file', mimetype='text/event', name='event'),
             EventAction)
