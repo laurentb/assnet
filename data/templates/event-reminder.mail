@@ -1,0 +1,9 @@
+Hi ${realname}!
+
+${content}
+
+To see the full event, follow this link:
+
+${url}
+
+Thanks.

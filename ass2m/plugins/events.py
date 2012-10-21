@@ -110,6 +110,23 @@ class Event(object):
         mail.send()
         return user.email
 
+    def send_reminder(self, content):
+        for username, state in self.users.iteritems():
+            user = self.f.storage.get_user(username)
+            if not user.exists or state != self.USER_CONFIRMED:
+                continue
+
+            if not user.key:
+                user.gen_key()
+                user.save()
+            url = build_url(build_root_url(self.f.storage),
+                            self.f, user=user, use_key=True)
+            mail = user.new_mail('event-reminder.mail', 'Reminder of event')
+            mail.vars['realname'] = user.realname
+            mail.vars['content'] = content
+            mail.vars['url'] = url
+            mail.send()
+
     def notify_state_changed(self, user):
         config = self.f.storage.get_config()
         if not 'sender' in config.data['mail']:
@@ -250,20 +267,22 @@ class EventsCmd(Command):
         r = ''
         event.print_me()
         while r != 'q':
-            r = self.ask('Choose an action (t/s/d/p/a to edit, ? to get help, or q to exit)',
-                         regexp='^(t|s|d|p|a|\?|q)$')
+            r = self.ask('Choose an action (t/s/d/p/a to edit, r to send reminder, ? to get help, or q to exit)',
+                         regexp='^(t|s|d|p|a|r|\?|q)$')
             try:
                 if r == 't': self.edit_title(event)
                 if r == 's': self.edit_summary(event)
                 if r == 'd': self.edit_date(event)
                 if r == 'p': self.edit_place(event)
                 if r == 'a': self.edit_attendees(event)
+                if r == 'r': self.send_reminder(event)
                 if r == '?':
                     print 't = edit title'
                     print 's = edit summary'
                     print 'd = edit date'
                     print 'p = edit place'
                     print 'a = edit attendees'
+                    print 'r = send reminder'
                     continue
                 if r == 'q':
                     continue
@@ -272,6 +291,11 @@ class EventsCmd(Command):
             else:
                 event.print_me()
                 self.save_event(event)
+
+    def send_reminder(self, event):
+        content = self.acquire_input()
+        event.send_reminder(content)
+        print 'A mail has been sent to every user confirmed.'
 
     def edit_event(self, event):
         self.edit_title(event)
