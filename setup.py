@@ -36,4 +36,6 @@ setup(name="ass2m",
         ('%s/scripts' % DATA_DIR,   glob('data/scripts/*')),
     ],
     install_requires=REQUIREMENTS,
+    test_suite='nose.collector',
+    tests_require=['nose>=1.0', 'webtest'],
 )
