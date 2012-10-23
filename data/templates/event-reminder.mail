@@ -1,8 +1,20 @@
 Hi ${realname}!
 
+% if user_state == event.USER_CONFIRMED:
+You have confirmed the event "${event.title}" on ${event.date.strftime('%A %d %B %Y, %H:%M') | h}.
+% else:
+You said you are not sure to come at the event "${event.title}" on ${event.date.strftime('%A %d %B %Y, %H:%M') | h}.
+% endif
+
+The owner sends you this message:
+
 ${content}
 
+% if user_state == event.USER_CONFIRMED:
 To see the full event, follow this link:
+% else:
+To finally confirm or decline the event, follow this link:
+% endif
 
 ${url}
 

@@ -113,7 +113,7 @@ class Event(object):
     def send_reminder(self, content):
         for username, state in self.users.iteritems():
             user = self.f.storage.get_user(username)
-            if not user.exists or state != self.USER_CONFIRMED:
+            if not user.exists or state not in (self.USER_CONFIRMED, self.USER_MAYBE):
                 continue
 
             if not user.key:
@@ -122,6 +122,8 @@ class Event(object):
             url = build_url(build_root_url(self.f.storage),
                             self.f, user=user, use_key=True)
             mail = user.new_mail('event-reminder.mail', 'Reminder of event')
+            mail.vars['event'] = self
+            mail.vars['user_state'] = state
             mail.vars['realname'] = user.realname
             mail.vars['content'] = content
             mail.vars['url'] = url
