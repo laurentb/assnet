@@ -1,4 +1,4 @@
-#!/bin/sh -xe
+#!/bin/bash -e
 
 if [ -z "${NOSE}" ]; then
     which nosetests >/dev/null 2>&1 && NOSE=$(which nosetests)
@@ -6,15 +6,14 @@ if [ -z "${NOSE}" ]; then
 fi
 
 if [ "$1" == '--slow' ]; then
-    ASS2M_FAST_TEST=0
+    export ASS2M_FAST_TEST=0
     shift
 else
-    ASS2M_FAST_TEST=1
+    export ASS2M_FAST_TES=1
 fi
-export ASS2M_FAST_TEST
 
 if [ "$1" != "" ]; then
-    ${NOSE} -sv $(dirname $0)/../tests/$1_test.py
+    ${NOSE} -sv $(dirname $0)/../tests/${1}_test.py
 else
     ${NOSE} --all-modules -sv $(dirname $0)/../tests
 fi
