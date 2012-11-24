@@ -9,7 +9,7 @@ if [ "$1" == '--slow' ]; then
     export ASS2M_FAST_TEST=0
     shift
 else
-    export ASS2M_FAST_TES=1
+    export ASS2M_FAST_TEST=1
 fi
 
 if [ "$1" != "" ]; then
