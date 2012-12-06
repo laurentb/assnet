@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: ft=python et softtabstop=4 cinoptions=4 shiftwidth=4 ts=4 ai
+
+# Copyright (C) 2011 Romain Bignon, Laurent Bachelier
+#
+# This file is part of assnet.
+#
+# assnet is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# assnet is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with assnet. If not, see <http://www.gnu.org/licenses/>.
+
+
+from assnet.server import Server
+import argparse
+from os import getenv
+
+
+def parse_env_arg(arg):
+    """
+    Split VAR=val into (VAR, val). If no = is present, the value will be
+    taken from the system environment.
+    """
+    arg = arg.split('=', 1)
+    key = arg[0]
+    if len(arg) > 1:
+        value = arg[1]
+    else:
+        value = getenv(arg[0])
+    return (key, value)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('rootdir', help="root directory")
+    parser.add_argument('-p', '--port', type=int, default=8042,
+                        help="server port")
+    parser.add_argument('-i', '--ip', default='0.0.0.0',
+                        help="server IP")
+    parser.add_argument('-e', '--env', action='append', default=[],
+                        metavar="VAR=val", help="environment default")
+
+    args = parser.parse_args()
+    env = dict([parse_env_arg(kv) for kv in args.env])
+    server = Server(args.rootdir, default_env=env)
+    server.bind(args.ip, args.port)

@@ -1,5 +1,5 @@
-from ass2m.storage import Storage
-from ass2m.server import Server
+from assnet.storage import Storage
+from assnet.server import Server
 
 from unittest import TestCase
 from webtest import TestApp
@@ -11,7 +11,7 @@ import shutil
 
 class AssetsTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)
@@ -37,7 +37,7 @@ class AssetsTest(TestCase):
 
         self.app.get('/?action=asset&file=none.css', status=404)
 
-        self.app.get('/?action=asset&file=../../.ass2m/config', status=412)
+        self.app.get('/?action=asset&file=../../.assnet/config', status=412)
 
     def test_stylesheets(self):
         res = self.app.get('/?view=list', status=200)

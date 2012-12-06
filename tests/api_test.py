@@ -1,5 +1,5 @@
-from ass2m.storage import Storage
-from ass2m.server import Server
+from assnet.storage import Storage
+from assnet.server import Server
 
 from unittest import TestCase
 from webtest import TestApp
@@ -13,7 +13,7 @@ from datetime import datetime
 
 class ApiTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)

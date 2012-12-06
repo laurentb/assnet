@@ -1,8 +1,8 @@
-from ass2m.storage import Storage
-from ass2m.users import User
-from ass2m.server import Server
-from ass2m.template import build_url, build_root_url
-from ass2m.filters import quote_url
+from assnet.storage import Storage
+from assnet.users import User
+from assnet.server import Server
+from assnet.template import build_url, build_root_url
+from assnet.filters import quote_url
 
 from unittest import TestCase
 from webtest import TestApp
@@ -14,7 +14,7 @@ import os
 
 class BuildURLTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage.create(self.root)
         server = Server(self.root)
         app = TestApp(server.process)

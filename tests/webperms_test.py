@@ -1,7 +1,7 @@
-from ass2m.storage import Storage
-from ass2m.users import User, Group
-from ass2m.files import File
-from ass2m.server import Server
+from assnet.storage import Storage
+from assnet.users import User, Group
+from assnet.files import File
+from assnet.server import Server
 
 from unittest import TestCase
 from webtest import TestApp
@@ -13,7 +13,7 @@ import os
 
 class WebPermsTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage.create(self.root)
         user = User(self.storage, 'penguin')
         user.realname = 'Penguin'
@@ -35,17 +35,17 @@ class WebPermsTest(TestCase):
     def test_defaultDirs(self):
         # list the root directory
         res = self.app.get("/", status=200)
-        # hide the ass2m dir
-        assert ".ass2m" not in res.body
-        # don't list the ass2m dir
-        res = self.app.get("/.ass2m/", status=404)
+        # hide the assnet dir
+        assert ".assnet" not in res.body
+        # don't list the assnet dir
+        res = self.app.get("/.assnet/", status=404)
 
         # don't even normalize the path
-        res = self.app.get("/.ass2m", status=404)
+        res = self.app.get("/.assnet", status=404)
         # don't serve the file
-        res = self.app.get("/.ass2m/config", status=404)
+        res = self.app.get("/.assnet/config", status=404)
         # don't 404
-        res = self.app.get("/.ass2m/penguin", status=404)
+        res = self.app.get("/.assnet/penguin", status=404)
 
     def test_list(self):
         os.mkdir(os.path.join(self.root, 'penguins'))

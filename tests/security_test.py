@@ -1,4 +1,4 @@
-from ass2m import security
+from assnet import security
 
 from unittest import TestCase
 

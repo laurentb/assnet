@@ -1,6 +1,6 @@
-from ass2m.storage import Storage
-from ass2m.server import Server
-from ass2m.users import User
+from assnet.storage import Storage
+from assnet.server import Server
+from assnet.users import User
 
 from unittest import TestCase
 from webtest import TestApp
@@ -12,7 +12,7 @@ import shutil
 
 class EventTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         storage = Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)

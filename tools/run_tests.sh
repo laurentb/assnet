@@ -6,10 +6,10 @@ if [ -z "${NOSE}" ]; then
 fi
 
 if [ "$1" == '--slow' ]; then
-    export ASS2M_FAST_TEST=0
+    export ASSNET_FAST_TEST=0
     shift
 else
-    export ASS2M_FAST_TEST=1
+    export ASSNET_FAST_TEST=1
 fi
 
 if [ "$1" != "" ]; then

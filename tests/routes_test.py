@@ -1,4 +1,4 @@
-from ass2m.routes import View, Router
+from assnet.routes import View, Router
 from unittest import TestCase
 
 

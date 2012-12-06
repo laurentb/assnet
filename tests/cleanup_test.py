@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from unittest import TestCase
-from ass2m.cli import CLI
-from ass2m.storage import Storage
+from assnet.cli import CLI
+from assnet.storage import Storage
 from tempfile import mkdtemp
 import shutil
 import os
@@ -12,7 +12,7 @@ from StringIO import StringIO
 
 class CleanupTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage.create(self.root)
         self.app = CLI(self.root)
 
@@ -43,12 +43,12 @@ class CleanupTest(TestCase):
 
     def test_simpleRun(self):
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup']) in (0, None)
         output = self.endCapture()
         assert output.strip() == ''
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == ''
 
@@ -57,24 +57,24 @@ class CleanupTest(TestCase):
             f.write('')
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/hello has an invalid path: None.'
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/hello has an invalid path: None.\nRemoved files/hello.'
         with open(os.path.join(self.storage.path, 'files', 'c93c3312483174a3170ebe7395612c404a0620d0'), 'w') as f:
             f.write('[info]\npath = /hello')
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/c93c3312483174a3170ebe7395612c404a0620d0 has an invalid path: /hello.'
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/c93c3312483174a3170ebe7395612c404a0620d0 has an invalid path: /hello.\nRemoved files/c93c3312483174a3170ebe7395612c404a0620d0.'
 
@@ -83,7 +83,7 @@ class CleanupTest(TestCase):
             f.write('[info]\npath = /hello\nview = None')
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == 'files/3be00feb429b32b7705b689475e3ab8bdf16733f: fixed empty view.'
 
@@ -96,6 +96,6 @@ class CleanupTest(TestCase):
             f.write('[info]\npath = /héy')
 
         self.beginCapture()
-        assert self.app.main(['ass2m_test', 'cleanup', '--gc']) in (0, None)
+        assert self.app.main(['assnet_test', 'cleanup', '--gc']) in (0, None)
         output = self.endCapture()
         assert output.strip() == ''

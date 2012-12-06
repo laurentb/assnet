@@ -1,5 +1,5 @@
-from ass2m.storage import Storage
-from ass2m.server import Server
+from assnet.storage import Storage
+from assnet.server import Server
 
 from unittest import TestCase
 from webtest import TestApp
@@ -11,7 +11,7 @@ import shutil
 
 class BaseWebTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         Storage.create(self.root)
         server = Server(self.root)
         self.app = TestApp(server.process)
@@ -140,8 +140,8 @@ class BaseWebTest(TestCase):
 
     def test_initConfig(self):
         os.mkdir(os.path.join(self.root, "penguins"))
-        self.app.get('http://ass2m.test/penguins/', status=200)
+        self.app.get('http://assnet.test/penguins/', status=200)
 
         storage = Storage.lookup(self.root)
-        assert storage.get_config().data['web']['root_url'] == 'http://ass2m.test/'
+        assert storage.get_config().data['web']['root_url'] == 'http://assnet.test/'
         assert storage.get_config().data['web']['cookie_secret']

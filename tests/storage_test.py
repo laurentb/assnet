@@ -1,7 +1,7 @@
-from ass2m.storage import Storage, GlobalConfig
-from ass2m.obj import ConfigDict
-from ass2m.files import File
-from ass2m.users import User
+from assnet.storage import Storage, GlobalConfig
+from assnet.obj import ConfigDict
+from assnet.files import File
+from assnet.users import User
 from unittest import TestCase
 from tempfile import mkdtemp
 import shutil
@@ -10,7 +10,7 @@ import os
 
 class StorageTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage(os.path.join(self.root, Storage.DIRNAME))
 
     def tearDown(self):
@@ -20,7 +20,7 @@ class StorageTest(TestCase):
     def test_create(self):
         storage = Storage.create(self.root)
         assert len(storage.get_file('').perms) == 1
-        assert len(storage.get_file('/.ass2m').perms) == 1
+        assert len(storage.get_file('/.assnet').perms) == 1
 
     def test_configDict(self):
         d = ConfigDict()

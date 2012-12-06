@@ -1,5 +1,5 @@
-from ass2m.storage import Storage
-from ass2m.users import User
+from assnet.storage import Storage
+from assnet.users import User
 from unittest import TestCase
 from tempfile import mkdtemp
 import shutil
@@ -7,7 +7,7 @@ import shutil
 
 class UsersTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage.create(self.root)
 
     def tearDown(self):

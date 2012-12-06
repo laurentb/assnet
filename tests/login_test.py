@@ -1,6 +1,6 @@
-from ass2m.storage import Storage
-from ass2m.server import Server
-from ass2m.users import User
+from assnet.storage import Storage
+from assnet.server import Server
+from assnet.users import User
 
 from unittest import TestCase
 from webtest import TestApp
@@ -11,7 +11,7 @@ import shutil
 
 class LoginTest(TestCase):
     def setUp(self):
-        self.root = mkdtemp(prefix='ass2m_test_root')
+        self.root = mkdtemp(prefix='assnet_test_root')
         storage = Storage.create(self.root)
         user = User(storage, 'penguin')
         user.realname = 'Penguin'
