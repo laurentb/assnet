@@ -124,7 +124,7 @@ class RssListAction(InfoAction):
                              items=items)
         self.ctx.res.content_type = 'application/rss+xml'
         self.ctx.res.charset = 'UTF-8'
-        self.ctx.res.body = rss.to_xml()
+        self.ctx.res.body = rss.to_xml('utf-8')
 
 class ApiPlugin(Plugin):
     def init(self):
