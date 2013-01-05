@@ -105,7 +105,8 @@ class Event(object):
                         self.f, user=user, use_key=True)
         mail = user.new_mail('event-notification.mail', 'Notification of event')
         mail.vars['realname'] = user.realname
-        mail.vars['description'] = self.summary
+        summary = '\n'.join(wrap(self.summary.encode('utf-8'), 78))
+        mail.vars['description'] = summary
         mail.vars['url'] = url
         mail.send()
         return user.email
