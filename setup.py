@@ -12,7 +12,7 @@ if version_info < (2, 7):
 
 setup(name="assnet",
     version='0.1',
-    description='The Authenticated Social Storage Made for Mothers project is a web application useful for sharing files (with support for photos galleries, videos, etc.) or organizing events with your friends, removing the obligation of using Facebook or other centralized social networks.',
+    description='The Asocial Sharing Network project is a web application useful for sharing files (with support for photos galleries, videos, etc.) or organizing events with your friends, removing the obligation of using Facebook or other centralized social networks. It is configurable and administrable by geeks, yet easy to use by their mothers.',
     long_description=open('README.rst').read(),
     author='Laurent Bachelier',
     author_email='laurent@bachelier.name',
