@@ -6,11 +6,17 @@ from sys import version_info
 
 assert version_info >= (2, 6)
 DATA_DIR = 'share/assnet'
-REQUIREMENTS = ['PIL', 'mako', 'webob', 'paste', 'PyRSS2Gen', 'python-dateutil']
+PIL = 'PIL'
+try:
+    import Image  # NOQA
+except ImportError:
+    PIL = 'Pillow'
+REQUIREMENTS = [PIL, 'mako', 'webob', 'paste', 'PyRSS2Gen', 'python-dateutil']
 if version_info < (2, 7):
     REQUIREMENTS.append('argparse')
 
-setup(name="assnet",
+setup(
+    name="assnet",
     version='0.1',
     description='The Asocial Sharing Network project is a web application useful for sharing files (with support for photos galleries, videos, etc.) or organizing events with your friends, removing the obligation of using Facebook or other centralized social networks. It is configurable and administrable by geeks, yet easy to use by their mothers.',
     long_description=open('README.rst').read(),
