@@ -1,8 +1,9 @@
 #!/bin/bash -u
 cd $(dirname $0)
 cd ..
-grep -r --include '*.py' 'class [^( ]\+:$' . && exit 3
-grep -r --include '*.py' $'\t\|\s$' . && exit 4
+PYFILES=$(git ls-files|grep '^bin\|\.py$'|tr '\n' ' ')
+grep 'class [^( ]\+:$' ${PYFILES} && exit 3
+grep $'\t\|\s$' $PYFILES && exit 4
 
 FLAKE8=""
 if which flake8 >/dev/null 2>&1; then
@@ -13,10 +14,15 @@ if which flake8-python2 >/dev/null 2>&1; then
 fi
 
 if [ -n "${FLAKE8}" ]; then
-    set -e
-    ${FLAKE8} --ignore=E,W *.py assnet tests bin/*
+    exec ${FLAKE8} --select=E9,F *.py $PYFILES
 else
-    # grep will return 0 only if it founds something, but our script
-    # wants to return 0 when it founds nothing!
-    pyflakes *.py assnet tests bin/* | grep -v redefinition && exit 1 || exit 0
-fi
+    # check for modern pyflakes
+    if pyflakes --version >/dev/null 2>&1; then
+        exec pyflakes $PYFILES
+    else
+        # hide error reported by mistake.
+        # grep will return 0 only if it founds something, but our script
+        # wants to return 0 when it founds nothing!
+        pyflakes $PYFILES | grep -v redefinition && exit 1 || exit 0
+    fi
+ fi
