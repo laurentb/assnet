@@ -6,11 +6,17 @@ from sys import version_info
 
 assert version_info >= (2, 6)
 DATA_DIR = 'share/assnet'
-PIL = 'PIL'
+
 try:
-    import Image  # NOQA
+    import Image
 except ImportError:
     PIL = 'Pillow'
+else:
+    if 'PILcompat' not in Image.__file__:
+        PIL = 'PIL'
+    else:
+        PIL = 'Pillow'
+
 REQUIREMENTS = [PIL, 'mako', 'webob', 'paste', 'PyRSS2Gen', 'python-dateutil']
 if version_info < (2, 7):
     REQUIREMENTS.append('argparse')
