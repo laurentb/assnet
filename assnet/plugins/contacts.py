@@ -217,9 +217,9 @@ class ContactsSelection(ContactsManagement):
 
     def handle_extra_command(self, r):
         if r == 'c':
-            self.sel_users = []
+            self.sel_users = set()
             if self.sel_groups is not None:
-                self.sel_groups = []
+                self.sel_groups = set()
 
     def print_user(self, i, user):
         checked = 'x' if user.name in self.sel_users else ' '
