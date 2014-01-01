@@ -12,10 +12,11 @@ try:
 except ImportError:
     PIL = 'Pillow'
 else:
-    if 'PILcompat' not in Image.__file__:
-        PIL = 'PIL'
-    else:
+    # detect Pillow-only feature, or weird Debian stuff
+    if hasattr(Image, 'alpha_composite') or 'PILcompat' in Image.__file__:
         PIL = 'Pillow'
+    else:
+        PIL = 'PIL'
 
 REQUIREMENTS = [PIL, 'mako', 'webob', 'paste', 'PyRSS2Gen', 'python-dateutil']
 if version_info < (2, 7):
