@@ -103,7 +103,7 @@ class Event(object):
             user.save()
         url = build_url(build_root_url(self.f.storage),
                         self.f, user=user, use_key=True)
-        mail = user.new_mail('event-notification.mail', 'Notification of event')
+        mail = user.new_mail('event-notification.mail', self.title)
         mail.vars['realname'] = user.realname
         summary = '\n'.join(wrap(self.summary.encode('utf-8'), 78))
         mail.vars['description'] = summary
@@ -122,7 +122,7 @@ class Event(object):
                 user.save()
             url = build_url(build_root_url(self.f.storage),
                             self.f, user=user, use_key=True)
-            mail = user.new_mail('event-reminder.mail', 'Reminder of event')
+            mail = user.new_mail('event-reminder.mail', self.title)
             mail.vars['event'] = self
             mail.vars['user_state'] = state
             mail.vars['realname'] = user.realname
