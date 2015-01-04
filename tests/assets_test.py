@@ -14,7 +14,7 @@ class AssetsTest(TestCase):
         self.root = mkdtemp(prefix='assnet_test_root')
         Storage.create(self.root)
         server = Server(self.root)
-        self.app = TestApp(server.process)
+        self.app = TestApp(server)
         datapath = os.path.join(self.root, 'test_data')
         os.mkdir(datapath)
         os.mkdir(os.path.join(datapath, 'assets'))

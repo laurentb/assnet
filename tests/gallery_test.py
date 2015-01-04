@@ -16,7 +16,7 @@ class GalleryTest(TestCase):
         self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage.create(self.root)
         server = Server(self.root)
-        self.app = TestApp(server.process)
+        self.app = TestApp(server)
         os.mkdir(os.path.join(self.root, 'images'))
         os.mkdir(os.path.join(self.root, 'images', 'nothing'))
 

@@ -24,4 +24,4 @@ from flup.server.fcgi import WSGIServer
 from assnet.server import Server
 
 server = Server()
-WSGIServer(server.process).run()
+WSGIServer(server).run()

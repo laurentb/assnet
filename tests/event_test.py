@@ -15,7 +15,7 @@ class EventTest(TestCase):
         self.root = mkdtemp(prefix='assnet_test_root')
         storage = Storage.create(self.root)
         server = Server(self.root)
-        self.app = TestApp(server.process)
+        self.app = TestApp(server)
 
         user = User(storage, 'penguin')
         user.realname = 'Penguin'

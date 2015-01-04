@@ -16,7 +16,7 @@ class ApiTest(TestCase):
         self.root = mkdtemp(prefix='assnet_test_root')
         Storage.create(self.root)
         server = Server(self.root)
-        self.app = TestApp(server.process)
+        self.app = TestApp(server)
 
         with open(os.path.join(self.root, 'penguins_are_cute'), 'w') as f:
             f.write('HELLO')

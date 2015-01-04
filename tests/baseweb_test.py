@@ -14,7 +14,7 @@ class BaseWebTest(TestCase):
         self.root = mkdtemp(prefix='assnet_test_root')
         Storage.create(self.root)
         server = Server(self.root)
-        self.app = TestApp(server.process)
+        self.app = TestApp(server)
 
     def tearDown(self):
         if self.root:

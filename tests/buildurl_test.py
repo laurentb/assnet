@@ -17,7 +17,7 @@ class BuildURLTest(TestCase):
         self.root = mkdtemp(prefix='assnet_test_root')
         self.storage = Storage.create(self.root)
         server = Server(self.root)
-        app = TestApp(server.process)
+        app = TestApp(server)
         # fill root_url
         app.get('http://penguin:42/')
         self.root_url = build_root_url(self.storage)

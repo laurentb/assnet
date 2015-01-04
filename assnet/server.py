@@ -451,9 +451,9 @@ class Server(object):
             self.default_env['ASSNET_ROOT'] = root
 
     def bind(self, hostname, port):
-        httpserver.serve(self.process, host=hostname, port=str(port))
+        httpserver.serve(self, host=hostname, port=str(port))
 
-    def process(self, environ, start_response):
+    def __call__(self, environ, start_response):
         """
         WSGI interface
         """

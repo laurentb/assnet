@@ -24,4 +24,4 @@ from assnet.server import Server
 import os
 
 server = Server()
-application = server.process
+application = server

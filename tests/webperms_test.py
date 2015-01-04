@@ -26,7 +26,7 @@ class WebPermsTest(TestCase):
         groupscfg['admin'] = group
         groupscfg.save()
         server = Server(self.root)
-        self.app = TestApp(server.process)
+        self.app = TestApp(server)
 
     def tearDown(self):
         if self.root:

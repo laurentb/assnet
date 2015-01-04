@@ -26,7 +26,7 @@ class RootDirTest(TestCase):
 
     def test_notWorkingDir(self):
         server = Server(self.root)
-        app = TestApp(server.process)
+        app = TestApp(server)
         res = app.get("/", status=500)
         assert "not an assnet working directory" in res.body
         res = app.get("/penguin", status=500)
@@ -36,7 +36,7 @@ class RootDirTest(TestCase):
 
     def test_noRootPath(self):
         server = Server(None)
-        app = TestApp(server.process)
+        app = TestApp(server)
         res = app.get("/", status=500)
         assert "No root path was provided" in res.body
         res = app.get("/penguin", status=500)
@@ -46,7 +46,7 @@ class RootDirTest(TestCase):
 
     def test_configByEnv(self):
         server = Server(None)
-        app = TestApp(server.process)
+        app = TestApp(server)
         res = app.get("/", status=500, extra_environ={'ASSNET_ROOT': self.root})
         assert "not an assnet working directory" in res.body
         Storage.create(self.root)
@@ -60,7 +60,7 @@ class RootDirTest(TestCase):
         res = app.get("/penguin", status=404, extra_environ={'ASSNET_ROOT': self.a_wd})
 
         server = Server(self.a_wd)
-        app = TestApp(server.process)
+        app = TestApp(server)
         res = app.get("/", status=200)
         res = app.get("/", status=200, extra_environ={'ASSNET_ROOT': self.root})
         assert "penguin" in res.body

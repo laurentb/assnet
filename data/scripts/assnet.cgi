@@ -24,4 +24,4 @@ from wsgiref.handlers import CGIHandler
 from assnet.server import Server
 
 server = Server()
-CGIHandler().run(server.process)
+CGIHandler().run(server)
